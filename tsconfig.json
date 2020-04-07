@@ -9,7 +9,9 @@
     "rootDir": "src",
     "baseUrl": "./",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@vant/weapp/*": ["./node_modules/@vant/weapp/dist/*"],
+      "@components": ["./src/components"]
     }
   }
 }
