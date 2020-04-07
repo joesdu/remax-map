@@ -14,21 +14,27 @@ cd my-app
 安装依赖
 
 ```bash
-npm install
+yarn install
 ```
 
 开始构建
 
 ```bash
-npm run dev
+yarn start
 ```
 
 使用微信小程序开发者工具打开项目目录。
 
+```bash
+yarn start
+```
+
+不监视文件改变即时编译.每次修改后需要再次编译,才能通过微信开发者工具预览.
+
 ## 发布
 
 ```bash
-npm run build
+yarn build
 ```
 
 使用微信小程序开发者工具上传版本。

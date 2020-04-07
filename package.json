@@ -9,6 +9,7 @@
   "license": "MIT",
   "scripts": {
     "start": "remax build -t wechat -w",
+    "start:no-watch": "remax build -t wechat",
     "build": "NODE_ENV=production remax build -t wechat",
     "clean": "rimraf dist",
     "prebuild": "npm run clean"
