@@ -26,7 +26,7 @@ yarn start
 使用微信小程序开发者工具打开项目目录。
 
 ```bash
-yarn start
+yarn start:no-watch
 ```
 
 不监视文件改变即时编译.每次修改后需要再次编译,才能通过微信开发者工具预览.
