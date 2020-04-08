@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="40px" height="40px" viewBox="0 0 40 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 64 (93537) - https://sketch.com -->
+    <title>矩形</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <filter x="-9.0%" y="-17.9%" width="118.0%" height="135.8%" filterUnits="objectBoundingBox" id="filter-1">
+            <feOffset dx="0" dy="4" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="6" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.08 0" type="matrix" in="shadowBlurOuter1" result="shadowMatrixOuter1"></feColorMatrix>
+            <feMerge>
+                <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+            </feMerge>
+        </filter>
+    </defs>
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="12" transform="translate(-227.000000, -709.000000)">
+            <g id="矩形-2" filter="url(#filter-1)" transform="translate(16.000000, 586.000000)">
+                <g id="编组-8" transform="translate(171.000000, 113.000000)">
+                    <g id="编组-9" transform="translate(40.000000, 10.000000)">
+                        <g id="编组-13备份-2">
+                            <g id="77" transform="translate(4.000000, 4.000000)">
+                                <rect id="矩形" fill="#161F3D" fill-rule="nonzero" opacity="0" x="0" y="0" width="32" height="32"></rect>
+                                <path d="M17.732,16.137 L23.547,10.322 C23.859,10.01 24.393,10.222 24.406,10.663 L24.444,12.029 C24.46,12.581 24.92,13 25.472,13 L25.25,13 C25.802,13 26,12.524 26,11.972 L26,8 C26,6.9 25.1,6 24,6 L20.483,6 C19.93,6 19,6.425 19,6.977 L19,6.98 C19,7.532 19.647,7.994 20.199,8.009 L21.733,8.05 C22.174,8.061 22.387,8.595 22.076,8.907 L16.289,14.723 C15.899,15.113 15.913,15.746 16.304,16.137 C16.694,16.527 17.341,16.528 17.732,16.137 M26,19.011 L26,24.015 C26,25.117 25.55,26 24.448,26 L8.44,26 C7.338,26 6,25.117 6,24.015 L6,8.007 C6,6.904 7.338,6 8.44,6 L13.444,6 C13.996,6 14.444,6.448 14.444,7 C14.444,7.553 13.996,8 13.444,8 L9.444,8 C8.892,8 8,8.458 8,9.011 L8,22.015 C8,23.117 9.338,24 10.44,24 L23.444,24 C23.996,24 24,23.563 24,23.011 L24,19.011 C24,18.458 24.447,18.011 25,18.011 C25.552,18.011 26,18.458 26,19.011" id="send_round-[#1569]" fill="#A2A5B1"></path>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

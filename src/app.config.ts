@@ -1,9 +1,9 @@
 import { AppConfig } from 'remax/wechat';
 
 const config: AppConfig = {
-  pages: ['pages/index/index'],
+  pages: ['pages/main/index'],
   window: {
-    navigationBarTitleText: 'Remax Wechat Template',
+    navigationBarTitleText: 'WeChat小程序',
     navigationBarBackgroundColor: '#282c34'
   }
 };
