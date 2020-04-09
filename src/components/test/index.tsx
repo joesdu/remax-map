@@ -7,7 +7,7 @@ import notfavorite from '@/assets/notfavorite.svg';
 import share from '@/assets/share.svg';
 import styles from './index.module.less';
 
-export interface FacilityItemData {
+export interface TestItemData {
   facilityId: string;
   avatar: string;
   point: [number, number];
@@ -16,18 +16,18 @@ export interface FacilityItemData {
   isFavorite: boolean;
   shareData: any;
 }
-export interface FacilityItemProps {
+export interface TestItemProps {
   itemUrl?: string;
   data: any;
   key?: any;
 }
-interface FacilityItemState {
+interface TestItemState {
   popShow?: boolean;
   popStyle: string;
   keep: boolean;
 }
-class FacilityItem extends React.PureComponent<FacilityItemProps, FacilityItemState> {
-  constructor(props: Readonly<FacilityItemProps>) {
+class TestItem extends React.PureComponent<TestItemProps, TestItemState> {
+  constructor(props: Readonly<TestItemProps>) {
     super(props);
     this.state = {
       popShow: false,
@@ -74,8 +74,9 @@ class FacilityItem extends React.PureComponent<FacilityItemProps, FacilityItemSt
     const { popShow, popStyle, keep } = this.state;
     return (
       <View>
-        <View className={styles.facilityItem} style={{ left: `${point[0] - 15}'px'`, top: `${point[1] - 15}'px'` }} onClick={this.onItemClick}>
-          <Image className={styles.facilityImage} src={itemUrl ? itemUrl : avatar} />
+        <View className={styles.facilityItem} style={{ left: `${point[0] - 15}px`, top: `${point[1] - 15}px` }} onClick={this.onItemClick}>
+          <Image className={styles['facility-img']} src={itemUrl ? itemUrl : avatar} />
+          <Text className={styles['facility-name']}>{name}</Text>
         </View>
         <VanPopup overlay={false} round show={popShow} closeable close-icon="close" position="bottom" custom-style={popStyle} bindclose={this.onClose}>
           <View className={styles.popContainer}>
@@ -105,4 +106,4 @@ class FacilityItem extends React.PureComponent<FacilityItemProps, FacilityItemSt
   }
 }
 
-export default FacilityItem;
+export default TestItem;

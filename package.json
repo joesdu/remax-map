@@ -1,12 +1,8 @@
 {
-  "name": "remax-template",
+  "name": "remax-map",
   "private": true,
   "version": "1.0.0",
   "description": "Starter template for Remax apps",
-  "main": "index.js",
-  "keywords": [],
-  "author": "杜宇",
-  "license": "MIT",
   "scripts": {
     "start": "remax build -t wechat -w",
     "start:no-watch": "remax build -t wechat",
@@ -18,13 +14,15 @@
     "@vant/weapp": "^1.2.0",
     "less": "^3.11.1",
     "react": "^16.13.1",
-    "remax": "^1.19.6"
+    "remax": "^1.19.8",
+    "remax-dva": "^2.0.0"
   },
   "devDependencies": {
-    "@types/react": "^16.9.32",
+    "@types/react": "^16.9.33",
     "@umijs/fabric": "^2.0.8",
     "chokidar": "^3.3.1",
-    "remax-cli": "^1.19.6",
+    "miniprogram-api-typings": "^2.10.3-1",
+    "remax-cli": "^1.19.8",
     "rimraf": "^3.0.2",
     "typescript": "^3.8.3"
   }

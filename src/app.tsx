@@ -1,7 +1,17 @@
 import './app.less';
 
-import * as React from 'react';
+import React from 'react';
+import dva from 'remax-dva';
 
-const App: React.FC = (props) => props.children as React.ReactElement;
+const app = dva();
+class App extends React.Component {
+  onShow() {
+    console.log('App OnShow');
+  }
 
-export default App;
+  render() {
+    return this.props.children;
+  }
+}
+
+export default app.start(App);
