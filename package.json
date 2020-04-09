@@ -14,8 +14,7 @@
     "@vant/weapp": "^1.2.0",
     "less": "^3.11.1",
     "react": "^16.13.1",
-    "remax": "^1.19.8",
-    "remax-dva": "^2.0.0"
+    "remax": "^1.19.8"
   },
   "devDependencies": {
     "@types/react": "^16.9.33",

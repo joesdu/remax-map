@@ -1,17 +1,18 @@
 import './app.less';
 
 import React from 'react';
-import dva from 'remax-dva';
 
-const app = dva();
 class App extends React.Component {
-  onShow() {
-    console.log('App OnShow');
+  // did mount 的触发时机是在 onLaunch 的时候
+  componentDidMount() {
+    console.log('App launch');
   }
-
+  onShow(options: any) {
+    console.log('onShow', options);
+  }
   render() {
     return this.props.children;
   }
 }
 
-export default app.start(App);
+export default App;

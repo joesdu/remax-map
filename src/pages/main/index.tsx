@@ -1,22 +1,23 @@
-import FacilityItem, { FacilityItemData } from './components';
-import { Image, MovableArea, MovableView, View, Text } from 'remax/wechat';
+import FacilityItem, { FacilityItemData } from './components/facility-item';
+import { Image, MovableArea, MovableView, Text, View } from 'remax/wechat';
 
 import CircleButton from '@/components/circleButton';
 import React from 'react';
+import VantPopup from '@vant/weapp/dist/popup';
+import favorite from '@/assets/favorite.svg';
 import floormap from '@/assets/floormap.png';
 import { getImageInfo } from 'remax/wechat';
 import location from '@/assets/location.svg';
-import favorite from '@/assets/favorite.svg';
 import notfavorite from '@/assets/notfavorite.svg';
 import share from '@/assets/share.svg';
 import styles from './index.module.less';
-import VantPopup from '@vant/weapp/dist/popup';
 
 interface MainPageState {
   mapWidth: number;
   mapHeight: number;
   drawings: string;
   itemData?: any;
+  current: number;
   popShow?: boolean;
   popStyle: string;
   keep: boolean;
@@ -37,6 +38,7 @@ class MainPage extends React.Component<{}, MainPageState> {
         isFavorite: true,
         shareData: '1'
       },
+      current: 0,
       popShow: false,
       popStyle: 'background:#FFFFFFFF;box-shadow:0rpx 8rpx 24rpx 0rpx #00000019;border-radius:16rpx;border: 2rpx solid #00000019;margin-bottom:108rpx;width:686rpx;margin-left:32rpx',
       keep: false
@@ -69,10 +71,12 @@ class MainPage extends React.Component<{}, MainPageState> {
   private onFavorite = () => {
     // Todo do favorite action
     const {
-      itemData: { isFavorite, facilityId }
+      itemData: { isFavorite, facilityId },
+      current
     } = this.state;
     const { keep } = this.state;
     console.log(isFavorite, facilityId);
+    this.facilityGroup[current].isFavorite = !keep;
     this.setState({ keep: !keep });
   };
 
@@ -101,18 +105,19 @@ class MainPage extends React.Component<{}, MainPageState> {
       name: '测试1',
       address: '测试地址-3#-2L',
       isFavorite: false,
-      shareData: '1'
+      shareData: '2'
     }
   ];
 
-  private onItemClick = (record: any) => {
-    this.setState({ itemData: record, popShow: true });
+  private onItemClick = (record: any, current: number) => {
+    console.log('index:', current);
+    this.setState({ itemData: record, popShow: true, current, keep: record.isFavorite });
   };
 
   private renderFacilities = (facilityGroup: Array<any>) => {
     let itemTemp: Array<any> = [];
-    for (let index: number = 0, item: any; (item = facilityGroup[index++]); ) {
-      itemTemp.push(<FacilityItem key={index} data={item} onItemClick={this.onItemClick.bind(this, item)} />);
+    for (let index: number = 0, item: any; (item = facilityGroup && facilityGroup[index++]); ) {
+      itemTemp.push(<FacilityItem key={index - 1} data={item} onItemClick={this.onItemClick.bind(this, item, index - 1)} />);
     }
     return itemTemp;
   };
@@ -140,7 +145,7 @@ class MainPage extends React.Component<{}, MainPageState> {
           <CircleButton icon={location} onClick={this.onLocationClick} style={{ float: 'left', position: 'fixed', bottom: 108, left: 32 }} />
           <CircleButton icon={notfavorite} onClick={this.onFavoriteClick} style={{ float: 'right', position: 'fixed', bottom: 108, right: 32 }} />
         </View>
-        <VantPopup overlay={false} round show={popShow} closeable close-icon="close" position="bottom" custom-style={popStyle} bindclose={this.onClose}>
+        <VantPopup round show={popShow} closeable close-icon="close" position="bottom" custom-style={popStyle} bindclose={this.onClose}>
           <View className={styles.popContainer}>
             <View className={styles.flexTop}>
               <View className={styles.topRight}>
