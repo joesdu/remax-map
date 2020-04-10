@@ -4,11 +4,14 @@ import { Image, MovableArea, MovableView, Text, View } from 'remax/wechat';
 import CircleButton from '@/components/circleButton';
 import React from 'react';
 import VantPopup from '@vant/weapp/dist/popup';
+import VantToast from '@vant/weapp/dist/toast';
 import favorite from '@/assets/favorite.svg';
 import floormap from '@/assets/floormap.png';
 import { getImageInfo } from 'remax/wechat';
 import location from '@/assets/location.svg';
 import notfavorite from '@/assets/notfavorite.svg';
+import { onBluetoothStateChange } from '@/utils/utils';
+import { onTest } from '@/utils/utils';
 import share from '@/assets/share.svg';
 import styles from './index.module.less';
 
@@ -46,6 +49,7 @@ class MainPage extends React.Component<{}, MainPageState> {
   }
 
   onShow() {
+    onTest('ces');
     getImageInfo({ src: floormap })
       .then((res: any) => {
         const { width: mapWidth, height: mapHeight } = res;
@@ -54,6 +58,7 @@ class MainPage extends React.Component<{}, MainPageState> {
       .catch((error: any) => {
         console.error(error);
       });
+    onBluetoothStateChange();
   }
 
   private onLocationClick = () => {
@@ -168,6 +173,7 @@ class MainPage extends React.Component<{}, MainPageState> {
             </View>
           </View>
         </VantPopup>
+        <VantToast id="custom-selector" />
       </View>
     );
   }
