@@ -11,7 +11,6 @@ import { getImageInfo } from 'remax/wechat';
 import location from '@/assets/location.svg';
 import notfavorite from '@/assets/notfavorite.svg';
 import { onBluetoothStateChange } from '@/utils/utils';
-import { onTest } from '@/utils/utils';
 import share from '@/assets/share.svg';
 import styles from './index.module.less';
 
@@ -49,15 +48,12 @@ class MainPage extends React.Component<{}, MainPageState> {
   }
 
   onShow() {
-    onTest('ces');
     getImageInfo({ src: floormap })
       .then((res: any) => {
         const { width: mapWidth, height: mapHeight } = res;
         this.setState({ mapWidth, mapHeight, drawings: floormap });
       })
-      .catch((error: any) => {
-        console.error(error);
-      });
+      .catch((error: any) => console.error(error));
     onBluetoothStateChange();
   }
 
@@ -69,9 +65,7 @@ class MainPage extends React.Component<{}, MainPageState> {
     console.log('favoriteClick');
   };
 
-  private onClose = () => {
-    this.setState({ popShow: false });
-  };
+  private onClose = () => this.setState({ popShow: false });
 
   private onFavorite = () => {
     // Todo do favorite action

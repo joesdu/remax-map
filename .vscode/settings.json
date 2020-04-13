@@ -7,6 +7,7 @@
     "compat",
     "degit",
     "floormap",
+    "jscode",
     "miniprogram",
     "notfavorite",
     "prebuild",
@@ -19,6 +20,7 @@
     "vant",
     "weapp",
     "wechat",
-    "wxml"
+    "wxml",
+    "wxuser"
   ]
 }

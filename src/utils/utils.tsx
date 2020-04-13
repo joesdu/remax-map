@@ -1,4 +1,4 @@
-import { closeBluetoothAdapter, onBeaconServiceChange, onBeaconUpdate, openBluetoothAdapter, startBeaconDiscovery, stopBeaconDiscovery } from 'remax/wechat';
+import { closeBluetoothAdapter, login, onBeaconServiceChange, onBeaconUpdate, openBluetoothAdapter, startBeaconDiscovery, stopBeaconDiscovery } from 'remax/wechat';
 
 import Toast from '@vant/weapp/dist/toast/toast';
 import { uuids } from '@/configs/config';
@@ -55,13 +55,16 @@ const onStopBeaconDiscovery = () => {
       console.log('stopBeaconDiscovery', res);
       closeBluetoothAdapter();
     })
-    .catch((error: any) => {
-      console.error('stopBeaconDiscovery', error);
-    })
-    .finally(() => {});
+    .catch((error: any) => console.error('stopBeaconDiscovery', error));
 };
 
-export const onTest = (args: any) => {
-  console.log('test');
-  console.log('testParams', args);
+/**
+ * 获取小程序用户登录凭证
+ */
+export const getCode = async (): Promise<any> => {
+  return new Promise((resolve, reject) => {
+    login()
+      .then((res: any) => resolve(res))
+      .catch((error: any) => reject(error));
+  });
 };
