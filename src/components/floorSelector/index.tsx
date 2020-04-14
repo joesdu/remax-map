@@ -13,9 +13,9 @@ export interface FloorSelectorProps {
 const FloorSelector: React.FC<FloorSelectorProps> = ({ text, onClick, style }) => {
   return (
     <Button style={style} className={styles.buttonStyle} onClick={onClick}>
-      <Image className={styles.img} mode="aspectFit" src={laminated}></Image>
+      <Image className={styles.img} mode="aspectFit" style={{ marginLeft: 10 }} src={laminated}></Image>
       <Text className={styles.txt}>{text}</Text>
-      <Image className={styles.img} mode="aspectFit" src={up}></Image>
+      <Image className={styles.img} mode="aspectFit" style={{ marginRight: 10 }} src={up}></Image>
     </Button>
   );
 };
