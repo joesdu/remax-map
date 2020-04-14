@@ -32,8 +32,8 @@ class App extends React.Component {
           });
       }
     });
-    if (Token) TokenLogin(Token);
-    else getCode().then((res: any) => Login(res));
+    if (Token) TokenLogin();
+    else getCode().then((res: any) => Login(res.code));
   }
 
   onShow(options: any) {

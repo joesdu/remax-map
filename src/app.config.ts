@@ -1,9 +1,9 @@
 import { AppConfig } from 'remax/wechat';
 
-const pages: Array<string> = ['pages/index/index', 'pages/main/index'];
+const pages: Array<string> = ['pages/test/index', 'pages/main/index'];
 
 const config: AppConfig = {
-  pages: [pages[1]],
+  pages: [pages[0]],
   window: {
     navigationBarTitleText: 'Remax WeChat Program',
     navigationBarBackgroundColor: '#282c34'

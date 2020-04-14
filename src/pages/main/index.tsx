@@ -2,6 +2,7 @@ import FacilityItem, { FacilityItemData } from './components/facility-item';
 import { Image, MovableArea, MovableView, Text, View } from 'remax/wechat';
 
 import CircleButton from '@/components/circleButton';
+import FloorSelector from '@/components/floorSelector';
 import React from 'react';
 import VantPopup from '@vant/weapp/dist/popup';
 import VantToast from '@vant/weapp/dist/toast';
@@ -22,6 +23,8 @@ interface MainPageState {
   current: number;
   popShow?: boolean;
   popStyle: string;
+  selectorPopShow?: boolean;
+  selectorPopStyle?: string;
   keep: boolean;
 }
 class MainPage extends React.Component<{}, MainPageState> {
@@ -43,6 +46,8 @@ class MainPage extends React.Component<{}, MainPageState> {
       current: 0,
       popShow: false,
       popStyle: 'background:#FFFFFFFF;box-shadow:0rpx 8rpx 24rpx 0rpx #00000019;border-radius:16rpx;border: 2rpx solid #00000019;margin-bottom:108rpx;width:686rpx;margin-left:32rpx',
+      selectorPopShow: false,
+      selectorPopStyle: '',
       keep: false
     };
   }
@@ -65,7 +70,11 @@ class MainPage extends React.Component<{}, MainPageState> {
     console.log('favoriteClick');
   };
 
-  private onClose = () => this.setState({ popShow: false });
+  private onClose = () => this.setState({ popShow: false, selectorPopShow: false });
+
+  private onSelector = () => {
+    this.setState({ selectorPopShow: true });
+  };
 
   private onFavorite = () => {
     // Todo do favorite action
@@ -129,7 +138,9 @@ class MainPage extends React.Component<{}, MainPageState> {
       popShow,
       popStyle,
       keep,
-      itemData: { avatar, name, address }
+      itemData: { avatar, name, address },
+      selectorPopShow,
+      selectorPopStyle
     } = this.state;
 
     return (
@@ -142,6 +153,7 @@ class MainPage extends React.Component<{}, MainPageState> {
             </MovableView>
           </MovableArea>
           <CircleButton icon={location} onClick={this.onLocationClick} style={{ float: 'left', position: 'fixed', bottom: 108, left: 32 }} />
+          <FloorSelector text={''} onClick={this.onSelector} style={{ position: 'absolute', bottom: 104, left: 250 }} />
           <CircleButton icon={notfavorite} onClick={this.onFavoriteClick} style={{ float: 'right', position: 'fixed', bottom: 108, right: 32 }} />
         </View>
         <VantPopup round show={popShow} closeable close-icon="close" position="bottom" custom-style={popStyle} bindclose={this.onClose}>
@@ -166,6 +178,9 @@ class MainPage extends React.Component<{}, MainPageState> {
               </View>
             </View>
           </View>
+        </VantPopup>
+        <VantPopup round show={selectorPopShow} close-on-click-overlay={false} position="bottom" custom-style={selectorPopStyle}>
+          <View>test </View>
         </VantPopup>
         <VantToast id="custom-selector" />
       </View>
