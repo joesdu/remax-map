@@ -12,6 +12,7 @@
     "miniprogram",
     "nocheck",
     "notfavorite",
+    "plusplus",
     "prebuild",
     "prettierrc",
     "remax",
