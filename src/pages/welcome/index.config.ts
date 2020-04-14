@@ -1,7 +1,7 @@
 import { PageConfig } from 'remax/wechat';
 
 const config: PageConfig = {
-  navigationBarTitleText: 'Remax Test'
+  navigationBarTitleText: 'Welcome'
 };
 
 export default config;

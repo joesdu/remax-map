@@ -1,25 +1,15 @@
-import { Image, Text, View } from 'remax/wechat';
+import { Image, View } from 'remax/wechat';
 
-import CircleButton from '@/components/circleButton';
-import FloorSelector from '@/components/floorSelector';
 import React from 'react';
-import location from '@/assets/location.svg';
 import styles from './index.module.less';
 
 export default () => {
-  const click = () => {
-    console.log('输出');
-  };
+  // 用于测试
 
   return (
     <View className={styles.app}>
       <View className={styles.header}>
         <Image src="https://gw.alipayobjects.com/mdn/rms_b5fcc5/afts/img/A*OGyZSI087zkAAAAAAAAAAABkARQnAQ" className={styles.logo} />
-        <View className={styles.text}>
-          编辑 <Text className={styles.path}>src/pages/index/index.tsx</Text> 开始
-        </View>
-        <CircleButton icon={location} onClick={click}></CircleButton>
-        <FloorSelector text="5F·4#" onClick={click} style={{ position: 'absolute', bottom: 104, left: 250 }}></FloorSelector>
       </View>
     </View>
   );

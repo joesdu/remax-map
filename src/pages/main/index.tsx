@@ -4,8 +4,10 @@ import { Image, MovableArea, MovableView, Text, View } from 'remax/wechat';
 import CircleButton from '@/components/circleButton';
 import FloorSelector from '@/components/floorSelector';
 import React from 'react';
+import VantPicker from '@vant/weapp/dist/picker';
 import VantPopup from '@vant/weapp/dist/popup';
 import VantToast from '@vant/weapp/dist/toast';
+import VantSearch from '@vant/weapp/dist/search';
 import favorite from '@/assets/favorite.svg';
 import floormap from '@/assets/floormap.png';
 import { getImageInfo } from 'remax/wechat';
@@ -22,10 +24,15 @@ interface MainPageState {
   itemData?: any;
   current: number;
   popShow?: boolean;
-  popStyle: string;
   selectorPopShow?: boolean;
-  selectorPopStyle?: string;
   keep: boolean;
+  buildName: string;
+  floorName: string;
+  buildList: Array<string>;
+  buildIndex: number;
+  floorList: Array<string>;
+  floorIndex: number;
+  facilityGroup: Array<FacilityItemData>;
 }
 class MainPage extends React.Component<{}, MainPageState> {
   constructor(props: Readonly<{}>) {
@@ -34,6 +41,26 @@ class MainPage extends React.Component<{}, MainPageState> {
       mapWidth: 0,
       mapHeight: 0,
       drawings: '',
+      facilityGroup: [
+        {
+          facilityId: '1',
+          avatar: 'https://gw.alipayobjects.com/mdn/rms_b5fcc5/afts/img/A*OGyZSI087zkAAAAAAAAAAABkARQnAQ',
+          point: [110, 140],
+          name: '测试',
+          address: '测试地址-3#-3L',
+          isFavorite: true,
+          shareData: '1'
+        },
+        {
+          facilityId: '2',
+          avatar: 'https://gw.alipayobjects.com/mdn/rms_b5fcc5/afts/img/A*OGyZSI087zkAAAAAAAAAAABkARQnAQ',
+          point: [210, 100],
+          name: '测试1',
+          address: '测试地址-3#-2L',
+          isFavorite: false,
+          shareData: '2'
+        }
+      ],
       itemData: {
         facilityId: '1',
         avatar: 'https://gw.alipayobjects.com/mdn/rms_b5fcc5/afts/img/A*OGyZSI087zkAAAAAAAAAAABkARQnAQ',
@@ -45,10 +72,14 @@ class MainPage extends React.Component<{}, MainPageState> {
       },
       current: 0,
       popShow: false,
-      popStyle: 'background:#FFFFFFFF;box-shadow:0rpx 8rpx 24rpx 0rpx #00000019;border-radius:16rpx;border: 2rpx solid #00000019;margin-bottom:108rpx;width:686rpx;margin-left:32rpx',
       selectorPopShow: false,
-      selectorPopStyle: '',
-      keep: false
+      keep: false,
+      buildName: '',
+      floorName: '',
+      buildList: ['1F', '2F', '3F'],
+      buildIndex: 0,
+      floorList: ['1#', '2#', '3#'],
+      floorIndex: 0
     };
   }
 
@@ -65,11 +96,9 @@ class MainPage extends React.Component<{}, MainPageState> {
   private onLocationClick = () => {
     console.log('locationClick');
   };
-
   private onFavoriteClick = () => {
     console.log('favoriteClick');
   };
-
   private onClose = () => this.setState({ popShow: false, selectorPopShow: false });
 
   private onSelector = () => {
@@ -80,12 +109,14 @@ class MainPage extends React.Component<{}, MainPageState> {
     // Todo do favorite action
     const {
       itemData: { isFavorite, facilityId },
-      current
+      current,
+      facilityGroup,
+      keep
     } = this.state;
-    const { keep } = this.state;
+    let facilities = facilityGroup;
     console.log(isFavorite, facilityId);
-    this.facilityGroup[current].isFavorite = !keep;
-    this.setState({ keep: !keep });
+    facilities[current].isFavorite = !keep;
+    this.setState({ keep: !keep, facilityGroup: facilities });
   };
 
   private onShare = () => {
@@ -96,32 +127,29 @@ class MainPage extends React.Component<{}, MainPageState> {
     console.log(shareData, facilityId);
   };
 
-  private facilityGroup: Array<FacilityItemData> = [
-    {
-      facilityId: '1',
-      avatar: 'https://gw.alipayobjects.com/mdn/rms_b5fcc5/afts/img/A*OGyZSI087zkAAAAAAAAAAABkARQnAQ',
-      point: [110, 140],
-      name: '测试',
-      address: '测试地址-3#-3L',
-      isFavorite: true,
-      shareData: '1'
-    },
-    {
-      facilityId: '2',
-      avatar: 'https://gw.alipayobjects.com/mdn/rms_b5fcc5/afts/img/A*OGyZSI087zkAAAAAAAAAAABkARQnAQ',
-      point: [210, 100],
-      name: '测试1',
-      address: '测试地址-3#-2L',
-      isFavorite: false,
-      shareData: '2'
-    }
-  ];
+  private onBuildChange = (event: any) => {
+    const { value, index } = event.detail;
+    console.log(`当前值：${value}, 当前索引：${index}`);
+    // TODO 根据BuildID获取楼层列表
+    this.setState({ buildName: value, buildIndex: index });
+  };
 
+  private onFloorChange = (event: any) => {
+    const { value, index } = event.detail;
+    console.log(`当前值：${value}, 当前索引：${index}`);
+    this.setState({ floorName: value, floorIndex: index });
+  };
+
+  private onSelectorOK = () => {
+    // TODO 根据楼层数据获取地图等内容.
+    this.setState({ selectorPopShow: false });
+  };
+  // 点击设施时弹出收藏框
   private onItemClick = (record: any, current: number) => {
     console.log('index:', current);
     this.setState({ itemData: record, popShow: true, current, keep: record.isFavorite });
   };
-
+  // 动态渲染设施
   private renderFacilities = (facilityGroup: Array<any>) => {
     let itemTemp: Array<any> = [];
     for (let index: number = 0, item: any; (item = facilityGroup && facilityGroup[index++]); ) {
@@ -131,29 +159,23 @@ class MainPage extends React.Component<{}, MainPageState> {
   };
 
   render() {
-    const {
-      mapWidth,
-      mapHeight,
-      drawings,
-      popShow,
-      popStyle,
-      keep,
-      itemData: { avatar, name, address },
-      selectorPopShow,
-      selectorPopStyle
-    } = this.state;
+    const { mapWidth, mapHeight, drawings, popShow, keep, itemData, selectorPopShow, buildName, floorName, buildList, floorList, facilityGroup } = this.state;
+    const { avatar, name, address } = itemData;
+
+    const popStyle = 'background:#FFFFFFFF;box-shadow:0rpx 8rpx 24rpx 0rpx #00000019;border-radius:16rpx;border: 2rpx solid #00000019;margin-bottom:108rpx;width:686rpx;margin-left:32rpx';
 
     return (
       <View>
         <View className={styles['floor-wrap']}>
+          <VantSearch shape="round" placeholder="请输入搜索关键词" custom-class={styles.search} />
           <MovableArea className={styles['floor-container']} style={{ height: `100vh`, width: `100vw` }}>
             <MovableView scale direction="all" className={styles['floor-map']} style={{ height: `${mapHeight}px`, width: `${mapWidth}px` }}>
               <Image className={styles['floor-map-drawings']} src={drawings} />
-              {this.renderFacilities(this.facilityGroup)}
+              {this.renderFacilities(facilityGroup)}
             </MovableView>
           </MovableArea>
           <CircleButton icon={location} onClick={this.onLocationClick} style={{ float: 'left', position: 'fixed', bottom: 108, left: 32 }} />
-          <FloorSelector text={''} onClick={this.onSelector} style={{ position: 'absolute', bottom: 104, left: 250 }} />
+          <FloorSelector text={`${buildName}·${floorName}`} onClick={this.onSelector} style={{ position: 'absolute', bottom: 104, left: 250 }} />
           <CircleButton icon={notfavorite} onClick={this.onFavoriteClick} style={{ float: 'right', position: 'fixed', bottom: 108, right: 32 }} />
         </View>
         <VantPopup round show={popShow} closeable close-icon="close" position="bottom" custom-style={popStyle} bindclose={this.onClose}>
@@ -179,8 +201,29 @@ class MainPage extends React.Component<{}, MainPageState> {
             </View>
           </View>
         </VantPopup>
-        <VantPopup round show={selectorPopShow} close-on-click-overlay={false} position="bottom" custom-style={selectorPopStyle}>
-          <View>test </View>
+        <VantPopup round show={selectorPopShow} close-on-click-overlay={false} position="bottom" custom-style={popStyle}>
+          <View className={styles.selector}>
+            <View className={styles['selector-title']}>
+              <View className={styles['selector-title-left']}>楼栋</View>
+              <View className={styles['selector-title-right']}>楼层</View>
+            </View>
+            <View className={styles['selector-top']}>
+              <View className={styles['selector-top-left']}>
+                <VantPicker columns={buildList} bindchange={this.onBuildChange} />
+              </View>
+              <View className={styles['selector-top-right']}>
+                <VantPicker columns={floorList} bindchange={this.onFloorChange} />
+              </View>
+            </View>
+            <View className={styles['selector-bottom']}>
+              <View className={styles['selector-bottom-left']} onClick={this.onClose}>
+                取消
+              </View>
+              <View className={styles['selector-bottom-right']} onClick={this.onSelectorOK}>
+                确定
+              </View>
+            </View>
+          </View>
         </VantPopup>
         <VantToast id="custom-selector" />
       </View>

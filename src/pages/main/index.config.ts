@@ -1,7 +1,7 @@
 import { PageConfig } from 'remax/wechat';
 
 const config: PageConfig = {
-  navigationBarTitleText: 'WeChat Main Page'
+  navigationBarTitleText: '室内导航'
 };
 
 export default config;
