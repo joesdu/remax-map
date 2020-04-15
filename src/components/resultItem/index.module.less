@@ -1,0 +1,49 @@
+.item {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  &-left {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    &-left {
+      width: 64px;
+      height: 64px;
+      line-height: 64px;
+    }
+    &-right {
+      display: flex;
+      flex-direction: column;
+      &-top {
+        font-size: 32px;
+        color: rgba(81, 85, 89, 1);
+      }
+      &-bottom {
+        font-size: 24px;
+        color: rgba(162, 170, 179, 1);
+      }
+    }
+  }
+  &-right {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    &-top {
+      width: 40px;
+      height: 40px;
+    }
+    &-bottom {
+      font-size: 20px;
+      color: rgba(162, 170, 179, 1);
+    }
+    &-del {
+      font-size: 28px;
+      color: rgba(230, 69, 69, 1);
+    }
+  }
+}
