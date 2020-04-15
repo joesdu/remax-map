@@ -34,7 +34,7 @@ class SearchResult extends React.Component<SearchResultProps, SearchResultState>
   render() {
     return (
       <ScrollView scrollY style={{ height: '100vh', width: '100vw' }}>
-        {this.renderResultItem}
+        {this.renderResultItem()}
       </ScrollView>
     );
   }
