@@ -1,6 +1,6 @@
 import { Copyright, Token, Version } from '@/configs/config';
-import { Image, View, authorize, getSystemInfo, getUserInfo } from 'remax/wechat';
-import { Login, TokenLogin } from '@/models/model';
+import { Image, View, authorize, checkSession, getSystemInfo, getUserInfo, redirectTo } from 'remax/wechat';
+import { Login, TokenLogin, UpdatePhone, UpdateUserInfo } from '@/models/model';
 
 import Dialog from '@vant/weapp/dist/dialog/dialog';
 import React from 'react';
@@ -11,13 +11,11 @@ import logo from '@/assets/logo.svg';
 import styles from './index.module.less';
 
 class Welcome extends React.Component {
-  //TODO 欢迎页面预留,可以用于校验微信是否开启相关权限,获取基础数据等操作.
   // did mount 的触发时机是在 onLaunch 的时候
   componentDidMount() {
     setTimeout(() => {
       getSystemInfo()
         .then((res: any) => {
-          console.log(res);
           const { locationAuthorized, bluetoothEnabled, locationEnabled } = res;
           if (!locationAuthorized || !bluetoothEnabled || !locationEnabled) {
             Dialog.alert({
@@ -28,19 +26,35 @@ class Welcome extends React.Component {
         })
         .catch((error: any) => console.error(error));
     }, 1300);
-    authorize({ scope: 'scope.userInfo' })
-      .then((res: any) => console.log(`authorize:${res}`))
-      .catch((error: any) => console.error(error));
   }
 
   onInto = () => {
     authorize({ scope: 'scope.userInfo' })
       .then(() => {
-        console.log('authorize:true');
         getUserInfo({ withCredentials: true }).then((res: any) => {
-          console.log(res.userInfo);
-          if (Token) TokenLogin();
-          else getCode().then((res: any) => Login(res.code));
+          let userInfo = res.userInfo;
+          let reLogin: boolean = false;
+          if (Token) {
+            checkSession()
+              .then(() => {
+                reLogin = false;
+                TokenLogin();
+              })
+              .catch(() => (reLogin = true));
+          } else reLogin = true;
+          if (reLogin) {
+            getCode()
+              .then((res: any) => {
+                console.log(res);
+                Login(res.code);
+              })
+              .then(() => {
+                const { nickName, avatarUrl, gender, country, province, city, language, encryptedData, iv } = userInfo;
+                UpdateUserInfo({ nickName, avatarUrl, gender, country, province, city, language });
+                UpdatePhone({ encryptedData, iv });
+              });
+          }
+          redirectTo({ url: '../main/index' });
         });
       })
       .catch((error: any) => console.error(error));

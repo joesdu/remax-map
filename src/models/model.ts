@@ -1,4 +1,4 @@
-import { AddFavorAPI, AddUsageAPI, BuildListAPI, DelFavorAPI, FloorDataAPI, FloorListAPI, LocationAPI, LoginAPI, ProjectMapAPI, SearchLocationAPI, TokenLoginAPI } from '@/service/service';
+import { AddFavorAPI, AddUsageAPI, BuildListAPI, DelFavorAPI, FloorDataAPI, FloorListAPI, LocationAPI, LoginAPI, ProjectMapAPI, SearchLocationAPI, TokenLoginAPI, UpdatePhoneAPI, UpdateUserInfoAPI } from '@/service/service';
 
 import { setStorageSync } from 'remax/wechat';
 
@@ -17,6 +17,24 @@ export const Login = (code: string): void => {
 export const TokenLogin = (): Promise<any> =>
   new Promise((resolve, reject) => {
     TokenLoginAPI()
+      .then((res: any) => resolve(res))
+      .catch((error: any) => reject(error));
+  });
+/**
+ * 更新用户信息
+ */
+export const UpdateUserInfo = (data: any): Promise<any> =>
+  new Promise((resolve, reject) => {
+    UpdateUserInfoAPI(data)
+      .then((res: any) => resolve(res))
+      .catch((error: any) => reject(error));
+  });
+/**
+ * 更新手机号
+ */
+export const UpdatePhone = (data: any): Promise<any> =>
+  new Promise((resolve, reject) => {
+    UpdatePhoneAPI(data)
       .then((res: any) => resolve(res))
       .catch((error: any) => reject(error));
   });

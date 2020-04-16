@@ -31,6 +31,34 @@ export const TokenLoginAPI = (): Promise<any> =>
       .catch((error: any) => reject(error));
   });
 /**
+ * 更新用户信息
+ */
+export const UpdateUserInfoAPI = (data: any): Promise<any> =>
+  new Promise((resolve, reject) => {
+    request({
+      url: APIS.updateUserInfo,
+      data: data,
+      header: { Authorization: Token },
+      method: 'POST'
+    })
+      .then((res: any) => resolve(res))
+      .catch((error: any) => reject(error));
+  });
+/**
+ * 更新用户手机号
+ */
+export const UpdatePhoneAPI = (data: any): Promise<any> =>
+  new Promise((resolve, reject) => {
+    request({
+      url: APIS.updatePhone,
+      data: data,
+      header: { Authorization: Token },
+      method: 'POST'
+    })
+      .then((res: any) => resolve(res))
+      .catch((error: any) => reject(error));
+  });
+/**
  *获取项目地图
  */
 export const ProjectMapAPI = (): Promise<any> =>
