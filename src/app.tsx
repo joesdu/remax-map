@@ -1,7 +1,6 @@
 import './app.less';
 
 import React from 'react';
-import { View } from 'remax/wechat';
 
 class App extends React.Component {
   onShow(options: any) {
@@ -9,7 +8,7 @@ class App extends React.Component {
   }
 
   render() {
-    return <View>{this.props.children}</View>;
+    return this.props.children;
   }
 }
 

@@ -6,8 +6,8 @@ import FloorSelector from '@/components/floorSelector';
 import React from 'react';
 import VantPicker from '@vant/weapp/dist/picker';
 import VantPopup from '@vant/weapp/dist/popup';
-import VantToast from '@vant/weapp/dist/toast';
 import VantSearch from '@vant/weapp/dist/search';
+import VantToast from '@vant/weapp/dist/toast';
 import favorite from '@/assets/favorite.svg';
 import floormap from '@/assets/floormap.png';
 import { getImageInfo } from 'remax/wechat';
@@ -61,15 +61,7 @@ class MainPage extends React.Component<{}, MainPageState> {
           shareData: '2'
         }
       ],
-      itemData: {
-        facilityId: '1',
-        avatar: 'https://gw.alipayobjects.com/mdn/rms_b5fcc5/afts/img/A*OGyZSI087zkAAAAAAAAAAABkARQnAQ',
-        point: [110, 140],
-        name: '测试',
-        address: '测试地址-3#-3L',
-        isFavorite: true,
-        shareData: '1'
-      },
+      itemData: {},
       current: 0,
       popShow: false,
       selectorPopShow: false,
