@@ -44,26 +44,26 @@ class Welcome extends React.Component {
           let userInfo = res.userInfo;
           let reLogin: boolean = false;
           // 暂时注释API请求部分内容
-          // if (Token) {
-          //   checkSession()
-          //     .then(() => {
-          //       reLogin = false;
-          //       TokenLogin();
-          //     })
-          //     .catch(() => (reLogin = true));
-          // } else reLogin = true;
-          // if (reLogin) {
-          //   getCode()
-          //     .then((res: any) => {
-          //       console.log(res);
-          //       Login(res.code);
-          //     })
-          //     .then(() => {
-          //       const { nickName, avatarUrl, gender, country, province, city, language, encryptedData, iv } = userInfo;
-          //       UpdateUserInfo({ nickName, avatarUrl, gender, country, province, city, language });
-          //       UpdatePhone({ encryptedData, iv });
-          //     });
-          // }
+          if (Token) {
+            checkSession()
+              .then(() => {
+                reLogin = false;
+                TokenLogin();
+              })
+              .catch(() => (reLogin = true));
+          } else reLogin = true;
+          if (reLogin) {
+            getCode()
+              .then((res: any) => {
+                console.log(res);
+                Login(res.code);
+              })
+              .then(() => {
+                const { nickName, avatarUrl, gender, country, province, city, language, encryptedData, iv } = userInfo;
+                UpdateUserInfo({ nickName, avatarUrl, gender, country, province, city, language });
+                UpdatePhone({ encryptedData, iv });
+              });
+          }
           redirectTo({ url: '../main/index?from=welcome' });
         });
       })

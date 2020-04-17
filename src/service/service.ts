@@ -74,7 +74,7 @@ export const AddFavor = (data: { facilityId: string }): Promise<any> =>
 /**
  *删除收藏位置
  */
-export const DelFavor = (data: { id: string }): Promise<any> =>
+export const DelFavor = (data: { facilityId: string }): Promise<any> =>
   new Promise((resolve, reject) => {
     request({
       url: `${BaseUrl}location/delFavorLocation`,

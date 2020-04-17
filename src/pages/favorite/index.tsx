@@ -43,7 +43,7 @@ class Favorite extends React.Component<FavoriteProps, FavoriteState> {
     const { isManage } = this.state;
     console.log(record);
     if (isManage) {
-      DelFavor({ id: record.id }).then(() => {
+      DelFavor({ facilityId: record.facilityId }).then(() => {
         FavoriteList().then((res: any) => {
           this.setState({ favorites: res });
         });
