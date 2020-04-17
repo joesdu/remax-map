@@ -17,26 +17,8 @@ class App extends React.Component<{}, AppState> {
       global: {
         test: 'test',
         searchText: '',
-        facilityGroup: [
-          {
-            facilityId: '1',
-            avatar: 'https://gw.alipayobjects.com/mdn/rms_b5fcc5/afts/img/A*OGyZSI087zkAAAAAAAAAAABkARQnAQ',
-            point: [110, 140],
-            name: '测试',
-            address: '测试地址-3#-3L',
-            isFavorite: true,
-            shareData: '1'
-          },
-          {
-            facilityId: '2',
-            avatar: 'https://gw.alipayobjects.com/mdn/rms_b5fcc5/afts/img/A*OGyZSI087zkAAAAAAAAAAABkARQnAQ',
-            point: [210, 100],
-            name: '测试1',
-            address: '测试地址-3#-2L',
-            isFavorite: false,
-            shareData: '2'
-          }
-        ]
+        allowUpdate: false,
+        ibeacons: []
       }
     };
   }
@@ -52,7 +34,7 @@ class App extends React.Component<{}, AppState> {
       }
     });
   };
-  onOpenBluetooth = () => {
+  private onOpenBluetooth = () => {
     openBluetoothAdapter({
       success: (res: any) => {
         console.log('openBluetoothAdapter', res);
@@ -61,7 +43,7 @@ class App extends React.Component<{}, AppState> {
     });
   };
 
-  onStartBeaconDiscovery = () => {
+  private onStartBeaconDiscovery = () => {
     startBeaconDiscovery({ uuids })
       .then((res: any) => {
         console.log('startBeaconDiscovery', res);
@@ -78,19 +60,24 @@ class App extends React.Component<{}, AppState> {
       });
   };
 
-  BeaconUpdate = () => {
+  private BeaconUpdate = () => {
     onBeaconUpdate((res: any) => {
       if (res && res.beacons && res.beacons.length > 0) {
         const { beacons } = res;
+        let ibeacons: any = [];
         for (let index: number = 0, item: any; (item = beacons[index++]); ) {
           console.log(`${index - 1}:`, item);
           // TODO 使用 setGlobal 将数据存入到全局中
+          if (index < 7) {
+            ibeacons.push(item);
+          }
         }
+        this.setGlobal({ allowUpdate: true, ibeacons });
       }
     });
   };
 
-  onStopBeaconDiscovery = () => {
+  private onStopBeaconDiscovery = () => {
     stopBeaconDiscovery()
       .then((res: any) => {
         console.log('stopBeaconDiscovery', res);

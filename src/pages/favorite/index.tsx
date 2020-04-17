@@ -1,4 +1,4 @@
-import { ScrollView, View, redirectTo } from 'remax/wechat';
+import { ScrollView, View, redirectTo, getSystemInfo } from 'remax/wechat';
 
 import { DelFavor, FavoriteList } from '@/service/service';
 import React from 'react';
@@ -7,6 +7,7 @@ import styles from './index.module.less';
 
 export interface FavoriteProps {}
 interface FavoriteState {
+  scrollHight: number;
   manageTxt: string;
   isManage: boolean;
   favorites: Array<any>;
@@ -15,6 +16,7 @@ class Favorite extends React.Component<FavoriteProps, FavoriteState> {
   constructor(props: Readonly<FavoriteProps>) {
     super(props);
     this.state = {
+      scrollHight: 500,
       manageTxt: '管理',
       isManage: false,
       favorites: []
@@ -25,6 +27,10 @@ class Favorite extends React.Component<FavoriteProps, FavoriteState> {
     FavoriteList().then((res: any) => {
       this.setState({ favorites: res });
     });
+    getSystemInfo().then((res: any) => {
+      const { screenHeight } = res;
+      this.setState({ scrollHight: screenHeight });
+    });
   }
 
   private onManage = () => {
@@ -33,7 +39,7 @@ class Favorite extends React.Component<FavoriteProps, FavoriteState> {
     else this.setState({ isManage: true, manageTxt: '完成' });
   };
 
-  onFavorItemClick = (record: any) => {
+  private onFavorItemClick = (record: any) => {
     const { isManage } = this.state;
     console.log(record);
     if (isManage) {
@@ -57,7 +63,7 @@ class Favorite extends React.Component<FavoriteProps, FavoriteState> {
   };
 
   render() {
-    const { manageTxt, favorites } = this.state;
+    const { manageTxt, favorites, scrollHight } = this.state;
 
     return (
       <View>
@@ -65,7 +71,7 @@ class Favorite extends React.Component<FavoriteProps, FavoriteState> {
           <View>{favorites.length}个收藏</View>
           <View onClick={this.onManage}>{manageTxt}</View>
         </View>
-        <ScrollView style={{}}>{this.renderFavorItem()}</ScrollView>
+        <ScrollView style={{ height: `${scrollHight}px`, width: '100vw' }}>{this.renderFavorItem()}</ScrollView>
       </View>
     );
   }

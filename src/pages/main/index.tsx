@@ -1,4 +1,4 @@
-import FacilityItem, { FacilityItemData } from './components/facility-item';
+import FacilityItem from './components/facility-item';
 import { Image, MovableArea, MovableView, Text, View, navigateTo } from 'remax/wechat';
 
 import { AppContext } from '@/app';
@@ -10,12 +10,12 @@ import VantPopup from '@vant/weapp/dist/popup';
 import VantSearch from '@vant/weapp/dist/search';
 import VantToast from '@vant/weapp/dist/toast';
 import favorite from '@/assets/favorite.svg';
-import floormap from '@/assets/floormap.png';
 import { getImageInfo } from 'remax/wechat';
 import location from '@/assets/location.svg';
 import notfavorite from '@/assets/notfavorite.svg';
 import share from '@/assets/share.svg';
 import styles from './index.module.less';
+import { Location } from '@/service/service';
 
 interface MainPageState {
   mapWidth: number;
@@ -26,7 +26,6 @@ interface MainPageState {
   popShow?: boolean;
   selectorPopShow?: boolean;
   keep: boolean;
-  buildName: string;
   floorName: string;
   buildList: Array<any>;
   buildNameList: Array<string>;
@@ -34,7 +33,7 @@ interface MainPageState {
   floorList: Array<any>;
   floorNameList: Array<string>;
   floorIndex: number;
-  facilityGroup: Array<FacilityItemData>;
+  facilityGroup: Array<any>;
 }
 class MainPage extends React.Component<{}, MainPageState> {
   static contextType = AppContext;
@@ -44,6 +43,9 @@ class MainPage extends React.Component<{}, MainPageState> {
       mapWidth: 0,
       mapHeight: 0,
       drawings: '',
+      itemData: {},
+      current: 0,
+      popShow: false,
       facilityGroup: [
         {
           facilityId: '1',
@@ -53,23 +55,10 @@ class MainPage extends React.Component<{}, MainPageState> {
           address: '测试地址-3#-3L',
           isFavorite: true,
           shareData: '1'
-        },
-        {
-          facilityId: '2',
-          avatar: 'https://gw.alipayobjects.com/mdn/rms_b5fcc5/afts/img/A*OGyZSI087zkAAAAAAAAAAABkARQnAQ',
-          point: [210, 100],
-          name: '测试1',
-          address: '测试地址-3#-2L',
-          isFavorite: false,
-          shareData: '2'
         }
       ],
-      itemData: {},
-      current: 0,
-      popShow: false,
       selectorPopShow: false,
       keep: false,
-      buildName: '',
       floorName: '',
       buildList: [],
       buildNameList: ['1F', '2F', '3F'],
@@ -83,29 +72,44 @@ class MainPage extends React.Component<{}, MainPageState> {
   onLoad = (options: any) => {
     // 非欢迎页跳转过来
     if (options.from !== 'welcome') {
-       let data = JSON.parse(options.current);
-       this.setState({});
+      let data = JSON.parse(options.current);
+      this.setState({});
     }
   };
 
+  private timer: any = -1;
+
   onShow() {
-    this.context.onBluetoothStateChange();
-    // TODO 获取楼层和楼栋列表数据
+    this.onLocationClick();
   }
 
   private onLocationClick = () => {
     // TODO 定位按钮点击
     console.log('定位按钮点击');
-    getImageInfo({ src: floormap })
-      .then((res: any) => {
-        const { width: mapWidth, height: mapHeight } = res;
-        this.setState({ mapWidth, mapHeight, drawings: floormap });
-      })
-      .catch((error: any) => console.error(error));
+    this.context.onBluetoothStateChange();
+    // TODO 获取楼层和楼栋列表数据
+    this.timer = setInterval(() => {
+      if (this.context.global.allowUpdate) {
+        Location(this.context.global.ibeacons).then((res: any) => {
+          const { location, floorMapUrl, facilityList } = res;
+          for (let index: number = 0, item: any; (item = facilityList[index++]); ) {
+            const element = item;
+          }
+          getImageInfo({ src: floorMapUrl })
+            .then((res: any) => {
+              const { width: mapWidth, height: mapHeight } = res;
+              this.setState({ mapWidth, mapHeight, drawings: floormap });
+            })
+            .catch((error: any) => console.error(error));
+        });
+      }
+    }, 1000);
   };
+
   private onFavoriteClick = () => {
     navigateTo({ url: '../favorite/index' });
   };
+
   private onClose = () => this.setState({ popShow: false, selectorPopShow: false });
 
   private onSelector = () => {
@@ -117,13 +121,13 @@ class MainPage extends React.Component<{}, MainPageState> {
     const {
       itemData: { isFavorite, facilityId },
       current,
-      facilityGroup,
       keep
     } = this.state;
-    let facilities = facilityGroup;
+    let facilities = this.context.global.facilityGroup;
     console.log(isFavorite, facilityId);
     facilities[current].isFavorite = !keep;
-    this.setState({ keep: !keep, facilityGroup: facilities });
+    this.setState({ keep: !keep });
+    this.context.global.setGlobal({ facilityGroup: facilities });
   };
 
   private onShare = () => {
@@ -138,7 +142,7 @@ class MainPage extends React.Component<{}, MainPageState> {
     const { value, index } = event.detail;
     console.log(`当前值：${value}, 当前索引：${index}`);
     // TODO 根据BuildID获取楼层列表
-    this.setState({ buildName: value, buildIndex: index });
+    this.setState({ buildIndex: index });
   };
 
   private onFloorChange = (event: any) => {
@@ -171,7 +175,7 @@ class MainPage extends React.Component<{}, MainPageState> {
   };
 
   render() {
-    const { mapWidth, mapHeight, drawings, popShow, keep, itemData, selectorPopShow, buildName, floorName, buildNameList, floorNameList, facilityGroup } = this.state;
+    const { mapWidth, mapHeight, drawings, popShow, keep, itemData, selectorPopShow, floorName, buildNameList, floorNameList } = this.state;
     const { avatar, name, address } = itemData;
 
     const popStyle = 'background:#FFFFFFFF;box-shadow:0rpx 8rpx 24rpx 0rpx #00000019;border-radius:16rpx;border: 2rpx solid #00000019;margin-bottom:108rpx;width:686rpx;margin-left:32rpx';
@@ -183,11 +187,11 @@ class MainPage extends React.Component<{}, MainPageState> {
           <MovableArea className={styles['floor-container']} style={{ height: `100vh`, width: `100vw` }}>
             <MovableView scale direction="all" className={styles['floor-map']} style={{ height: `${mapHeight}px`, width: `${mapWidth}px` }}>
               <Image className={styles['floor-map-drawings']} src={drawings} />
-              {this.renderFacilities(facilityGroup)}
+              {this.renderFacilities(this.context.global.facilityGroup)}
             </MovableView>
           </MovableArea>
           <CircleButton icon={location} onClick={this.onLocationClick} style={{ float: 'left', position: 'fixed', bottom: 108, left: 32 }} />
-          <FloorSelector text={`${buildName}·${floorName}`} onClick={this.onSelector} style={{ position: 'absolute', bottom: 104, left: 250 }} />
+          <FloorSelector text={floorName} onClick={this.onSelector} style={{ position: 'absolute', bottom: 104, left: 250 }} />
           <CircleButton icon={notfavorite} onClick={this.onFavoriteClick} style={{ float: 'right', position: 'fixed', bottom: 108, right: 32 }} />
         </View>
         <VantPopup round show={popShow} closeable close-icon="close" position="bottom" custom-style={popStyle} bindclose={this.onClose}>
