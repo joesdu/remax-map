@@ -2,6 +2,7 @@ import { Copyright, Token, Version } from '@/configs/config';
 import { Image, View, authorize, checkSession, getSystemInfo, getUserInfo, redirectTo } from 'remax/wechat';
 import { Login, TokenLogin, UpdatePhone, UpdateUserInfo } from '@/models/model';
 
+import { AppContext } from '@/app';
 import Dialog from '@vant/weapp/dist/dialog/dialog';
 import React from 'react';
 import VantButton from '@vant/weapp/dist/button';
@@ -11,6 +12,7 @@ import logo from '@/assets/logo.svg';
 import styles from './index.module.less';
 
 class Welcome extends React.Component {
+  static contextType = AppContext;
   // did mount 的触发时机是在 onLaunch 的时候
   componentDidMount() {
     setTimeout(() => {
@@ -28,33 +30,41 @@ class Welcome extends React.Component {
     }, 1300);
   }
 
+  onTest = () => {
+    // 用于测试Context
+    console.log(this.context.global.test);
+    this.context.setGlobal({ test: 'ces' });
+    console.log(this.context.global.test);
+  };
+
   onInto = () => {
     authorize({ scope: 'scope.userInfo' })
       .then(() => {
         getUserInfo({ withCredentials: true }).then((res: any) => {
           let userInfo = res.userInfo;
           let reLogin: boolean = false;
-          if (Token) {
-            checkSession()
-              .then(() => {
-                reLogin = false;
-                TokenLogin();
-              })
-              .catch(() => (reLogin = true));
-          } else reLogin = true;
-          if (reLogin) {
-            getCode()
-              .then((res: any) => {
-                console.log(res);
-                Login(res.code);
-              })
-              .then(() => {
-                const { nickName, avatarUrl, gender, country, province, city, language, encryptedData, iv } = userInfo;
-                UpdateUserInfo({ nickName, avatarUrl, gender, country, province, city, language });
-                UpdatePhone({ encryptedData, iv });
-              });
-          }
-          redirectTo({ url: '../main/index' });
+          // 暂时注释API请求部分内容
+          // if (Token) {
+          //   checkSession()
+          //     .then(() => {
+          //       reLogin = false;
+          //       TokenLogin();
+          //     })
+          //     .catch(() => (reLogin = true));
+          // } else reLogin = true;
+          // if (reLogin) {
+          //   getCode()
+          //     .then((res: any) => {
+          //       console.log(res);
+          //       Login(res.code);
+          //     })
+          //     .then(() => {
+          //       const { nickName, avatarUrl, gender, country, province, city, language, encryptedData, iv } = userInfo;
+          //       UpdateUserInfo({ nickName, avatarUrl, gender, country, province, city, language });
+          //       UpdatePhone({ encryptedData, iv });
+          //     });
+          // }
+          redirectTo({ url: '../main/index?from=welcome' });
         });
       })
       .catch((error: any) => console.error(error));

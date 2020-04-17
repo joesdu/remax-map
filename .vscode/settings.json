@@ -4,6 +4,8 @@
     "bindchange",
     "bindclick",
     "bindclose",
+    "bindfocus",
+    "bindsearch",
     "browserslist",
     "compat",
     "degit",

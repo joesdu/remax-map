@@ -1,6 +1,7 @@
 import FacilityItem, { FacilityItemData } from './components/facility-item';
-import { Image, MovableArea, MovableView, Text, View } from 'remax/wechat';
+import { Image, MovableArea, MovableView, Text, View, navigateTo } from 'remax/wechat';
 
+import { AppContext } from '@/app';
 import CircleButton from '@/components/circleButton';
 import FloorSelector from '@/components/floorSelector';
 import React from 'react';
@@ -13,7 +14,6 @@ import floormap from '@/assets/floormap.png';
 import { getImageInfo } from 'remax/wechat';
 import location from '@/assets/location.svg';
 import notfavorite from '@/assets/notfavorite.svg';
-import { onBluetoothStateChange } from '@/utils/utils';
 import share from '@/assets/share.svg';
 import styles from './index.module.less';
 
@@ -28,13 +28,16 @@ interface MainPageState {
   keep: boolean;
   buildName: string;
   floorName: string;
-  buildList: Array<string>;
+  buildList: Array<any>;
+  buildNameList: Array<string>;
   buildIndex: number;
-  floorList: Array<string>;
+  floorList: Array<any>;
+  floorNameList: Array<string>;
   floorIndex: number;
   facilityGroup: Array<FacilityItemData>;
 }
 class MainPage extends React.Component<{}, MainPageState> {
+  static contextType = AppContext;
   constructor(props: Readonly<{}>) {
     super(props);
     this.state = {
@@ -68,28 +71,40 @@ class MainPage extends React.Component<{}, MainPageState> {
       keep: false,
       buildName: '',
       floorName: '',
-      buildList: ['1F', '2F', '3F'],
+      buildList: [],
+      buildNameList: ['1F', '2F', '3F'],
       buildIndex: 0,
-      floorList: ['1#', '2#', '3#'],
+      floorList: [],
+      floorNameList: ['1#', '2#', '3#'],
       floorIndex: 0
     };
   }
 
+  onLoad = (options: any) => {
+    // 非欢迎页跳转过来
+    if (options.from !== 'welcome') {
+       let data = JSON.parse(options.current);
+       this.setState({});
+    }
+  };
+
   onShow() {
+    this.context.onBluetoothStateChange();
+    // TODO 获取楼层和楼栋列表数据
+  }
+
+  private onLocationClick = () => {
+    // TODO 定位按钮点击
+    console.log('定位按钮点击');
     getImageInfo({ src: floormap })
       .then((res: any) => {
         const { width: mapWidth, height: mapHeight } = res;
         this.setState({ mapWidth, mapHeight, drawings: floormap });
       })
       .catch((error: any) => console.error(error));
-    onBluetoothStateChange();
-  }
-
-  private onLocationClick = () => {
-    console.log('locationClick');
   };
   private onFavoriteClick = () => {
-    console.log('favoriteClick');
+    navigateTo({ url: '../favorite/index' });
   };
   private onClose = () => this.setState({ popShow: false, selectorPopShow: false });
 
@@ -150,8 +165,13 @@ class MainPage extends React.Component<{}, MainPageState> {
     return itemTemp;
   };
 
+  private onSearchFocus = () => {
+    const { floorList, floorIndex } = this.state;
+    navigateTo({ url: `../search/index?current=${JSON.stringify({ floorId: floorList[floorIndex].floorId })}` });
+  };
+
   render() {
-    const { mapWidth, mapHeight, drawings, popShow, keep, itemData, selectorPopShow, buildName, floorName, buildList, floorList, facilityGroup } = this.state;
+    const { mapWidth, mapHeight, drawings, popShow, keep, itemData, selectorPopShow, buildName, floorName, buildNameList, floorNameList, facilityGroup } = this.state;
     const { avatar, name, address } = itemData;
 
     const popStyle = 'background:#FFFFFFFF;box-shadow:0rpx 8rpx 24rpx 0rpx #00000019;border-radius:16rpx;border: 2rpx solid #00000019;margin-bottom:108rpx;width:686rpx;margin-left:32rpx';
@@ -159,7 +179,7 @@ class MainPage extends React.Component<{}, MainPageState> {
     return (
       <View>
         <View className={styles['floor-wrap']}>
-          <VantSearch shape="round" placeholder="请输入搜索关键词" custom-class={styles.search} />
+          <VantSearch value={this.context.global.searchText} shape="round" placeholder="请输入搜索关键词" custom-class={styles.search} bindfocus={this.onSearchFocus} />
           <MovableArea className={styles['floor-container']} style={{ height: `100vh`, width: `100vw` }}>
             <MovableView scale direction="all" className={styles['floor-map']} style={{ height: `${mapHeight}px`, width: `${mapWidth}px` }}>
               <Image className={styles['floor-map-drawings']} src={drawings} />
@@ -201,10 +221,10 @@ class MainPage extends React.Component<{}, MainPageState> {
             </View>
             <View className={styles['selector-top']}>
               <View className={styles['selector-top-left']}>
-                <VantPicker columns={buildList} bindchange={this.onBuildChange} />
+                <VantPicker columns={buildNameList} bindchange={this.onBuildChange} />
               </View>
               <View className={styles['selector-top-right']}>
-                <VantPicker columns={floorList} bindchange={this.onFloorChange} />
+                <VantPicker columns={floorNameList} bindchange={this.onFloorChange} />
               </View>
             </View>
             <View className={styles['selector-bottom']}>
