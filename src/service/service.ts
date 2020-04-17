@@ -1,6 +1,5 @@
-import { AppID, Token } from '@/configs/config';
+import { AppID, Token, BaseUrl } from '@/configs/config';
 
-import APIS from '@/configs/apis';
 import { request, setStorageSync } from 'remax/wechat';
 
 /**
@@ -10,7 +9,7 @@ import { request, setStorageSync } from 'remax/wechat';
 export const Login = (code: string): Promise<any> =>
   new Promise((_, reject) => {
     request({
-      url: APIS.login,
+      url: `${BaseUrl}wxuser/jscodeLogin`,
       data: { jsCode: code, appId: AppID },
       method: 'POST'
     })
@@ -23,7 +22,7 @@ export const Login = (code: string): Promise<any> =>
 export const TokenLogin = (): Promise<any> =>
   new Promise((resolve, reject) => {
     request({
-      url: APIS.tokenLogin,
+      url: `${BaseUrl}wxuser/tokenLogin`,
       header: { Authorization: Token },
       method: 'POST'
     })
@@ -36,7 +35,7 @@ export const TokenLogin = (): Promise<any> =>
 export const UpdateUserInfo = (data: any): Promise<any> =>
   new Promise((resolve, reject) => {
     request({
-      url: APIS.updateUserInfo,
+      url: `${BaseUrl}wxuser/updateUserInfo`,
       data: data,
       header: { Authorization: Token },
       method: 'POST'
@@ -50,35 +49,8 @@ export const UpdateUserInfo = (data: any): Promise<any> =>
 export const UpdatePhone = (data: any): Promise<any> =>
   new Promise((resolve, reject) => {
     request({
-      url: APIS.updatePhone,
+      url: `${BaseUrl}wxuser/updatePhoneNumber`,
       data: data,
-      header: { Authorization: Token },
-      method: 'POST'
-    })
-      .then((res: any) => resolve(res))
-      .catch((error: any) => reject(error));
-  });
-/**
- *获取项目地图
- */
-export const ProjectMap = (): Promise<any> =>
-  new Promise((resolve, reject) => {
-    request({
-      url: APIS.projectMap,
-      header: { Authorization: Token },
-      method: 'POST'
-    })
-      .then((res: any) => resolve(res))
-      .catch((error: any) => reject(error));
-  });
-/**
- *记录项目/楼层地图使用记录
- */
-export const AddUsage = (data: { floorId: string; projectId: string }): Promise<any> =>
-  new Promise((resolve, reject) => {
-    request({
-      url: APIS.addLog,
-      data,
       header: { Authorization: Token },
       method: 'POST'
     })
@@ -91,7 +63,7 @@ export const AddUsage = (data: { floorId: string; projectId: string }): Promise<
 export const AddFavor = (data: { facilityId: string }): Promise<any> =>
   new Promise((resolve, reject) => {
     request({
-      url: APIS.addFavor,
+      url: `${BaseUrl}location/addFavorLocation`,
       data,
       header: { Authorization: Token },
       method: 'POST'
@@ -105,7 +77,7 @@ export const AddFavor = (data: { facilityId: string }): Promise<any> =>
 export const DelFavor = (data: { id: string }): Promise<any> =>
   new Promise((resolve, reject) => {
     request({
-      url: APIS.delFavor,
+      url: `${BaseUrl}location/delFavorLocation`,
       data,
       header: { Authorization: Token },
       method: 'POST'
@@ -119,7 +91,7 @@ export const DelFavor = (data: { id: string }): Promise<any> =>
 export const SearchLocation = (data: { floorId?: string; keywords: string }): Promise<any> =>
   new Promise((resolve, reject) => {
     request({
-      url: APIS.searchLocation,
+      url: `${BaseUrl}location/searchLocation`,
       data,
       header: { Authorization: Token },
       method: 'POST'
@@ -133,7 +105,7 @@ export const SearchLocation = (data: { floorId?: string; keywords: string }): Pr
 export const FloorData = (data: { floorId: string }): Promise<any> =>
   new Promise((resolve, reject) => {
     request({
-      url: APIS.floorMap,
+      url: `${BaseUrl}location/getFloorData`,
       data,
       header: { Authorization: Token },
       method: 'POST'
@@ -147,7 +119,7 @@ export const FloorData = (data: { floorId: string }): Promise<any> =>
 export const Location = (data: any): Promise<any> =>
   new Promise((resolve, reject) => {
     request({
-      url: APIS.location,
+      url: `${BaseUrl}location/location`,
       data,
       header: { Authorization: Token },
       method: 'POST'
@@ -161,7 +133,7 @@ export const Location = (data: any): Promise<any> =>
 export const BuildList = (data: { projectId: string }): Promise<any> =>
   new Promise((resolve, reject) => {
     request({
-      url: APIS.buildList,
+      url: `${BaseUrl}project/getBuildList`,
       data,
       header: { Authorization: Token },
       method: 'POST'
@@ -175,7 +147,7 @@ export const BuildList = (data: { projectId: string }): Promise<any> =>
 export const FloorList = (data: { buildId: string }): Promise<any> =>
   new Promise((resolve, reject) => {
     request({
-      url: APIS.floorList,
+      url: `${BaseUrl}project/getFloorList`,
       data,
       header: { Authorization: Token },
       method: 'POST'
@@ -190,7 +162,7 @@ export const FloorList = (data: { buildId: string }): Promise<any> =>
 export const FavoriteList = (): Promise<any> =>
   new Promise((resolve, reject) => {
     request({
-      url: APIS.favoriteList,
+      url: `${BaseUrl}location/myFavorLocation`,
       header: { Authorization: Token },
       method: 'POST'
     })
