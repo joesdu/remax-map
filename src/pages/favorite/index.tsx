@@ -1,6 +1,6 @@
 import { ScrollView, View, redirectTo } from 'remax/wechat';
 
-import { DelFavor, FavoriteList } from '@/models/model';
+import { DelFavor, FavoriteList } from '@/service/service';
 import React from 'react';
 import ResultItem from '@/components/resultItem';
 import styles from './index.module.less';
