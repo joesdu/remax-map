@@ -1,6 +1,6 @@
 import { ScrollView, View, redirectTo } from 'remax/wechat';
 
-import { DelFavor } from '@/models/model';
+import { DelFavor, FavoriteList } from '@/models/model';
 import React from 'react';
 import ResultItem from '@/components/resultItem';
 import styles from './index.module.less';
@@ -22,7 +22,9 @@ class Favorite extends React.Component<FavoriteProps, FavoriteState> {
   }
 
   onShow() {
-    // TODO 获取favorites列表
+    FavoriteList().then((res: any) => {
+      this.setState({ favorites: res });
+    });
   }
 
   private onManage = () => {
@@ -33,15 +35,14 @@ class Favorite extends React.Component<FavoriteProps, FavoriteState> {
 
   onFavorItemClick = (record: any) => {
     const { isManage } = this.state;
+    console.log(record);
     if (isManage) {
-      // TODO 为True即为删除
-      console.log(record);
       DelFavor({ id: record.id }).then(() => {
-        //todo删除后再次刷新数据.
+        FavoriteList().then((res: any) => {
+          this.setState({ favorites: res });
+        });
       });
     } else {
-      // 非True即为点击跳转
-      console.log(record);
       redirectTo({ url: `../main/index?current=${JSON.stringify(record)}&from=favorite` });
     }
   };
@@ -50,7 +51,7 @@ class Favorite extends React.Component<FavoriteProps, FavoriteState> {
     const { favorites, isManage } = this.state;
     let tp: Array<any> = [];
     for (let index: number = 0, item: any; (item = favorites[index++]); ) {
-      tp.push(<ResultItem key={index - 1} isDel={isManage} title={item.facilityName} subTitle={`${item.projectName}-${item.floorName}`} onClick={this.onFavorItemClick.bind(this, item)}></ResultItem>);
+      tp.push(<ResultItem key={index - 1} isDel={isManage} title={item.facilityName} subTitle={`${item.projectName}-${item.buildName}-${item.floorName}`} onClick={this.onFavorItemClick.bind(this, item)}></ResultItem>);
     }
     return tp;
   };

@@ -1,6 +1,6 @@
 import { Copyright, Token, Version } from '@/configs/config';
 import { Image, View, authorize, checkSession, getSystemInfo, getUserInfo, redirectTo } from 'remax/wechat';
-import { Login, TokenLogin, UpdatePhone, UpdateUserInfo } from '@/models/model';
+import { Login, TokenLogin, UpdatePhone, UpdateUserInfo } from '@/service/service';
 
 import { AppContext } from '@/app';
 import Dialog from '@vant/weapp/dist/dialog/dialog';

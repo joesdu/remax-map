@@ -2,7 +2,7 @@ import { Image, View, navigateTo } from 'remax/wechat';
 
 import { AppContext } from '@/app';
 import React from 'react';
-import { SearchLocation } from '@/models/model';
+import { SearchLocation } from '@/service/service';
 import VantDropdownItem from '@vant/weapp/dist/dropdown-item';
 import VantDropdownMenu from '@vant/weapp/dist/dropdown-menu';
 import VantSearch from '@vant/weapp/dist/search';

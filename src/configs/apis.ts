@@ -53,6 +53,10 @@ class APIS {
    * 楼层列表
    */
   public static floorList: string = `${BaseUrl}project/getFloorList`;
+  /**
+   * 我的收藏列表
+   */
+  public static favoriteList: string = `${BaseUrl}location/myFavorLocation`;
 }
 
 export default APIS;

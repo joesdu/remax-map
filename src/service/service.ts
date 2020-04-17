@@ -1,26 +1,26 @@
 import { AppID, Token } from '@/configs/config';
 
 import APIS from '@/configs/apis';
-import { request } from 'remax/wechat';
+import { request, setStorageSync } from 'remax/wechat';
 
 /**
  * 登陆API
  * @param data 获取的loginCode
  */
-export const LoginAPI = (code: string): Promise<any> =>
-  new Promise((resolve, reject) => {
+export const Login = (code: string): Promise<any> =>
+  new Promise((_, reject) => {
     request({
       url: APIS.login,
       data: { jsCode: code, appId: AppID },
       method: 'POST'
     })
-      .then((res: any) => resolve(res))
+      .then((res: any) => setStorageSync('token', res.result.token))
       .catch((error: any) => reject(error));
   });
 /**
  * Token登陆API
  */
-export const TokenLoginAPI = (): Promise<any> =>
+export const TokenLogin = (): Promise<any> =>
   new Promise((resolve, reject) => {
     request({
       url: APIS.tokenLogin,
@@ -33,7 +33,7 @@ export const TokenLoginAPI = (): Promise<any> =>
 /**
  * 更新用户信息
  */
-export const UpdateUserInfoAPI = (data: any): Promise<any> =>
+export const UpdateUserInfo = (data: any): Promise<any> =>
   new Promise((resolve, reject) => {
     request({
       url: APIS.updateUserInfo,
@@ -47,7 +47,7 @@ export const UpdateUserInfoAPI = (data: any): Promise<any> =>
 /**
  * 更新用户手机号
  */
-export const UpdatePhoneAPI = (data: any): Promise<any> =>
+export const UpdatePhone = (data: any): Promise<any> =>
   new Promise((resolve, reject) => {
     request({
       url: APIS.updatePhone,
@@ -61,7 +61,7 @@ export const UpdatePhoneAPI = (data: any): Promise<any> =>
 /**
  *获取项目地图
  */
-export const ProjectMapAPI = (): Promise<any> =>
+export const ProjectMap = (): Promise<any> =>
   new Promise((resolve, reject) => {
     request({
       url: APIS.projectMap,
@@ -74,7 +74,7 @@ export const ProjectMapAPI = (): Promise<any> =>
 /**
  *记录项目/楼层地图使用记录
  */
-export const AddUsageAPI = (data: { floorId: string; projectId: string }): Promise<any> =>
+export const AddUsage = (data: { floorId: string; projectId: string }): Promise<any> =>
   new Promise((resolve, reject) => {
     request({
       url: APIS.addLog,
@@ -88,7 +88,7 @@ export const AddUsageAPI = (data: { floorId: string; projectId: string }): Promi
 /**
  *新增位置收藏
  */
-export const AddFavorAPI = (data: { facilityId: string }): Promise<any> =>
+export const AddFavor = (data: { facilityId: string }): Promise<any> =>
   new Promise((resolve, reject) => {
     request({
       url: APIS.addFavor,
@@ -102,7 +102,7 @@ export const AddFavorAPI = (data: { facilityId: string }): Promise<any> =>
 /**
  *删除收藏位置
  */
-export const DelFavorAPI = (data: { id: string }): Promise<any> =>
+export const DelFavor = (data: { id: string }): Promise<any> =>
   new Promise((resolve, reject) => {
     request({
       url: APIS.delFavor,
@@ -116,7 +116,7 @@ export const DelFavorAPI = (data: { id: string }): Promise<any> =>
 /**
  *搜索位置
  */
-export const SearchLocationAPI = (data: { floorId?: string; keywords: string }): Promise<any> =>
+export const SearchLocation = (data: { floorId?: string; keywords: string }): Promise<any> =>
   new Promise((resolve, reject) => {
     request({
       url: APIS.searchLocation,
@@ -130,7 +130,7 @@ export const SearchLocationAPI = (data: { floorId?: string; keywords: string }):
 /**
  *获取楼层数据
  */
-export const FloorDataAPI = (data: { floorId: string }): Promise<any> =>
+export const FloorData = (data: { floorId: string }): Promise<any> =>
   new Promise((resolve, reject) => {
     request({
       url: APIS.floorMap,
@@ -144,7 +144,7 @@ export const FloorDataAPI = (data: { floorId: string }): Promise<any> =>
 /**
  *定位
  */
-export const LocationAPI = (data: any): Promise<any> =>
+export const Location = (data: any): Promise<any> =>
   new Promise((resolve, reject) => {
     request({
       url: APIS.location,
@@ -158,7 +158,7 @@ export const LocationAPI = (data: any): Promise<any> =>
 /**
  *获取楼栋列表数据
  */
-export const BuildListAPI = (data: { projectId: string }): Promise<any> =>
+export const BuildList = (data: { projectId: string }): Promise<any> =>
   new Promise((resolve, reject) => {
     request({
       url: APIS.buildList,
@@ -172,11 +172,25 @@ export const BuildListAPI = (data: { projectId: string }): Promise<any> =>
 /**
  *获取楼层列表数据
  */
-export const FloorListAPI = (data: { buildId: string }): Promise<any> =>
+export const FloorList = (data: { buildId: string }): Promise<any> =>
   new Promise((resolve, reject) => {
     request({
       url: APIS.floorList,
       data,
+      header: { Authorization: Token },
+      method: 'POST'
+    })
+      .then((res: any) => resolve(res))
+      .catch((error: any) => reject(error));
+  });
+
+/**
+ *获取我的收藏列表
+ */
+export const FavoriteList = (): Promise<any> =>
+  new Promise((resolve, reject) => {
+    request({
+      url: APIS.favoriteList,
       header: { Authorization: Token },
       method: 'POST'
     })
