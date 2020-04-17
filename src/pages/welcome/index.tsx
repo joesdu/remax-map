@@ -1,5 +1,5 @@
 import { Copyright, Token, Version } from '@/configs/config';
-import { Image, View, authorize, checkSession, getSystemInfo, getUserInfo, redirectTo } from 'remax/wechat';
+import { Image, View, authorize, checkSession, getSystemInfo, getUserInfo, login, redirectTo } from 'remax/wechat';
 import { Login, TokenLogin, UpdatePhone, UpdateUserInfo } from '@/service/service';
 
 import { AppContext } from '@/app';
@@ -7,7 +7,6 @@ import Dialog from '@vant/weapp/dist/dialog/dialog';
 import React from 'react';
 import VantButton from '@vant/weapp/dist/button';
 import VantDialog from '@vant/weapp/dist/dialog';
-import { getCode } from '@/utils/utils';
 import logo from '@/assets/logo.svg';
 import styles from './index.module.less';
 
@@ -53,9 +52,9 @@ class Welcome extends React.Component {
               .catch(() => (reLogin = true));
           } else reLogin = true;
           if (reLogin) {
-            getCode()
+            login()
               .then((res: any) => {
-                console.log(res);
+                console.log('123:', res);
                 Login(res.code);
               })
               .then(() => {

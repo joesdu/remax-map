@@ -1,5 +1,4 @@
-import { AppID, Token, BaseUrl } from '@/configs/config';
-
+import { AppID, BaseUrl, Token } from '@/configs/config';
 import { request, setStorageSync } from 'remax/wechat';
 
 /**
@@ -11,7 +10,8 @@ export const Login = (code: string): Promise<any> =>
     request({
       url: `${BaseUrl}wxuser/jscodeLogin`,
       data: { jsCode: code, appId: AppID },
-      method: 'POST'
+      method: 'POST',
+      header: { 'content-type': 'application/x-www-form-urlencoded' }
     })
       .then((res: any) => setStorageSync('token', res.result.token))
       .catch((error: any) => reject(error));
@@ -23,7 +23,7 @@ export const TokenLogin = (): Promise<any> =>
   new Promise((resolve, reject) => {
     request({
       url: `${BaseUrl}wxuser/tokenLogin`,
-      header: { Authorization: Token },
+      header: { Authorization: Token, 'content-type': 'application/x-www-form-urlencoded' },
       method: 'POST'
     })
       .then((res: any) => resolve(res))
@@ -37,7 +37,7 @@ export const UpdateUserInfo = (data: any): Promise<any> =>
     request({
       url: `${BaseUrl}wxuser/updateUserInfo`,
       data: data,
-      header: { Authorization: Token },
+      header: { Authorization: Token, 'content-type': 'application/x-www-form-urlencoded' },
       method: 'POST'
     })
       .then((res: any) => resolve(res))
@@ -51,7 +51,7 @@ export const UpdatePhone = (data: any): Promise<any> =>
     request({
       url: `${BaseUrl}wxuser/updatePhoneNumber`,
       data: data,
-      header: { Authorization: Token },
+      header: { Authorization: Token, 'content-type': 'application/x-www-form-urlencoded' },
       method: 'POST'
     })
       .then((res: any) => resolve(res))
@@ -65,7 +65,7 @@ export const AddFavor = (data: { facilityId: string }): Promise<any> =>
     request({
       url: `${BaseUrl}location/addFavorLocation`,
       data,
-      header: { Authorization: Token },
+      header: { Authorization: Token, 'content-type': 'application/x-www-form-urlencoded' },
       method: 'POST'
     })
       .then((res: any) => resolve(res))
@@ -79,7 +79,7 @@ export const DelFavor = (data: { facilityId: string }): Promise<any> =>
     request({
       url: `${BaseUrl}location/delFavorLocation`,
       data,
-      header: { Authorization: Token },
+      header: { Authorization: Token, 'content-type': 'application/x-www-form-urlencoded' },
       method: 'POST'
     })
       .then((res: any) => resolve(res))
@@ -93,7 +93,7 @@ export const SearchLocation = (data: { floorId?: string; keywords: string }): Pr
     request({
       url: `${BaseUrl}location/searchLocation`,
       data,
-      header: { Authorization: Token },
+      header: { Authorization: Token, 'content-type': 'application/x-www-form-urlencoded' },
       method: 'POST'
     })
       .then((res: any) => resolve(res))
@@ -107,7 +107,7 @@ export const FloorData = (data: { floorId: string }): Promise<any> =>
     request({
       url: `${BaseUrl}location/getFloorData`,
       data,
-      header: { Authorization: Token },
+      header: { Authorization: Token, 'content-type': 'application/x-www-form-urlencoded' },
       method: 'POST'
     })
       .then((res: any) => resolve(res))
@@ -121,7 +121,7 @@ export const Location = (data: any): Promise<any> =>
     request({
       url: `${BaseUrl}location/location`,
       data,
-      header: { Authorization: Token },
+      header: { Authorization: Token, 'content-type': 'application/x-www-form-urlencoded' },
       method: 'POST'
     })
       .then((res: any) => resolve(res))
@@ -135,7 +135,7 @@ export const BuildList = (data: { projectId: string }): Promise<any> =>
     request({
       url: `${BaseUrl}project/getBuildList`,
       data,
-      header: { Authorization: Token },
+      header: { Authorization: Token, 'content-type': 'application/x-www-form-urlencoded' },
       method: 'POST'
     })
       .then((res: any) => resolve(res))
@@ -149,7 +149,7 @@ export const FloorList = (data: { buildId: string }): Promise<any> =>
     request({
       url: `${BaseUrl}project/getFloorList`,
       data,
-      header: { Authorization: Token },
+      header: { Authorization: Token, 'content-type': 'application/x-www-form-urlencoded' },
       method: 'POST'
     })
       .then((res: any) => resolve(res))
@@ -163,7 +163,7 @@ export const FavoriteList = (): Promise<any> =>
   new Promise((resolve, reject) => {
     request({
       url: `${BaseUrl}location/myFavorLocation`,
-      header: { Authorization: Token },
+      header: { Authorization: Token, 'content-type': 'application/x-www-form-urlencoded' },
       method: 'POST'
     })
       .then((res: any) => resolve(res))
