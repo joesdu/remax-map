@@ -15,7 +15,6 @@ class App extends React.Component<{}, AppState> {
     super(props);
     this.state = {
       global: {
-        test: 'test',
         searchText: '',
         allowUpdate: false,
         ibeacons: []
@@ -67,9 +66,14 @@ class App extends React.Component<{}, AppState> {
         let ibeacons: any = [];
         for (let index: number = 0, item: any; (item = beacons[index++]); ) {
           console.log(`${index - 1}:`, item);
-          // TODO 使用 setGlobal 将数据存入到全局中
+          let temp: any = {};
+          temp = {
+            coordinateId: '',
+            rssi: item.rssi,
+            accuracy: item.accuracy
+          };
           if (index < 7) {
-            ibeacons.push(item);
+            ibeacons.push(temp);
           }
         }
         this.setGlobal({ allowUpdate: true, ibeacons });

@@ -6,7 +6,7 @@ export const BaseUrl: string = 'http://service-gw.winside.com:8080/smartlight/ap
 
 export const Token: string = getStorageSync('token');
 
-export const AppID: string = 'wxb469856f9258f52b';
+export const AppID: string = 'wxa521c64b9a5faa4c';
 
 export const Version: string = 'Insider Preview 20200416-1650';
 

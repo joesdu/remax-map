@@ -1,8 +1,9 @@
-import FacilityItem from './components/facility-item';
-import { Image, MovableArea, MovableView, Text, View, navigateTo } from 'remax/wechat';
+import { AddFavor, BuildList, DelFavor, FloorData, FloorList, Location } from '@/service/service';
+import { Image, MovableArea, MovableView, Text, View, navigateTo, showToast } from 'remax/wechat';
 
 import { AppContext } from '@/app';
 import CircleButton from '@/components/circleButton';
+import FacilityItem from './components/facility-item';
 import FloorSelector from '@/components/floorSelector';
 import React from 'react';
 import VantPicker from '@vant/weapp/dist/picker';
@@ -15,7 +16,6 @@ import location from '@/assets/location.svg';
 import notfavorite from '@/assets/notfavorite.svg';
 import share from '@/assets/share.svg';
 import styles from './index.module.less';
-import { Location } from '@/service/service';
 
 interface MainPageState {
   mapWidth: number;
@@ -34,6 +34,7 @@ interface MainPageState {
   floorNameList: Array<string>;
   floorIndex: number;
   facilityGroup: Array<any>;
+  projectId: string;
 }
 class MainPage extends React.Component<{}, MainPageState> {
   static contextType = AppContext;
@@ -46,37 +47,29 @@ class MainPage extends React.Component<{}, MainPageState> {
       itemData: {},
       current: 0,
       popShow: false,
-      facilityGroup: [
-        {
-          facilityId: '1',
-          avatar: 'https://gw.alipayobjects.com/mdn/rms_b5fcc5/afts/img/A*OGyZSI087zkAAAAAAAAAAABkARQnAQ',
-          point: [110, 140],
-          name: '测试',
-          address: '测试地址-3#-3L',
-          isFavorite: true,
-          shareData: '1'
-        }
-      ],
+      facilityGroup: [],
       selectorPopShow: false,
       keep: false,
       floorName: '',
       buildList: [],
-      buildNameList: ['1F', '2F', '3F'],
+      buildNameList: [],
       buildIndex: 0,
       floorList: [],
-      floorNameList: ['1#', '2#', '3#'],
-      floorIndex: 0
+      floorNameList: [],
+      floorIndex: 0,
+      projectId: ''
     };
   }
 
   onLoad = (options: any) => {
     // 非欢迎页跳转过来
     if (options.from !== 'welcome') {
-      let data = JSON.parse(options.current);
+      // todo Fix Something from other page data
       this.setState({});
     }
   };
 
+  // 存储计时器ID
   private timer: any = -1;
 
   onShow() {
@@ -84,50 +77,68 @@ class MainPage extends React.Component<{}, MainPageState> {
   }
 
   private onLocationClick = () => {
-    // TODO 定位按钮点击
     console.log('定位按钮点击');
-    this.context.onBluetoothStateChange();
-    // TODO 获取楼层和楼栋列表数据
+    this.context.setGlobal({ allowUpdate: false });
+    // TODO 蓝牙未检测
+    // this.context.onBluetoothStateChange();
+    setTimeout(() => {
+      showToast({ title: '使用定时器修改蓝牙检测值。', duration: 1000 });
+      this.context.setGlobal({ allowUpdate: true });
+    }, 3000);
     this.timer = setInterval(() => {
       if (this.context.global.allowUpdate) {
-        Location(this.context.global.ibeacons).then((res: any) => {
-          const { location, floorMapUrl, facilityList } = res;
-          for (let index: number = 0, item: any; (item = facilityList[index++]); ) {
-            const element = item;
-          }
-          getImageInfo({ src: floorMapUrl })
-            .then((res: any) => {
-              const { width: mapWidth, height: mapHeight } = res;
-              this.setState({ mapWidth, mapHeight, drawings: floormap });
-            })
-            .catch((error: any) => console.error(error));
-        });
+        Location(JSON.stringify({ deviceData: this.context.global.ibeacons })).then((res: any) => this.fixFloorData(res));
       }
     }, 1000);
   };
 
-  private onFavoriteClick = () => {
-    navigateTo({ url: '../favorite/index' });
+  private fixFloorData = (res: any) => {
+    const { floorMapUrl, facilityList, floorName, projectId } = res;
+    let facilityGroup: Array<any> = [];
+    for (let index: number = 0, item: any; (item = facilityList[index++]); ) {
+      const { facilityId, facilityTypeUrl, point, facilityName, projectName, buildName, isFavor } = item;
+      facilityGroup.push({
+        facilityId,
+        avatar: facilityTypeUrl,
+        point,
+        name: facilityName,
+        address: `${projectName}-${buildName}`,
+        isFavorite: isFavor,
+        shareData: facilityId
+      });
+    }
+    this.setState({ facilityGroup, floorName: floorName, projectId });
+    getImageInfo({ src: floorMapUrl })
+      .then((res: any) => {
+        const { width: mapWidth, height: mapHeight } = res;
+        this.setState({ mapWidth, mapHeight, drawings: floorMapUrl });
+      })
+      .catch((error: any) => console.error(error))
+      .finally(() => clearInterval(this.timer));
   };
+
+  private onFavoriteClick = () => navigateTo({ url: '../favorite/index' });
 
   private onClose = () => this.setState({ popShow: false, selectorPopShow: false });
 
   private onSelector = () => {
+    const { projectId } = this.state;
+    BuildList({ projectId }).then((res: any) => {
+      let temp: Array<string> = [];
+      for (let index: number = 0, item: any; (item = res[index++]); ) temp.push(item.buildName);
+      this.setState({ buildList: res, buildNameList: temp });
+    });
     this.setState({ selectorPopShow: true });
   };
 
   private onFavorite = () => {
-    // Todo do favorite action
-    const {
-      itemData: { isFavorite, facilityId },
-      current,
-      keep
-    } = this.state;
-    let facilities = this.context.global.facilityGroup;
-    console.log(isFavorite, facilityId);
+    const { itemData, current, keep, facilityGroup } = this.state;
+    const { facilityId } = itemData;
+    let facilities = facilityGroup;
+    if (keep) DelFavor({ facilityId });
+    else AddFavor({ facilityId });
     facilities[current].isFavorite = !keep;
-    this.setState({ keep: !keep });
-    this.context.global.setGlobal({ facilityGroup: facilities });
+    this.setState({ facilityGroup: facilities, keep: !keep });
   };
 
   private onShare = () => {
@@ -139,9 +150,15 @@ class MainPage extends React.Component<{}, MainPageState> {
   };
 
   private onBuildChange = (event: any) => {
-    const { value, index } = event.detail;
-    console.log(`当前值：${value}, 当前索引：${index}`);
-    // TODO 根据BuildID获取楼层列表
+    const { buildList } = this.state;
+    const { index } = event.detail;
+    let item: any = buildList[index];
+    FloorList(item.buildId).then((res: any) => {
+      console.log(res);
+      let temp: Array<string> = [];
+      for (let index: number = 0, item: any; (item = res[index++]); ) temp.push(item.floorName);
+      this.setState({ floorList: res, floorNameList: temp });
+    });
     this.setState({ buildIndex: index });
   };
 
@@ -152,14 +169,17 @@ class MainPage extends React.Component<{}, MainPageState> {
   };
 
   private onSelectorOK = () => {
-    // TODO 根据楼层数据获取地图等内容.
+    const { floorList, floorIndex } = this.state;
+    FloorData({ floorId: floorList[floorIndex].floorId }).then((res: any) => {
+      console.log(res);
+      this.fixFloorData(res);
+    });
     this.setState({ selectorPopShow: false });
   };
+
   // 点击设施时弹出收藏框
-  private onItemClick = (record: any, current: number) => {
-    console.log('index:', current);
-    this.setState({ itemData: record, popShow: true, current, keep: record.isFavorite });
-  };
+  private onItemClick = (record: any, current: number) => this.setState({ itemData: record, popShow: true, current, keep: record.isFavorite });
+
   // 动态渲染设施
   private renderFacilities = (facilityGroup: Array<any>) => {
     let itemTemp: Array<any> = [];

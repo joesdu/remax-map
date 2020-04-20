@@ -29,13 +29,6 @@ class Welcome extends React.Component {
     }, 1300);
   }
 
-  onTest = () => {
-    // 用于测试Context
-    console.log(this.context.global.test);
-    this.context.setGlobal({ test: 'ces' });
-    console.log(this.context.global.test);
-  };
-
   onInto = () => {
     authorize({ scope: 'scope.userInfo' })
       .then(() => {
