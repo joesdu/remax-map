@@ -7,7 +7,9 @@ import React from 'react';
 
 export const AppContext = React.createContext({});
 
-interface AppProps {}
+export interface AppProps {
+  location: any;
+}
 interface AppState {
   global: any;
 }
