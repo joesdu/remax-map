@@ -14,7 +14,9 @@ import noresult from '@/assets/noresult.svg';
 import restRoom from '@/assets/restroom.svg';
 import styles from './index.module.less';
 
-interface SearchProps {}
+export interface SearchProps {
+  location: any;
+}
 interface SearchState {
   range: string;
   floorId: string;
@@ -26,11 +28,12 @@ class Search extends React.Component<SearchProps, SearchState> {
     this.state = { range: '0', floorId: '' };
   }
 
-  onLoad = (options: any) => {
-    let data = JSON.parse(options.current);
+  componentDidMount() {
+    let data = JSON.parse(this.props.location.query.current);
+    console.log('searchData:', data);
     const { floorId } = data;
     this.setState({ floorId });
-  };
+  }
 
   private onRangeChange = (dropdown: any) => {
     console.log(dropdown);
@@ -42,7 +45,7 @@ class Search extends React.Component<SearchProps, SearchState> {
     this.context.setGlobal({ searchText: event.detail });
     let args = range === '0' ? { floorId, keywords: event.detail } : { keywords: event.detail };
     SearchLocation(args).then((res: any) => {
-      navigateTo({ url: `../searchresult/index?current=${JSON.stringify(res)}` });
+      navigateTo({ url: '../searchresult/index?current=' + JSON.stringify(res) });
     });
   };
 
@@ -50,28 +53,28 @@ class Search extends React.Component<SearchProps, SearchState> {
     const { floorId } = this.state;
     let args = { floorId, keywords: '卫生间' };
     SearchLocation(args).then((res: any) => {
-      navigateTo({ url: `../searchresult/index?current=${JSON.stringify(res)}` });
+      navigateTo({ url: '../searchresult/index?current=' + JSON.stringify(res) });
     });
   };
   private onElevator = () => {
     const { floorId } = this.state;
     let args = { floorId, keywords: '电梯' };
     SearchLocation(args).then((res: any) => {
-      navigateTo({ url: `../searchresult/index?current=${JSON.stringify(res)}` });
+      navigateTo({ url: '../searchresult/index?current=' + JSON.stringify(res) });
     });
   };
   private onEscalator = () => {
     const { floorId } = this.state;
     let args = { floorId, keywords: '扶梯' };
     SearchLocation(args).then((res: any) => {
-      navigateTo({ url: `../searchresult/index?current=${JSON.stringify(res)}` });
+      navigateTo({ url: '../searchresult/index?current=' + JSON.stringify(res) });
     });
   };
   private onExit = () => {
     const { floorId } = this.state;
     let args = { floorId, keywords: '安全出口' };
     SearchLocation(args).then((res: any) => {
-      navigateTo({ url: `../searchresult/index?current=${JSON.stringify(res)}` });
+      navigateTo({ url: '../searchresult/index?current=' + JSON.stringify(res) });
     });
   };
 

@@ -1,8 +1,9 @@
 import './app.less';
 
-import React from 'react';
-import { getStorage } from 'remax/wechat';
+import { closeBluetoothAdapter, onBeaconUpdate, openBluetoothAdapter, startBeaconDiscovery, stopBeaconDiscovery } from 'remax/wechat';
+
 import { CloseMap } from './service/service';
+import React from 'react';
 
 export const AppContext = React.createContext({});
 
@@ -15,7 +16,6 @@ class App extends React.Component<AppProps, AppState> {
     super(props);
     this.state = {
       global: {
-        token: '',
         searchText: '',
         allowUpdate: false,
         ibeacons: []
@@ -27,21 +27,64 @@ class App extends React.Component<AppProps, AppState> {
     this.setState({ global: { ...global, ...data } });
   };
 
+  SearchIBeacon = () => {
+    openBluetoothAdapter({
+      success: (resOpen: any) => {
+        console.log('openBluetoothAdapter', resOpen);
+        startBeaconDiscovery({ uuids: ['FDA50693-A4E2-4FB1-AFCF-C6EB07647825'] }) // TODO 补齐UUID
+          .then((resStart: any) => {
+            console.log('startBeaconDiscovery', resStart);
+            onBeaconUpdate((res: any) => {
+              console.log('onBeaconUpdate', res);
+              if (res && res.beacons && res.beacons.length > 0) {
+                const { beacons } = res;
+                let ibeacons: any = [];
+                for (let index: number = 0, item: any; (item = beacons[index++]); ) {
+                  console.log(`${index - 1}:`, item);
+                  if (index < 7) {
+                    ibeacons.push({ coordinateId: '', rssi: item.rssi, accuracy: item.accuracy });
+                  }
+                }
+                this.setGlobal({ allowUpdate: true, ibeacons });
+              }
+            });
+          })
+          .catch((error: any) => {
+            console.error('startBeaconDiscovery', error);
+            this.onStopBeaconDiscovery();
+          })
+          .finally(() => {
+            setTimeout(() => {
+              this.onStopBeaconDiscovery();
+            }, 1000 * 10);
+          });
+      }
+    });
+  };
+
+  private onStopBeaconDiscovery = () => {
+    stopBeaconDiscovery()
+      .then((res: any) => {
+        console.log('stopBeaconDiscovery', res);
+        closeBluetoothAdapter();
+      })
+      .catch((error: any) => console.error('stopBeaconDiscovery', error));
+  };
+
   onShow(option: any) {
-    console.log('OnShow', option);
-    let that = this;
-    getStorage({ key: 'token' }).then((token: any) => that.setGlobal({ token: token.data }));
+    console.log('OnAppShow', option);
+    this.SearchIBeacon();
   }
 
   onHide = (option: any) => {
-    console.log('onAppHide', option);
+    console.log('OnAppHide', option);
     CloseMap();
   };
 
   render() {
     const { global } = this.state;
-    const { setGlobal } = this;
-    return <AppContext.Provider value={{ global, setGlobal }}>{this.props.children}</AppContext.Provider>;
+    const { setGlobal, SearchIBeacon } = this;
+    return <AppContext.Provider value={{ global, setGlobal, SearchIBeacon }}>{this.props.children}</AppContext.Provider>;
   }
 }
 export default App;

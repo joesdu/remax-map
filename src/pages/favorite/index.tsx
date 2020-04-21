@@ -1,11 +1,13 @@
-import { ScrollView, View, redirectTo, getSystemInfo } from 'remax/wechat';
-
 import { DelFavor, FavoriteList } from '@/service/service';
+import { ScrollView, View, getSystemInfo, redirectTo } from 'remax/wechat';
+
 import React from 'react';
 import ResultItem from '@/components/resultItem';
 import styles from './index.module.less';
 
-export interface FavoriteProps {}
+export interface FavoriteProps {
+  location: any;
+}
 interface FavoriteState {
   scrollHight: number;
   manageTxt: string;
@@ -46,7 +48,7 @@ class Favorite extends React.Component<FavoriteProps, FavoriteState> {
       DelFavor({ facilityId: record.facilityId }).then(() => {
         FavoriteList().then((res: any) => this.setState({ favorites: res }));
       });
-    } else redirectTo({ url: `../main/index?current=${JSON.stringify(record)}&from=favorite` });
+    } else redirectTo({ url: '../main/index?current=' + JSON.stringify(record) + '&from=favorite' });
   };
 
   renderFavorItem = () => {

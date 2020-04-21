@@ -1,6 +1,5 @@
 import { AddFavor, BuildList, DelFavor, FloorData, FloorList, Location } from '@/service/service';
 import { Image, MovableArea, MovableView, Text, View, navigateTo } from 'remax/wechat';
-import { closeBluetoothAdapter, onBeaconUpdate, openBluetoothAdapter, startBeaconDiscovery, stopBeaconDiscovery } from 'remax/wechat';
 
 import { AppContext } from '@/app';
 import CircleButton from '@/components/circleButton';
@@ -18,6 +17,9 @@ import notfavorite from '@/assets/notfavorite.svg';
 import share from '@/assets/share.svg';
 import styles from './index.module.less';
 
+export interface MainPageProps {
+  location: any;
+}
 interface MainPageState {
   mapWidth: number;
   mapHeight: number;
@@ -36,10 +38,11 @@ interface MainPageState {
   floorIndex: number;
   facilityGroup: Array<any>;
   projectId: string;
+  floorId: string;
 }
-class MainPage extends React.Component<{}, MainPageState> {
+class MainPage extends React.Component<MainPageProps, MainPageState> {
   static contextType = AppContext;
-  constructor(props: Readonly<{}>) {
+  constructor(props: Readonly<MainPageProps>) {
     super(props);
     this.state = {
       mapWidth: 0,
@@ -58,7 +61,8 @@ class MainPage extends React.Component<{}, MainPageState> {
       floorList: [],
       floorNameList: [],
       floorIndex: 0,
-      projectId: ''
+      projectId: '',
+      floorId: ''
     };
   }
 
@@ -93,7 +97,7 @@ class MainPage extends React.Component<{}, MainPageState> {
         ]
       })
     }).then((res: any) => this.fixFloorData(res));
-    // this.SearchIBeacon();
+    // this.context.SearchIBeacon();
     // this.timer = setInterval(() => {
     //   if (this.context.global.allowUpdate) {
     //     Location(JSON.stringify({ deviceData: this.context.global.ibeacons })).then((res: any) => this.fixFloorData(res));
@@ -103,7 +107,7 @@ class MainPage extends React.Component<{}, MainPageState> {
 
   private fixFloorData = (res: any) => {
     console.log('MapDATA:', res);
-    const { floorMapUrl, facilityList, floorName, projectId } = res.result;
+    const { floorMapUrl, facilityList, floorName, projectId, floorId } = res.result;
     let facilityGroup: Array<any> = [];
     for (let index: number = 0, item: any; (item = facilityList[index++]); ) {
       const { facilityId, facilityTypeUrl, point, facilityName, projectName, buildName, isFavor } = item;
@@ -118,7 +122,7 @@ class MainPage extends React.Component<{}, MainPageState> {
       });
     }
     console.log('facilityGroup:', facilityGroup);
-    this.setState({ facilityGroup, floorName: floorName, projectId });
+    this.setState({ facilityGroup, floorName: floorName, projectId, floorId });
     getImageInfo({ src: floorMapUrl })
       .then((res: any) => {
         const { width: mapWidth, height: mapHeight } = res;
@@ -174,9 +178,10 @@ class MainPage extends React.Component<{}, MainPageState> {
   };
 
   private onFloorChange = (event: any) => {
+    const { floorList } = this.state;
     const { value, index } = event.detail;
     console.log(`当前值：${value}, 当前索引：${index}`);
-    this.setState({ floorName: value, floorIndex: index });
+    this.setState({ floorName: value, floorIndex: index, floorId: floorList[index].floorId });
   };
 
   private onSelectorOK = () => {
@@ -201,62 +206,12 @@ class MainPage extends React.Component<{}, MainPageState> {
   };
 
   private onSearchFocus = () => {
-    const { floorList, floorIndex } = this.state;
-    navigateTo({ url: `../search/index?current=${JSON.stringify({ floorId: floorList[floorIndex].floorId })}` });
-  };
-
-  private SearchIBeacon = () => {
-    openBluetoothAdapter({
-      success: (resOpen: any) => {
-        console.log('openBluetoothAdapter', resOpen);
-        // TODO 补齐UUID
-        startBeaconDiscovery({ uuids: [] })
-          .then((resStart: any) => {
-            console.log('startBeaconDiscovery', resStart);
-            onBeaconUpdate((res: any) => {
-              if (res && res.beacons && res.beacons.length > 0) {
-                const { beacons } = res;
-                let ibeacons: any = [];
-                for (let index: number = 0, item: any; (item = beacons[index++]); ) {
-                  console.log(`${index - 1}:`, item);
-                  let temp: any = {};
-                  temp = {
-                    coordinateId: '',
-                    rssi: item.rssi,
-                    accuracy: item.accuracy
-                  };
-                  if (index < 7) {
-                    ibeacons.push(temp);
-                  }
-                }
-                this.context.setGlobal({ allowUpdate: true, ibeacons });
-              }
-            });
-          })
-          .catch((error: any) => {
-            console.error('startBeaconDiscovery', error);
-            this.onStopBeaconDiscovery();
-          })
-          .finally(() => {
-            setTimeout(() => {
-              this.onStopBeaconDiscovery();
-            }, 1000 * 10);
-          });
-      }
-    });
-  };
-
-  private onStopBeaconDiscovery = () => {
-    stopBeaconDiscovery()
-      .then((res: any) => {
-        console.log('stopBeaconDiscovery', res);
-        closeBluetoothAdapter();
-      })
-      .catch((error: any) => console.error('stopBeaconDiscovery', error));
+    const { floorId } = this.state;
+    navigateTo({ url: '../search/index?current=' + JSON.stringify({ floorId }) });
   };
 
   render() {
-    const { mapWidth, mapHeight, drawings, popShow, keep, itemData, selectorPopShow, floorName, buildNameList, floorNameList } = this.state;
+    const { mapWidth, mapHeight, drawings, popShow, keep, itemData, selectorPopShow, floorName, buildNameList, floorNameList, facilityGroup } = this.state;
     const { avatar, name, address } = itemData;
 
     const popStyle = 'background:#FFFFFFFF;box-shadow:0rpx 8rpx 24rpx 0rpx #00000019;border-radius:16rpx;border: 2rpx solid #00000019;margin-bottom:108rpx;width:686rpx;margin-left:32rpx';
@@ -268,7 +223,7 @@ class MainPage extends React.Component<{}, MainPageState> {
           <MovableArea className={styles['floor-container']} style={{ height: `100vh`, width: `100vw` }}>
             <MovableView scale direction="all" className={styles['floor-map']} style={{ height: `${mapHeight}px`, width: `${mapWidth}px` }}>
               <Image className={styles['floor-map-drawings']} src={drawings} />
-              {this.renderFacilities(this.context.global.facilityGroup)}
+              {this.renderFacilities(facilityGroup)}
             </MovableView>
           </MovableArea>
           <CircleButton icon={location} onClick={this.onLocationClick} style={{ float: 'left', position: 'fixed', bottom: 108, left: 32 }} />

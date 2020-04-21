@@ -9,7 +9,9 @@ import VantDialog from '@vant/weapp/dist/dialog';
 import logo from '@/assets/logo.svg';
 import styles from './index.module.less';
 
-interface WelcomeProps {}
+export interface WelcomeProps {
+  location: any;
+}
 interface WelcomeState {
   version: string;
   copyright: string;

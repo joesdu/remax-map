@@ -3,7 +3,9 @@ import { ScrollView, redirectTo } from 'remax/wechat';
 import React from 'react';
 import ResultItem from '@/components/resultItem';
 
-export interface SearchResultProps {}
+export interface SearchResultProps {
+  location: any;
+}
 
 interface SearchResultState {
   results: Array<any>;
@@ -27,7 +29,7 @@ class SearchResult extends React.Component<SearchResultProps, SearchResultState>
 
   onGotoClick = (record: any) => {
     console.log(record);
-    redirectTo({ url: `../main/index?current=${JSON.stringify(record)}&from=searchresult` });
+    redirectTo({ url: '../main/index?current=' + JSON.stringify(record) + '&from=searchresult' });
   };
 
   renderResultItem = () => {
