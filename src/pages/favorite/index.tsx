@@ -1,4 +1,4 @@
-import { DelFavor, FavoriteList } from '@/service/service';
+import { DelFavor, FavoriteList } from '@/service';
 import { ScrollView, View, getSystemInfo, redirectTo } from 'remax/wechat';
 
 import React from 'react';
@@ -27,7 +27,8 @@ class Favorite extends React.Component<FavoriteProps, FavoriteState> {
 
   onShow() {
     FavoriteList().then((res: any) => {
-      this.setState({ favorites: res });
+      console.log('favor:', res);
+      this.setState({ favorites: res.result });
     });
     getSystemInfo().then((res: any) => {
       const { screenHeight } = res;
@@ -66,7 +67,7 @@ class Favorite extends React.Component<FavoriteProps, FavoriteState> {
     return (
       <View>
         <View className={styles.topContainer}>
-          <View>{favorites.length}个收藏</View>
+          <View>{favorites ? favorites.length : 0}个收藏</View>
           <View onClick={this.onManage}>{manageTxt}</View>
         </View>
         <ScrollView style={{ height: `${scrollHight}px`, width: '100vw' }}>{this.renderFavorItem()}</ScrollView>

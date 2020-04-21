@@ -1,12 +1,12 @@
 import { Image, View, getSystemInfo, getUserInfo, login, redirectTo } from 'remax/wechat';
-import { Login, UpdatePhone, UpdateUserInfo } from '@/service/service';
+import { Login, UpdatePhone, UpdateUserInfo } from '@/service';
 
 import { AppContext } from '@/app';
 import Dialog from '@vant/weapp/dist/dialog/dialog';
+import { LogoIcon } from '@/assets/icons';
 import React from 'react';
 import VantButton from '@vant/weapp/dist/button';
 import VantDialog from '@vant/weapp/dist/dialog';
-import logo from '@/assets/logo.svg';
 import styles from './index.module.less';
 
 export interface WelcomeProps {
@@ -62,7 +62,7 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
     return (
       <View className={styles.app}>
         <View className={styles.header}>
-          <Image src={logo} className={styles.logo} />
+          <Image src={LogoIcon} className={styles.logo} />
           <View className={styles.text}>欢迎使用</View>
         </View>
         <View className={styles.into}>

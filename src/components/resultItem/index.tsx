@@ -1,8 +1,7 @@
+import { GotoIcon, MarkIcon } from '@/assets/icons';
 import { Image, View } from 'remax/wechat';
 
 import React from 'react';
-import goto from '@/assets/goto.svg';
-import mark from '@/assets/mark.svg';
 import styles from './index.module.less';
 
 export interface ResultItemProps {
@@ -18,7 +17,7 @@ const ResultItem: React.FC<ResultItemProps> = ({ title = '测试标题', subTitl
     } else {
       return (
         <View>
-          <Image className={styles['item-right-top']} mode="aspectFill" src={goto} />
+          <Image className={styles['item-right-top']} mode="aspectFill" src={GotoIcon} />
           <View className={styles['item-right-bottom']}>查看</View>
         </View>
       );
@@ -28,7 +27,7 @@ const ResultItem: React.FC<ResultItemProps> = ({ title = '测试标题', subTitl
   return (
     <View className={styles.item}>
       <View className={styles['item-left']}>
-        <Image className={styles['item-left-left']} mode="aspectFill" src={mark} />
+        <Image className={styles['item-left-left']} mode="aspectFill" src={MarkIcon} />
         <View className={styles['item-left-right']}>
           <View className={styles['item-left-right-top']}>{title}</View>
           <View className={styles['item-left-right-bottom']}>{subTitle}</View>

@@ -1,21 +1,18 @@
-import { AddFavor, BuildList, DelFavor, FloorData, FloorList, Location } from '@/service/service';
+import { AddFavor, BuildList, DelFavor, FloorData, FloorList, Location } from '@/service';
+import { CircleButton, FloorSelector } from '@/components';
+import { FavoriteIcon, LocationIcon, NotFavoriteIcon, SearchIcon, ShareIcon } from '@/assets/icons';
 import { Image, MovableArea, MovableView, Text, View, navigateTo } from 'remax/wechat';
 
 import { AppContext } from '@/app';
-import CircleButton from '@/components/circleButton';
 import FacilityItem from './components/facility-item';
-import FloorSelector from '@/components/floorSelector';
 import React from 'react';
 import VantPicker from '@vant/weapp/dist/picker';
 import VantPopup from '@vant/weapp/dist/popup';
-import VantSearch from '@vant/weapp/dist/search';
 import VantToast from '@vant/weapp/dist/toast';
-import favorite from '@/assets/favorite.svg';
 import { getImageInfo } from 'remax/wechat';
-import location from '@/assets/location.svg';
-import notfavorite from '@/assets/notfavorite.svg';
-import share from '@/assets/share.svg';
 import styles from './index.module.less';
+
+// import VantSearch from '@vant/weapp/dist/search';
 
 export interface MainPageProps {
   location: any;
@@ -136,16 +133,6 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
 
   private onClose = () => this.setState({ popShow: false, selectorPopShow: false });
 
-  private onSelector = () => {
-    const { projectId } = this.state;
-    BuildList({ projectId }).then((res: any) => {
-      let temp: Array<string> = [];
-      for (let index: number = 0, item: any; (item = res[index++]); ) temp.push(item.buildName);
-      this.setState({ buildList: res, buildNameList: temp });
-    });
-    this.setState({ selectorPopShow: true });
-  };
-
   private onFavorite = () => {
     const { itemData, current, keep, facilityGroup } = this.state;
     const { facilityId } = itemData;
@@ -164,15 +151,30 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     console.log(shareData, facilityId);
   };
 
+  private onSelector = () => {
+    const { projectId } = this.state;
+    BuildList({ projectId }).then((res: any) => {
+      const { result } = res;
+      let temp: Array<string> = [];
+      for (let index: number = 0, item: any; (item = result[index++]); ) temp.push(item.buildName);
+      this.setState({ buildList: result, buildNameList: temp });
+      this.onBuildChange({ detail: { index: 0 } });
+    });
+    this.setState({ selectorPopShow: true });
+  };
+
   private onBuildChange = (event: any) => {
     const { buildList } = this.state;
     const { index } = event.detail;
     let item: any = buildList[index];
-    FloorList(item.buildId).then((res: any) => {
+    console.log('buildItem:', item);
+    FloorList({ buildId: item.buildId }).then((res: any) => {
       console.log(res);
+      const { result } = res;
       let temp: Array<string> = [];
-      for (let index: number = 0, item: any; (item = res[index++]); ) temp.push(item.floorName);
-      this.setState({ floorList: res, floorNameList: temp });
+      for (let index: number = 0, item: any; (item = result[index++]); ) temp.push(item.floorName);
+      this.setState({ floorList: result, floorNameList: temp });
+      this.onFloorChange({ detail: { index: 0, value: result[0].floorName } });
     });
     this.setState({ buildIndex: index });
   };
@@ -219,16 +221,17 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     return (
       <View>
         <View className={styles['floor-wrap']}>
-          <VantSearch value={this.context.global.searchText} shape="round" placeholder="请输入搜索关键词" custom-class={styles.search} bindfocus={this.onSearchFocus} />
+          {/* <VantSearch value={this.context.global.searchText} shape="round" placeholder="请输入搜索关键词" custom-class={styles.search} bindfocus={this.onSearchFocus} /> */}
           <MovableArea className={styles['floor-container']} style={{ height: `100vh`, width: `100vw` }}>
             <MovableView scale direction="all" className={styles['floor-map']} style={{ height: `${mapHeight}px`, width: `${mapWidth}px` }}>
               <Image className={styles['floor-map-drawings']} src={drawings} />
               {this.renderFacilities(facilityGroup)}
             </MovableView>
           </MovableArea>
-          <CircleButton icon={location} onClick={this.onLocationClick} style={{ float: 'left', position: 'fixed', bottom: 108, left: 32 }} />
+          <CircleButton icon={SearchIcon} onClick={this.onSearchFocus} style={{ float: 'right', position: 'fixed', top: 100, right: 32 }} />
+          <CircleButton icon={LocationIcon} onClick={this.onLocationClick} style={{ float: 'left', position: 'fixed', bottom: 108, left: 32 }} />
           <FloorSelector text={floorName} onClick={this.onSelector} style={{ position: 'absolute', bottom: 104, left: 250 }} />
-          <CircleButton icon={notfavorite} onClick={this.onFavoriteClick} style={{ float: 'right', position: 'fixed', bottom: 108, right: 32 }} />
+          <CircleButton icon={NotFavoriteIcon} onClick={this.onFavoriteClick} style={{ float: 'right', position: 'fixed', bottom: 108, right: 32 }} />
         </View>
         <VantPopup round show={popShow} closeable close-icon="close" position="bottom" custom-style={popStyle} bindclose={this.onClose}>
           <View className={styles.popContainer}>
@@ -243,11 +246,11 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
             </View>
             <View className={styles.flexBottom}>
               <View className={styles.bottomLeft} onClick={this.onFavorite}>
-                <Image className={styles.bottomImg} src={keep ? favorite : notfavorite} />
+                <Image className={styles.bottomImg} src={keep ? FavoriteIcon : NotFavoriteIcon} />
                 <Text className={styles.bottomTxt}>位置收藏</Text>
               </View>
               <View className={styles.bottomRight} onClick={this.onShare}>
-                <Image className={styles.bottomImg} src={share} />
+                <Image className={styles.bottomImg} src={ShareIcon} />
                 <Text className={styles.bottomTxt}>位置分享</Text>
               </View>
             </View>

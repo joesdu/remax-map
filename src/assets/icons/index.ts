@@ -1,0 +1,16 @@
+export { default as DeleteIcon } from '@/assets/icons/delete.svg';
+export { default as ElevatorIcon } from '@/assets/icons/elevator.svg';
+export { default as EscalatorIcon } from '@/assets/icons/escalator.svg';
+export { default as ExitIcon } from '@/assets/icons/exit.svg';
+export { default as FavoriteIcon } from '@/assets/icons/favorite.svg';
+export { default as GotoIcon } from '@/assets/icons/goto.svg';
+export { default as LaminatedIcon } from '@/assets/icons/laminated.svg';
+export { default as LocationIcon } from '@/assets/icons/location.svg';
+export { default as LogoIcon } from '@/assets/icons/logo.svg';
+export { default as MarkIcon } from '@/assets/icons/mark.svg';
+export { default as NotFavoriteIcon } from '@/assets/icons/notfavorite.svg';
+export { default as NoResultIcon } from '@/assets/icons/noresult.svg';
+export { default as RestroomIcon } from '@/assets/icons/restroom.svg';
+export { default as SearchIcon } from '@/assets/icons/search.svg';
+export { default as ShareIcon } from '@/assets/icons/share.svg';
+export { default as UpIcon } from '@/assets/icons/up.svg';

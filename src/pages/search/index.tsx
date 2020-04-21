@@ -1,17 +1,12 @@
+import { DeleteIcon, ElevatorIcon, EscalatorIcon, ExitIcon, NoResultIcon, RestroomIcon } from '@/assets/icons';
 import { Image, View, navigateTo } from 'remax/wechat';
 
 import { AppContext } from '@/app';
 import React from 'react';
-import { SearchLocation } from '@/service/service';
+import { SearchLocation } from '@/service';
 import VantDropdownItem from '@vant/weapp/dist/dropdown-item';
 import VantDropdownMenu from '@vant/weapp/dist/dropdown-menu';
 import VantSearch from '@vant/weapp/dist/search';
-import deleteImg from '@/assets/delete.svg';
-import elevator from '@/assets/elevator.svg';
-import escalator from '@/assets/escalator.svg';
-import exit from '@/assets/exit.svg';
-import noresult from '@/assets/noresult.svg';
-import restRoom from '@/assets/restroom.svg';
 import styles from './index.module.less';
 
 export interface SearchProps {
@@ -45,7 +40,7 @@ class Search extends React.Component<SearchProps, SearchState> {
     this.context.setGlobal({ searchText: event.detail });
     let args = range === '0' ? { floorId, keywords: event.detail } : { keywords: event.detail };
     SearchLocation(args).then((res: any) => {
-      navigateTo({ url: '../searchresult/index?current=' + JSON.stringify(res) });
+      navigateTo({ url: `../searchresult/index?current=${JSON.stringify(res)}` });
     });
   };
 
@@ -53,28 +48,28 @@ class Search extends React.Component<SearchProps, SearchState> {
     const { floorId } = this.state;
     let args = { floorId, keywords: '卫生间' };
     SearchLocation(args).then((res: any) => {
-      navigateTo({ url: '../searchresult/index?current=' + JSON.stringify(res) });
+      navigateTo({ url: `../searchresult/index?current=${JSON.stringify(res)}` });
     });
   };
   private onElevator = () => {
     const { floorId } = this.state;
     let args = { floorId, keywords: '电梯' };
     SearchLocation(args).then((res: any) => {
-      navigateTo({ url: '../searchresult/index?current=' + JSON.stringify(res) });
+      navigateTo({ url: `../searchresult/index?current=${JSON.stringify(res)}` });
     });
   };
   private onEscalator = () => {
     const { floorId } = this.state;
     let args = { floorId, keywords: '扶梯' };
     SearchLocation(args).then((res: any) => {
-      navigateTo({ url: '../searchresult/index?current=' + JSON.stringify(res) });
+      navigateTo({ url: `../searchresult/index?current=${JSON.stringify(res)}` });
     });
   };
   private onExit = () => {
     const { floorId } = this.state;
-    let args = { floorId, keywords: '安全出口' };
+    let args = { floorId, keywords: '出口' };
     SearchLocation(args).then((res: any) => {
-      navigateTo({ url: '../searchresult/index?current=' + JSON.stringify(res) });
+      navigateTo({ url: `../searchresult/index?current=${JSON.stringify(res)}` });
     });
   };
 
@@ -98,19 +93,19 @@ class Search extends React.Component<SearchProps, SearchState> {
           </View>
         </View>
         <View className={styles.fastContainer}>
-          <Image className={styles.image} mode="aspectFill" src={restRoom} onClick={this.onRestroom} />
-          <Image className={styles.image} mode="aspectFill" src={elevator} onClick={this.onElevator} />
-          <Image className={styles.image} mode="aspectFill" src={escalator} onClick={this.onEscalator} />
-          <Image className={styles.image} mode="aspectFill" src={exit} onClick={this.onExit} />
+          <Image className={styles.image} mode="aspectFill" src={RestroomIcon} onClick={this.onRestroom} />
+          <Image className={styles.image} mode="aspectFill" src={ElevatorIcon} onClick={this.onElevator} />
+          <Image className={styles.image} mode="aspectFill" src={EscalatorIcon} onClick={this.onEscalator} />
+          <Image className={styles.image} mode="aspectFill" src={ExitIcon} onClick={this.onExit} />
         </View>
         <View className={styles.history}>
           <View className={styles['history-left']}>历史搜索记录</View>
           <View className={styles['history-right']}>
-            <Image className={styles['history-del']} mode="aspectFill" src={deleteImg} />
+            <Image className={styles['history-del']} mode="aspectFill" src={DeleteIcon} />
           </View>
         </View>
         <View className={styles.historyContainer}>
-          <Image className={styles['historyContainer-img']} mode="aspectFill" src={noresult} />
+          <Image className={styles['historyContainer-img']} mode="aspectFill" src={NoResultIcon} />
           <View className={styles['historyContainer-text']}>暂无搜索记录</View>
         </View>
       </View>

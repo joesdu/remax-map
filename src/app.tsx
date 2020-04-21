@@ -2,7 +2,7 @@ import './app.less';
 
 import { closeBluetoothAdapter, onBeaconUpdate, openBluetoothAdapter, startBeaconDiscovery, stopBeaconDiscovery } from 'remax/wechat';
 
-import { CloseMap } from './service/service';
+import { CloseMap } from './service';
 import React from 'react';
 
 export const AppContext = React.createContext({});

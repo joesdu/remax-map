@@ -1,9 +1,8 @@
 import { Button, Image, Text } from 'remax/wechat';
+import { LaminatedIcon, UpIcon } from '@/assets/icons';
 
 import React from 'react';
-import laminated from '@/assets/laminated.svg';
 import styles from './index.module.less';
-import up from '@/assets/up.svg';
 
 export interface FloorSelectorProps {
   text: string;
@@ -13,9 +12,9 @@ export interface FloorSelectorProps {
 const FloorSelector: React.FC<FloorSelectorProps> = ({ text, onClick, style }) => {
   return (
     <Button style={style} className={styles.buttonStyle} onClick={onClick}>
-      <Image className={styles.img} mode="aspectFit" style={{ marginLeft: 10 }} src={laminated}></Image>
+      <Image className={styles.img} mode="aspectFit" style={{ marginLeft: 10 }} src={LaminatedIcon}></Image>
       <Text className={styles.txt}>{text}</Text>
-      <Image className={styles.img} mode="aspectFit" style={{ marginRight: 10 }} src={up}></Image>
+      <Image className={styles.img} mode="aspectFit" style={{ marginRight: 10 }} src={UpIcon}></Image>
     </Button>
   );
 };
