@@ -20,7 +20,10 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
 
   constructor(props: Readonly<WelcomeProps>) {
     super(props);
-    this.state = { version: 'Insider Preview 20200416-1650', copyright: 'Copyright © 2020' };
+    this.state = {
+      version: 'Insider Preview 20200421-1650',
+      copyright: 'Copyright © 2020'
+    };
   }
 
   onInto = () => {
