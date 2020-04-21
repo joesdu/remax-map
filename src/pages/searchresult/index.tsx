@@ -18,10 +18,11 @@ class SearchResult extends React.Component<SearchResultProps, SearchResultState>
     };
   }
 
-  onLoad = (options: any) => {
-    let data = JSON.parse(options.current);
-    this.setState({ results: data });
-  };
+  componentDidMount() {
+    let data = JSON.parse(this.props.location.query.current);
+    console.log('searchData:', data.result);
+    this.setState({ results: data.result });
+  }
 
   onShow(options: any) {
     console.log('onShow', options);
