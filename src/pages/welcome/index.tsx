@@ -1,6 +1,5 @@
-import { Copyright, Token, Version } from '@/configs/config';
-import { Image, View, authorize, checkSession, getSystemInfo, getUserInfo, login, redirectTo } from 'remax/wechat';
-import { Login, TokenLogin, UpdatePhone, UpdateUserInfo } from '@/service/service';
+import { Image, View, getSystemInfo, getUserInfo, login, redirectTo } from 'remax/wechat';
+import { Login, UpdatePhone, UpdateUserInfo } from '@/service/service';
 
 import { AppContext } from '@/app';
 import Dialog from '@vant/weapp/dist/dialog/dialog';
@@ -10,59 +9,51 @@ import VantDialog from '@vant/weapp/dist/dialog';
 import logo from '@/assets/logo.svg';
 import styles from './index.module.less';
 
-class Welcome extends React.Component {
+interface WelcomeProps {}
+interface WelcomeState {
+  version: string;
+  copyright: string;
+}
+
+class Welcome extends React.Component<WelcomeProps, WelcomeState> {
   static contextType = AppContext;
-  // did mount 的触发时机是在 onLaunch 的时候
-  componentDidMount() {
-    setTimeout(() => {
-      getSystemInfo()
-        .then((res: any) => {
-          const { locationAuthorized, bluetoothEnabled, locationEnabled } = res;
-          if (!locationAuthorized || !bluetoothEnabled || !locationEnabled) {
-            Dialog.alert({
-              title: '权限不足',
-              message: '请到系统应用设置打开微信相关权限:允许微信使用定位的开关,以及打开操作系统的蓝牙的开关和地理位置的开关'
-            });
-          }
-        })
-        .catch((error: any) => console.error(error));
-    }, 1300);
+
+  constructor(props: Readonly<WelcomeProps>) {
+    super(props);
+    this.state = { version: 'Insider Preview 20200416-1650', copyright: 'Copyright © 2020' };
   }
 
   onInto = () => {
-    authorize({ scope: 'scope.userInfo' })
-      .then(() => {
-        getUserInfo({ withCredentials: true }).then((res: any) => {
-          let userInfo = res.userInfo;
-          let reLogin: boolean = false;
-          // 暂时注释API请求部分内容
-          if (Token) {
-            checkSession()
-              .then(() => {
-                reLogin = false;
-                TokenLogin();
-              })
-              .catch(() => (reLogin = true));
-          } else reLogin = true;
-          if (reLogin) {
-            login()
-              .then((res: any) => {
-                console.log('123:', res);
-                Login(res.code);
-              })
-              .then(() => {
-                const { nickName, avatarUrl, gender, country, province, city, language, encryptedData, iv } = userInfo;
-                UpdateUserInfo({ nickName, avatarUrl, gender, country, province, city, language });
-                UpdatePhone({ encryptedData, iv });
-              });
-          }
-          redirectTo({ url: '../main/index?from=welcome' });
+    getUserInfo({ withCredentials: true }).then((res: any) => {
+      let userInfo = res.userInfo;
+      login()
+        .then((res: any) => Login(res.code))
+        .then(() => redirectTo({ url: '../main/index?from=welcome' }))
+        .finally(() => {
+          const { nickName, avatarUrl, gender, country, province, city, language, encryptedData, iv } = userInfo;
+          UpdateUserInfo({ nickName, avatarUrl, gender, country, province, city, language });
+          UpdatePhone({ encryptedData, iv });
         });
+    });
+  };
+
+  onShow = () => {
+    getSystemInfo()
+      .then((res: any) => {
+        const { locationAuthorized, bluetoothEnabled, locationEnabled } = res;
+        if (!locationAuthorized || !bluetoothEnabled || !locationEnabled) {
+          Dialog.alert({
+            title: '权限不足',
+            message: '请到系统应用设置打开微信相关权限:允许微信使用定位的开关,以及打开操作系统的蓝牙的开关和地理位置的开关'
+          });
+        }
       })
       .catch((error: any) => console.error(error));
   };
 
   render() {
+    const { version, copyright } = this.state;
+
     return (
       <View className={styles.app}>
         <View className={styles.header}>
@@ -75,8 +66,8 @@ class Welcome extends React.Component {
           </VantButton>
         </View>
         <View className={styles.viewFooter}>
-          <View className={styles.footerLink}>{Version}</View>
-          <View className={styles.txtVersion}>{Copyright}</View>
+          <View className={styles.footerLink}>{version}</View>
+          <View className={styles.txtVersion}>{copyright}</View>
         </View>
         <VantDialog id="van-dialog"></VantDialog>
       </View>

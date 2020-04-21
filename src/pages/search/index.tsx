@@ -23,10 +23,7 @@ class Search extends React.Component<SearchProps, SearchState> {
   static contextType = AppContext;
   constructor(props: Readonly<SearchProps>) {
     super(props);
-    this.state = {
-      range: '0',
-      floorId: ''
-    };
+    this.state = { range: '0', floorId: '' };
   }
 
   onLoad = (options: any) => {

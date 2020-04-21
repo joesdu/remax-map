@@ -1,6 +1,6 @@
 import { AppConfig } from 'remax/wechat';
 
-const pages: Array<string> = ['pages/welcome/index', 'pages/searchresult/index', 'pages/main/index', 'pages/search/index', 'pages/favorite/index'];
+const pages: Array<string> = ['pages/welcome/index', 'pages/main/index', 'pages/searchresult/index', 'pages/search/index', 'pages/favorite/index'];
 
 const config: AppConfig = {
   pages: pages,

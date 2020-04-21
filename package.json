@@ -10,7 +10,7 @@
     "prebuild": "yarn run clean"
   },
   "dependencies": {
-    "@vant/weapp": "^1.2.1",
+    "@vant/weapp": "^1.2.2",
     "less": "^3.11.1",
     "react": "^16.13.1",
     "remax": "^1.21.1"
@@ -19,7 +19,7 @@
     "@types/react": "^16.9.34",
     "@umijs/fabric": "^2.0.8",
     "chokidar": "^3.3.1",
-    "miniprogram-api-typings": "^2.10.3-1",
+    "miniprogram-api-typings": "^2.10.4",
     "remax-cli": "^1.21.1",
     "rimraf": "^3.0.2"
   }

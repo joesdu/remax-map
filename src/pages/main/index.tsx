@@ -1,5 +1,6 @@
 import { AddFavor, BuildList, DelFavor, FloorData, FloorList, Location } from '@/service/service';
-import { Image, MovableArea, MovableView, Text, View, navigateTo, showToast } from 'remax/wechat';
+import { Image, MovableArea, MovableView, Text, View, navigateTo } from 'remax/wechat';
+import { closeBluetoothAdapter, onBeaconUpdate, openBluetoothAdapter, startBeaconDiscovery, stopBeaconDiscovery } from 'remax/wechat';
 
 import { AppContext } from '@/app';
 import CircleButton from '@/components/circleButton';
@@ -65,26 +66,23 @@ class MainPage extends React.Component<{}, MainPageState> {
     // 非欢迎页跳转过来
     if (options.from !== 'welcome') {
       // todo Fix Something from other page data
-      this.setState({});
+      // this.setState({});
     }
+  };
+
+  onShow = (options: any) => {
+    console.log(options);
+    this.onLocationClick();
   };
 
   // 存储计时器ID
   private timer: any = -1;
 
-  onShow() {
-    this.onLocationClick();
-  }
-
   private onLocationClick = () => {
     console.log('定位按钮点击');
     this.context.setGlobal({ allowUpdate: false });
     // TODO 蓝牙未检测
-    // this.context.onBluetoothStateChange();
-    setTimeout(() => {
-      showToast({ title: '使用定时器修改蓝牙检测值。', duration: 1000 });
-      this.context.setGlobal({ allowUpdate: true });
-    }, 3000);
+    this.SearchIBeacon();
     this.timer = setInterval(() => {
       if (this.context.global.allowUpdate) {
         Location(JSON.stringify({ deviceData: this.context.global.ibeacons })).then((res: any) => this.fixFloorData(res));
@@ -192,6 +190,55 @@ class MainPage extends React.Component<{}, MainPageState> {
   private onSearchFocus = () => {
     const { floorList, floorIndex } = this.state;
     navigateTo({ url: `../search/index?current=${JSON.stringify({ floorId: floorList[floorIndex].floorId })}` });
+  };
+
+  private SearchIBeacon = () => {
+    openBluetoothAdapter({
+      success: (resOpen: any) => {
+        console.log('openBluetoothAdapter', resOpen);
+        startBeaconDiscovery({ uuids: [] })
+          .then((resStart: any) => {
+            console.log('startBeaconDiscovery', resStart);
+            onBeaconUpdate((res: any) => {
+              if (res && res.beacons && res.beacons.length > 0) {
+                const { beacons } = res;
+                let ibeacons: any = [];
+                for (let index: number = 0, item: any; (item = beacons[index++]); ) {
+                  console.log(`${index - 1}:`, item);
+                  let temp: any = {};
+                  temp = {
+                    coordinateId: '',
+                    rssi: item.rssi,
+                    accuracy: item.accuracy
+                  };
+                  if (index < 7) {
+                    ibeacons.push(temp);
+                  }
+                }
+                this.context.setGlobal({ allowUpdate: true, ibeacons });
+              }
+            });
+          })
+          .catch((error: any) => {
+            console.error('startBeaconDiscovery', error);
+            this.onStopBeaconDiscovery();
+          })
+          .finally(() => {
+            setTimeout(() => {
+              this.onStopBeaconDiscovery();
+            }, 1000 * 10);
+          });
+      }
+    });
+  };
+
+  private onStopBeaconDiscovery = () => {
+    stopBeaconDiscovery()
+      .then((res: any) => {
+        console.log('stopBeaconDiscovery', res);
+        closeBluetoothAdapter();
+      })
+      .catch((error: any) => console.error('stopBeaconDiscovery', error));
   };
 
   render() {

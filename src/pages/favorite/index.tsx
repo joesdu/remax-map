@@ -44,13 +44,9 @@ class Favorite extends React.Component<FavoriteProps, FavoriteState> {
     console.log(record);
     if (isManage) {
       DelFavor({ facilityId: record.facilityId }).then(() => {
-        FavoriteList().then((res: any) => {
-          this.setState({ favorites: res });
-        });
+        FavoriteList().then((res: any) => this.setState({ favorites: res }));
       });
-    } else {
-      redirectTo({ url: `../main/index?current=${JSON.stringify(record)}&from=favorite` });
-    }
+    } else redirectTo({ url: `../main/index?current=${JSON.stringify(record)}&from=favorite` });
   };
 
   renderFavorItem = () => {
