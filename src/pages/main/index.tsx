@@ -82,16 +82,28 @@ class MainPage extends React.Component<{}, MainPageState> {
     console.log('定位按钮点击');
     this.context.setGlobal({ allowUpdate: false });
     // TODO 蓝牙未检测
-    this.SearchIBeacon();
-    this.timer = setInterval(() => {
-      if (this.context.global.allowUpdate) {
-        Location(JSON.stringify({ deviceData: this.context.global.ibeacons })).then((res: any) => this.fixFloorData(res));
-      }
-    }, 1000);
+    Location({
+      data: JSON.stringify({
+        deviceData: [
+          { coordinateId: 618, rssi: -40, accuracy: 0.6 },
+          { coordinateId: 619, rssi: -40, accuracy: 0.6 },
+          { coordinateId: 620, rssi: -40, accuracy: 0.6 },
+          { coordinateId: 621, rssi: -40, accuracy: 0.6 },
+          { coordinateId: 622, rssi: -40, accuracy: 0.6 }
+        ]
+      })
+    }).then((res: any) => this.fixFloorData(res));
+    // this.SearchIBeacon();
+    // this.timer = setInterval(() => {
+    //   if (this.context.global.allowUpdate) {
+    //     Location(JSON.stringify({ deviceData: this.context.global.ibeacons })).then((res: any) => this.fixFloorData(res));
+    //   }
+    // }, 1000);
   };
 
   private fixFloorData = (res: any) => {
-    const { floorMapUrl, facilityList, floorName, projectId } = res;
+    console.log('MapDATA:', res);
+    const { floorMapUrl, facilityList, floorName, projectId } = res.result;
     let facilityGroup: Array<any> = [];
     for (let index: number = 0, item: any; (item = facilityList[index++]); ) {
       const { facilityId, facilityTypeUrl, point, facilityName, projectName, buildName, isFavor } = item;
@@ -105,6 +117,7 @@ class MainPage extends React.Component<{}, MainPageState> {
         shareData: facilityId
       });
     }
+    console.log('facilityGroup:', facilityGroup);
     this.setState({ facilityGroup, floorName: floorName, projectId });
     getImageInfo({ src: floorMapUrl })
       .then((res: any) => {
@@ -196,6 +209,7 @@ class MainPage extends React.Component<{}, MainPageState> {
     openBluetoothAdapter({
       success: (resOpen: any) => {
         console.log('openBluetoothAdapter', resOpen);
+        // TODO 补齐UUID
         startBeaconDiscovery({ uuids: [] })
           .then((resStart: any) => {
             console.log('startBeaconDiscovery', resStart);
