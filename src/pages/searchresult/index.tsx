@@ -30,7 +30,7 @@ class SearchResult extends React.Component<SearchResultProps, SearchResultState>
 
   onGotoClick = (record: any) => {
     console.log(record);
-    redirectTo({ url: '../main/index?current=' + JSON.stringify(record) + '&from=searchresult' });
+    redirectTo({ url: `../main/index?current=${JSON.stringify(record)}&from=searchresult` });
   };
 
   renderResultItem = () => {

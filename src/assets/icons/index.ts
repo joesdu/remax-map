@@ -14,3 +14,4 @@ export { default as RestroomIcon } from '@/assets/icons/restroom.svg';
 export { default as SearchIcon } from '@/assets/icons/search.svg';
 export { default as ShareIcon } from '@/assets/icons/share.svg';
 export { default as UpIcon } from '@/assets/icons/up.svg';
+export { default as MyLocation } from '@/assets/icons/my.svg';

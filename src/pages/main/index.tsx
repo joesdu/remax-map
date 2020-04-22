@@ -1,6 +1,6 @@
 import { AddFavor, BuildList, DelFavor, FloorData, FloorList, Location } from '@/service';
 import { CircleButton, FloorSelector } from '@/components';
-import { FavoriteIcon, LocationIcon, NotFavoriteIcon, SearchIcon, ShareIcon } from '@/assets/icons';
+import { FavoriteIcon, LocationIcon, MyLocation, NotFavoriteIcon, SearchIcon, ShareIcon } from '@/assets/icons';
 import { Image, MovableArea, MovableView, Text, View, navigateTo } from 'remax/wechat';
 
 import { AppContext } from '@/app';
@@ -63,17 +63,17 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     };
   }
 
-  onLoad = (options: any) => {
-    // 非欢迎页跳转过来
-    if (options.from !== 'welcome') {
-      // todo Fix Something from other page data
-      // this.setState({});
+  onShow = () => {
+    let query = this.props.location.query;
+    console.log('FROM:', query.from);
+    if (query.from === 'favorite') {
+      // 从收藏跳转到主页
+    } else if (query.from === 'searchresult') {
+      //从结果页面跳转到主页
+    } else {
+      // 从欢迎页跳转到主页
+      this.onLocationClick();
     }
-  };
-
-  onShow = (options: any) => {
-    console.log(options);
-    this.onLocationClick();
   };
 
   // 存储计时器ID
@@ -104,11 +104,12 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
 
   private fixFloorData = (res: any) => {
     console.log('MapDATA:', res);
-    const { floorMapUrl, facilityList, floorName, projectId, floorId } = res.result;
+    const { floorMapUrl, facilityList, floorName, projectId, floorId, location } = res.result;
     let facilityGroup: Array<any> = [];
     for (let index: number = 0, item: any; (item = facilityList[index++]); ) {
       const { facilityId, facilityTypeUrl, point, facilityName, projectName, buildName, isFavor } = item;
       facilityGroup.push({
+        isLocation: true,
         facilityId,
         avatar: facilityTypeUrl,
         point,
@@ -118,6 +119,16 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
         shareData: facilityId
       });
     }
+    facilityGroup.push({
+      isLocation: false,
+      facilityId: '',
+      avatar: MyLocation,
+      point: location,
+      name: '',
+      address: '',
+      isFavorite: false,
+      shareData: ''
+    });
     console.log('facilityGroup:', facilityGroup);
     this.setState({ facilityGroup, floorName: floorName, projectId, floorId });
     getImageInfo({ src: floorMapUrl })
@@ -202,7 +213,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   private renderFacilities = (facilityGroup: Array<any>) => {
     let itemTemp: Array<any> = [];
     for (let index: number = 0, item: any; (item = facilityGroup && facilityGroup[index++]); ) {
-      itemTemp.push(<FacilityItem key={index - 1} data={item} onItemClick={this.onItemClick.bind(this, item, index - 1)} />);
+      itemTemp.push(<FacilityItem key={index - 1} data={item} onItemClick={item.isLocation ? this.onItemClick.bind(this, item, index - 1) : null} />);
     }
     return itemTemp;
   };
