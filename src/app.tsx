@@ -54,12 +54,12 @@ class App extends React.Component<AppProps, AppState> {
           .catch((error: any) => {
             console.error('startBeaconDiscovery', error);
             this.onStopBeaconDiscovery();
-          })
-          .finally(() => {
-            setTimeout(() => {
-              this.onStopBeaconDiscovery();
-            }, 1000 * 10);
           });
+        // .finally(() => {
+        //   setTimeout(() => {
+        //     this.onStopBeaconDiscovery();
+        //   }, 1000 * 10);
+        // });
       }
     });
   };
