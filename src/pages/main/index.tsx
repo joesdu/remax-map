@@ -68,8 +68,16 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     console.log('FROM:', query.from);
     if (query.from === 'favorite') {
       // 从收藏跳转到主页
+      console.log(query.current);
+      /**
+       * {"floorId":29,"facilityTypeName":"扶梯","buildName":"新建楼栋测试","facilityId":15,"facilityTypeUrl":"http://service-gw.winside.com:8080/uploadFile/facility/扶梯.svg","id":3,"facilityName":"扶梯","floorName":"测试地图问题5","facilityPosition":[1230,718],"projectName":"空地图测试","projectId":18}
+       */
     } else if (query.from === 'searchresult') {
       //从结果页面跳转到主页
+      console.log(query.current);
+      /**
+       * {"buildName":"新建楼栋测试","facilityTypeName":"卫生间","facilityId":13,"buildId":null,"point":[1186,356],"floorId":29,"wh":[null,null],"facilityTypeId":1,"facilityTypeUrl":"http://service-gw.winside.com:8080/uploadFile/facility/卫生间.svg","facilityName":"卫生间","floorName":"测试地图问题5","projectName":"空地图测试","projectId":18,"facilityOwner":2}
+       */
     } else {
       // 从欢迎页跳转到主页
       this.onLocationClick();
@@ -220,7 +228,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
 
   private onSearchFocus = () => {
     const { floorId } = this.state;
-    navigateTo({ url: '../search/index?current=' + JSON.stringify({ floorId }) });
+    navigateTo({ url: `../search/index?current=${JSON.stringify({ floorId })}` });
   };
 
   render() {
@@ -233,13 +241,13 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
       <View>
         <View className={styles['floor-wrap']}>
           {/* <VantSearch value={this.context.global.searchText} shape="round" placeholder="请输入搜索关键词" custom-class={styles.search} bindfocus={this.onSearchFocus} /> */}
-          <MovableArea className={styles['floor-container']} style={{ height: `100vh`, width: `100vw` }}>
+          <MovableArea className={styles['floor-container']} style={{ height: '100vh', width: '100vw' }}>
             <MovableView scale direction="all" className={styles['floor-map']} style={{ height: `${mapHeight}px`, width: `${mapWidth}px` }}>
               <Image className={styles['floor-map-drawings']} src={drawings} />
               {this.renderFacilities(facilityGroup)}
             </MovableView>
           </MovableArea>
-          <CircleButton icon={SearchIcon} onClick={this.onSearchFocus} style={{ float: 'right', position: 'fixed', top: 100, right: 32 }} />
+          <CircleButton icon={SearchIcon} imageStyle={{ width: 42 }} onClick={this.onSearchFocus} style={{ float: 'right', position: 'fixed', top: 100, right: 32 }} />
           <CircleButton icon={LocationIcon} onClick={this.onLocationClick} style={{ float: 'left', position: 'fixed', bottom: 108, left: 32 }} />
           <FloorSelector text={floorName} onClick={this.onSelector} style={{ position: 'absolute', bottom: 104, left: 250 }} />
           <CircleButton icon={NotFavoriteIcon} onClick={this.onFavoriteClick} style={{ float: 'right', position: 'fixed', bottom: 108, right: 32 }} />
