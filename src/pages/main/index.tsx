@@ -104,7 +104,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
         ]
       })
     }).then((res: any) => this.fixFloorData(res));
-    this.context.SearchIBeacon();
+    // this.context.SearchIBeacon();
     this.timer = setInterval(() => {
       if (this.context.global.allowUpdate) {
         if (this.context.global.ibeacons.length <= 0) {

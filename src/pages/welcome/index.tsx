@@ -51,6 +51,8 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
             title: '权限不足',
             message: '请到系统应用设置打开微信相关权限:允许微信使用定位的开关,以及打开操作系统的蓝牙的开关和地理位置的开关'
           });
+        } else {
+          this.context.S
         }
       })
       .catch((error: any) => console.error(error));
