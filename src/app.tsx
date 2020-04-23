@@ -75,7 +75,7 @@ class App extends React.Component<AppProps, AppState> {
 
   onShow() {
     console.log('OnAppShow');
-    this.SearchIBeacon();
+    // this.SearchIBeacon();
   }
 
   onHide = () => {
