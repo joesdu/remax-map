@@ -36,6 +36,7 @@ interface MainPageState {
   facilityGroup: Array<any>;
   projectId: string;
   floorId: string;
+  existent: boolean;
 }
 class MainPage extends React.Component<MainPageProps, MainPageState> {
   static contextType = AppContext;
@@ -59,7 +60,8 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
       floorNameList: [],
       floorIndex: 0,
       projectId: '',
-      floorId: ''
+      floorId: '',
+      existent: true
     };
   }
 
@@ -102,12 +104,17 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
         ]
       })
     }).then((res: any) => this.fixFloorData(res));
-    // this.context.SearchIBeacon();
-    // this.timer = setInterval(() => {
-    //   if (this.context.global.allowUpdate) {
-    //     Location(JSON.stringify({ deviceData: this.context.global.ibeacons })).then((res: any) => this.fixFloorData(res));
-    //   }
-    // }, 1000);
+    this.context.SearchIBeacon();
+    this.timer = setInterval(() => {
+      if (this.context.global.allowUpdate) {
+        if (this.context.global.ibeacons.length <= 0) {
+          this.setState({ existent: false });
+        } else {
+          Location(JSON.stringify({ deviceData: this.context.global.ibeacons })).then((res: any) => this.fixFloorData(res));
+          this.setState({ existent: true });
+        }
+      }
+    }, 1000);
   };
 
   private fixFloorData = (res: any) => {
@@ -231,8 +238,24 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     navigateTo({ url: `../search/index?current=${JSON.stringify({ floorId })}` });
   };
 
+  private renderView = () => {
+    const { mapWidth, mapHeight, drawings, facilityGroup, existent } = this.state;
+    if (existent) {
+      return (
+        <MovableArea className={styles['floor-container']} style={{ height: '100vh', width: '100vw' }}>
+          <MovableView scale direction="all" className={styles['floor-map']} style={{ height: `${mapHeight}px`, width: `${mapWidth}px` }}>
+            <Image className={styles['floor-map-drawings']} src={drawings} />
+            {this.renderFacilities(facilityGroup)}
+          </MovableView>
+        </MovableArea>
+      );
+    } else {
+      return <View>未检测到智能设备</View>;
+    }
+  };
+
   render() {
-    const { mapWidth, mapHeight, drawings, popShow, keep, itemData, selectorPopShow, floorName, buildNameList, floorNameList, facilityGroup } = this.state;
+    const { popShow, keep, itemData, selectorPopShow, floorName, buildNameList, floorNameList } = this.state;
     const { avatar, name, address } = itemData;
 
     const popStyle = 'background:#FFFFFFFF;box-shadow:0rpx 8rpx 24rpx 0rpx #00000019;border-radius:16rpx;border: 2rpx solid #00000019;margin-bottom:108rpx;width:686rpx;margin-left:32rpx';
@@ -241,12 +264,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
       <View>
         <View className={styles['floor-wrap']}>
           {/* <VantSearch value={this.context.global.searchText} shape="round" placeholder="请输入搜索关键词" custom-class={styles.search} bindfocus={this.onSearchFocus} /> */}
-          <MovableArea className={styles['floor-container']} style={{ height: '100vh', width: '100vw' }}>
-            <MovableView scale direction="all" className={styles['floor-map']} style={{ height: `${mapHeight}px`, width: `${mapWidth}px` }}>
-              <Image className={styles['floor-map-drawings']} src={drawings} />
-              {this.renderFacilities(facilityGroup)}
-            </MovableView>
-          </MovableArea>
+          {this.renderView()}
           <CircleButton icon={SearchIcon} imageStyle={{ width: 42 }} onClick={this.onSearchFocus} style={{ float: 'right', position: 'fixed', top: 100, right: 32 }} />
           <CircleButton icon={LocationIcon} onClick={this.onLocationClick} style={{ float: 'left', position: 'fixed', bottom: 108, left: 32 }} />
           <FloorSelector text={floorName} onClick={this.onSelector} style={{ position: 'absolute', bottom: 104, left: 250 }} />

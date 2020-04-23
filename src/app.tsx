@@ -73,13 +73,13 @@ class App extends React.Component<AppProps, AppState> {
       .catch((error: any) => console.error('stopBeaconDiscovery', error));
   };
 
-  onShow(option: any) {
-    console.log('OnAppShow', option);
+  onShow() {
+    console.log('OnAppShow');
     this.SearchIBeacon();
   }
 
-  onHide = (option: any) => {
-    console.log('OnAppHide', option);
+  onHide = () => {
+    console.log('OnAppHide');
     CloseMap();
   };
 
