@@ -63,6 +63,22 @@ export const UpdatePhone = (data: any): Promise<any> =>
     });
   });
 /**
+ * 地图使用日志
+ */
+export const MapUsageRecord = (data: { floorId: string; projectId: string }): Promise<any> =>
+  new Promise((resolve, reject) => {
+    getStorage({ key: 'token' }).then((token: any) => {
+      request({
+        url: `${BaseUrl}location/addMapUsageRecord`,
+        data: data,
+        header: { Authorization: token.data, 'content-type': 'application/x-www-form-urlencoded' },
+        method: 'POST'
+      })
+        .then((res: any) => resolve(res.data))
+        .catch((error: any) => reject(error));
+    });
+  });
+/**
  *新增位置收藏
  */
 export const AddFavor = (data: { facilityId: string }): Promise<any> =>

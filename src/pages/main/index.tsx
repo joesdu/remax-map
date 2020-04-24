@@ -1,4 +1,4 @@
-import { AddFavor, BuildList, DelFavor, FloorData, FloorList, Location } from '@/service';
+import { AddFavor, BuildList, DelFavor, FloorData, FloorList, Location, MapUsageRecord } from '@/service';
 import { CircleButton, FloorSelector } from '@/components';
 import { FavoriteIcon, LocationIcon, MyLocation, NotFavoriteIcon, SearchIcon, ShareIcon } from '@/assets/icons';
 import { Image, MovableArea, MovableView, Text, View, hideLoading, navigateTo, showLoading } from 'remax/wechat';
@@ -224,7 +224,8 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   };
 
   private onSelectorOK = () => {
-    const { floorId } = this.state;
+    const { floorId, projectId } = this.state;
+    MapUsageRecord({ floorId, projectId });
     FloorData({ floorId }).then((res: any) => {
       console.log(res);
       this.fixFloorData(res, false);
