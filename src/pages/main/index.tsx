@@ -244,7 +244,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     return itemTemp;
   };
 
-  private onSearchFocus = () => {
+  private onSearch = () => {
     const { floorId } = this.state;
     navigateTo({ url: `../search/index?current=${JSON.stringify({ floorId })}` });
   };
@@ -278,7 +278,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
         <View className={styles['floor-wrap']}>
           {/* <VantSearch value={this.context.global.searchText} shape="round" placeholder="请输入搜索关键词" custom-class={styles.search} bindfocus={this.onSearchFocus} /> */}
           {this.renderView()}
-          <CircleButton icon={SearchIcon} imageStyle={{ width: 42 }} onClick={this.onSearchFocus} style={{ float: 'right', position: 'fixed', top: 100, right: 32 }} />
+          <CircleButton icon={SearchIcon} imageStyle={{ width: 42 }} onClick={this.onSearch} style={{ float: 'right', position: 'fixed', top: 100, right: 32 }} />
           <CircleButton icon={LocationIcon} onClick={this.onLocationClick} style={{ float: 'left', position: 'fixed', bottom: 108, left: 32 }} />
           <FloorSelector text={floorName} onClick={this.onSelector} style={{ position: 'absolute', bottom: 104, left: 250 }} />
           <CircleButton icon={NotFavoriteIcon} onClick={this.onFavoriteClick} style={{ float: 'right', position: 'fixed', bottom: 108, right: 32 }} />
