@@ -71,7 +71,17 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     else {
       console.log(query.current);
       let current = JSON.parse(query.current);
-      FloorData({ floorId: current.floorId }).then((res: any) => this.fixFloorData(res, false));
+      let args = {
+        isLocation: true,
+        facilityId: current.facilityId,
+        avatar: current.facilityTypeUrl,
+        point: query.from === 'favorite' ? current.facilityPosition : current.point,
+        name: current.facilityName,
+        address: `${current.projectName}-${current.buildName}-${current.floorName}`,
+        isFavorite: query.from === 'favorite',
+        shareData: ''
+      };
+      FloorData({ floorId: current.floorId }).then((res: any) => this.fixFloorData(res, false, true, args));
     }
   };
 
@@ -113,18 +123,22 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     }
   };
 
-  private fixFloorData = (res: any, isLocation: boolean) => {
+  private fixFloorData = (res: any, isLocation: boolean, favorResult: boolean = false, favorData: any = null) => {
     console.log('MapData:', res);
     let location: any;
     const { floorMapUrl, facilityList, floorName, projectId, floorId } = res.result;
     if (isLocation) location = res.result.location;
     let facilityGroup: Array<any> = [];
-    for (let index: number = 0, item: any; (item = facilityList[index++]); ) {
-      const { facilityId, facilityTypeUrl, point, facilityName, projectName, buildName, isFavor } = item;
-      facilityGroup.push({ isLocation: true, facilityId, avatar: facilityTypeUrl, point, name: facilityName, address: `${projectName}-${buildName}`, isFavorite: isFavor, shareData: facilityId });
-    }
-    if (isLocation) {
-      facilityGroup.push({ isLocation: false, facilityId: '', avatar: MyLocation, point: location, name: '', address: '', isFavorite: false, shareData: '' });
+    if (favorResult) {
+      facilityGroup = [favorData];
+    } else {
+      for (let index: number = 0, item: any; (item = facilityList[index++]); ) {
+        const { facilityId, facilityTypeUrl, point, facilityName, projectName, buildName, isFavor } = item;
+        facilityGroup.push({ isLocation: true, facilityId, avatar: facilityTypeUrl, point, name: facilityName, address: `${projectName}-${buildName}-${floorName}`, isFavorite: isFavor, shareData: facilityId });
+      }
+      if (isLocation) {
+        facilityGroup.push({ isLocation: false, facilityId: '', avatar: MyLocation, point: location, name: '', address: '', isFavorite: false, shareData: '' });
+      }
     }
     this.setState({ facilityGroup, floorName: floorName, projectId, floorId });
     getImageInfo({ src: floorMapUrl })
