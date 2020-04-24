@@ -25,6 +25,7 @@ class App extends React.Component<AppProps, AppState> {
       }
     };
   }
+
   setGlobal = (data: any) => {
     const { global } = this.state;
     this.setState({ global: { ...global, ...data } });
@@ -32,14 +33,11 @@ class App extends React.Component<AppProps, AppState> {
 
   SearchIBeacon = () => {
     openBluetoothAdapter({
-      success: (resOpen: any) => {
-        console.log('openBluetoothAdapter', resOpen);
+      success: () => {
         this.onStopBeaconDiscovery();
         startBeaconDiscovery({ uuids: ['FDA50693-A4E2-4FB1-AFCF-C6EB07647825'] })
-          .then((resStart: any) => {
-            console.log('startBeaconDiscovery', resStart);
+          .then(() => {
             onBeaconUpdate((res: any) => {
-              console.log('onBeaconUpdate', res);
               if (res && res.beacons && res.beacons.length > 0) {
                 const { beacons } = res;
                 let ibeacons: any = [];
@@ -57,33 +55,16 @@ class App extends React.Component<AppProps, AppState> {
             console.error('startBeaconDiscovery', error);
             this.onStopBeaconDiscovery();
           });
-        // .finally(() => {
-        //   setTimeout(() => {
-        //     this.onStopBeaconDiscovery();
-        //   }, 1000 * 10);
-        // });
       }
     });
   };
 
-  onStopBeaconDiscovery = () => {
+  onStopBeaconDiscovery = () =>
     stopBeaconDiscovery()
-      .then((res: any) => {
-        console.log('stopBeaconDiscovery', res);
-        closeBluetoothAdapter();
-      })
+      .then(() => closeBluetoothAdapter())
       .catch((error: any) => console.error('stopBeaconDiscovery', error));
-  };
 
-  onShow() {
-    console.log('OnAppShow');
-    // this.SearchIBeacon();
-  }
-
-  onHide = () => {
-    console.log('OnAppHide');
-    CloseMap();
-  };
+  onHide = () => CloseMap();
 
   render() {
     const { global } = this.state;
@@ -92,23 +73,3 @@ class App extends React.Component<AppProps, AppState> {
   }
 }
 export default App;
-
-/**
-import { useAppEvent } from 'remax/wechat';
-
-export const AppContext = React.createContext({});
-
-const App: React.FC = ({ children }) => {
-  const [global, setGlobal] = React.useState({
-    test: 'test'
-  });
-
-  useAppEvent('onShow', (option: any) => {
-    console.log('OnShow', option);
-  });
-
-  return <AppContext.Provider value={{ global, setGlobal }}>{children}</AppContext.Provider>;
-};
-
-export default App;
- */

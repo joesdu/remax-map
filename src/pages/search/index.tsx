@@ -20,58 +20,30 @@ class Search extends React.Component<SearchProps, SearchState> {
   static contextType = AppContext;
   constructor(props: Readonly<SearchProps>) {
     super(props);
-    this.state = { range: '0', floorId: '' };
+    this.state = {
+      range: '0',
+      floorId: ''
+    };
   }
 
   componentDidMount() {
     let data = JSON.parse(this.props.location.query.current);
-    console.log('searchData:', data);
     const { floorId } = data;
     this.setState({ floorId });
   }
 
-  private onRangeChange = (dropdown: any) => {
-    console.log(dropdown);
-    this.setState({ range: dropdown.detail });
-  };
+  private onRangeChange = (dropdown: any) => this.setState({ range: dropdown.detail });
 
   private onSearch = (event: any) => {
     const { range, floorId } = this.state;
     this.context.setGlobal({ searchText: event.detail });
     let args = range === '0' ? { floorId, keywords: event.detail } : { keywords: event.detail };
-    SearchLocation(args).then((res: any) => {
-      navigateTo({ url: `../searchresult/index?current=${JSON.stringify(res)}` });
-    });
+    this.LocationSearch(args);
   };
 
-  private onRestroom = () => {
-    const { floorId } = this.state;
-    let args = { floorId, keywords: '卫生间' };
-    SearchLocation(args).then((res: any) => {
-      navigateTo({ url: `../searchresult/index?current=${JSON.stringify(res)}` });
-    });
-  };
-  private onElevator = () => {
-    const { floorId } = this.state;
-    let args = { floorId, keywords: '电梯' };
-    SearchLocation(args).then((res: any) => {
-      navigateTo({ url: `../searchresult/index?current=${JSON.stringify(res)}` });
-    });
-  };
-  private onEscalator = () => {
-    const { floorId } = this.state;
-    let args = { floorId, keywords: '扶梯' };
-    SearchLocation(args).then((res: any) => {
-      navigateTo({ url: `../searchresult/index?current=${JSON.stringify(res)}` });
-    });
-  };
-  private onExit = () => {
-    const { floorId } = this.state;
-    let args = { floorId, keywords: '出口' };
-    SearchLocation(args).then((res: any) => {
-      navigateTo({ url: `../searchresult/index?current=${JSON.stringify(res)}` });
-    });
-  };
+  private Search = (keywords: string) => this.LocationSearch({ floorId: this.state.floorId, keywords });
+
+  private LocationSearch = (args: any) => SearchLocation(args).then((res: any) => navigateTo({ url: `../searchresult/index?current=${JSON.stringify(res)}` }));
 
   render() {
     const { range } = this.state;
@@ -93,10 +65,10 @@ class Search extends React.Component<SearchProps, SearchState> {
           </View>
         </View>
         <View className={styles.fastContainer}>
-          <Image className={styles.image} mode="aspectFill" src={RestroomIcon} onClick={this.onRestroom} />
-          <Image className={styles.image} mode="aspectFill" src={ElevatorIcon} onClick={this.onElevator} />
-          <Image className={styles.image} mode="aspectFill" src={EscalatorIcon} onClick={this.onEscalator} />
-          <Image className={styles.image} mode="aspectFill" src={ExitIcon} onClick={this.onExit} />
+          <Image className={styles.image} mode="aspectFill" src={RestroomIcon} onClick={this.Search.bind(this, '卫生间')} />
+          <Image className={styles.image} mode="aspectFill" src={ElevatorIcon} onClick={this.Search.bind(this, '电梯')} />
+          <Image className={styles.image} mode="aspectFill" src={EscalatorIcon} onClick={this.Search.bind(this, '扶梯')} />
+          <Image className={styles.image} mode="aspectFill" src={ExitIcon} onClick={this.Search.bind(this, '出入口')} />
         </View>
         <View className={styles.history}>
           <View className={styles['history-left']}>历史搜索记录</View>

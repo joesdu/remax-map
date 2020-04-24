@@ -26,14 +26,8 @@ class Favorite extends React.Component<FavoriteProps, FavoriteState> {
   }
 
   onShow() {
-    FavoriteList().then((res: any) => {
-      console.log('favor:', res);
-      this.setState({ favorites: res.result });
-    });
-    getSystemInfo().then((res: any) => {
-      const { screenHeight } = res;
-      this.setState({ scrollHight: screenHeight });
-    });
+    FavoriteList().then((res: any) => this.setState({ favorites: res.result }));
+    getSystemInfo().then((res: any) => this.setState({ scrollHight: res.screenHeight }));
   }
 
   private onManage = () => {
@@ -44,19 +38,15 @@ class Favorite extends React.Component<FavoriteProps, FavoriteState> {
 
   private onFavorItemClick = (record: any) => {
     const { isManage } = this.state;
-    console.log(record);
-    if (isManage) {
-      DelFavor({ facilityId: record.facilityId }).then(() => {
-        FavoriteList().then((res: any) => this.setState({ favorites: res }));
-      });
-    } else redirectTo({ url: `../main/index?current=${JSON.stringify(record)}&from=favorite` });
+    if (isManage) DelFavor({ facilityId: record.facilityId }).then(() => FavoriteList().then((res: any) => this.setState({ favorites: res })));
+    else redirectTo({ url: `../main/index?current=${JSON.stringify(record)}&from=favorite` });
   };
 
   renderFavorItem = () => {
     const { favorites, isManage } = this.state;
     let tp: Array<any> = [];
     for (let index: number = 0, item: any; (item = favorites[index++]); ) {
-      tp.push(<ResultItem key={index - 1} isDel={isManage} title={item.facilityName} subTitle={`${item.projectName}-${item.buildName}-${item.floorName}`} onClick={this.onFavorItemClick.bind(this, item)}></ResultItem>);
+      tp.push(<ResultItem key={index} isDel={isManage} title={item.facilityName} subTitle={`${item.projectName}-${item.buildName}-${item.floorName}`} onClick={this.onFavorItemClick.bind(this, item)}></ResultItem>);
     }
     return tp;
   };
@@ -67,7 +57,7 @@ class Favorite extends React.Component<FavoriteProps, FavoriteState> {
     return (
       <View>
         <View className={styles.topContainer}>
-          <View>{favorites ? favorites.length : 0}个收藏</View>
+          <View>{favorites ? favorites.length : 0} 个收藏</View>
           <View onClick={this.onManage}>{manageTxt}</View>
         </View>
         <ScrollView style={{ height: `${scrollHight}px`, width: '100vw' }}>{this.renderFavorItem()}</ScrollView>

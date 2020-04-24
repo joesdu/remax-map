@@ -14,8 +14,6 @@ import VantToast from '@vant/weapp/dist/toast';
 import { getImageInfo } from 'remax/wechat';
 import styles from './index.module.less';
 
-// import VantSearch from '@vant/weapp/dist/search';
-
 export interface MainPageProps {
   location: any;
 }
@@ -69,18 +67,12 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
 
   onShow = () => {
     let query = this.props.location.query;
-    console.log('FROM:', query.from);
-    if (query.from === 'favorite') {
+    if (query.from === 'welcome') this.onLocationClick();
+    else {
       console.log(query.current);
       let current = JSON.parse(query.current);
-      console.log(current);
       FloorData({ floorId: current.floorId }).then((res: any) => this.fixFloorData(res, false));
-    } else if (query.from === 'searchresult') {
-      console.log(query.current);
-      let current = JSON.parse(query.current);
-      console.log(current);
-      FloorData({ floorId: current.floorId }).then((res: any) => this.fixFloorData(res, false));
-    } else this.onLocationClick();
+    }
   };
 
   private onLocationClick = () => {
@@ -102,12 +94,8 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
         })
       })
         .then((res: any) => this.fixFloorData(res, true))
-        .catch(() => {
-          this.setState({ existent: false });
-        })
-        .finally(() => {
-          hideLoading();
-        });
+        .catch(() => this.setState({ existent: false }))
+        .finally(() => hideLoading());
     } else {
       showLoading({ title: '定位中', mask: true });
       setInterval(() => {
@@ -133,30 +121,11 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     let facilityGroup: Array<any> = [];
     for (let index: number = 0, item: any; (item = facilityList[index++]); ) {
       const { facilityId, facilityTypeUrl, point, facilityName, projectName, buildName, isFavor } = item;
-      facilityGroup.push({
-        isLocation: true,
-        facilityId,
-        avatar: facilityTypeUrl,
-        point,
-        name: facilityName,
-        address: `${projectName}-${buildName}`,
-        isFavorite: isFavor,
-        shareData: facilityId
-      });
+      facilityGroup.push({ isLocation: true, facilityId, avatar: facilityTypeUrl, point, name: facilityName, address: `${projectName}-${buildName}`, isFavorite: isFavor, shareData: facilityId });
     }
     if (isLocation) {
-      facilityGroup.push({
-        isLocation: false,
-        facilityId: '',
-        avatar: MyLocation,
-        point: location,
-        name: '',
-        address: '',
-        isFavorite: false,
-        shareData: ''
-      });
+      facilityGroup.push({ isLocation: false, facilityId: '', avatar: MyLocation, point: location, name: '', address: '', isFavorite: false, shareData: '' });
     }
-    console.log('facilityGroup:', facilityGroup);
     this.setState({ facilityGroup, floorName: floorName, projectId, floorId });
     getImageInfo({ src: floorMapUrl })
       .then((res: any) => {
@@ -219,17 +188,13 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   private onFloorChange = (event: any) => {
     const { floorList } = this.state;
     const { value, index } = event.detail;
-    console.log(`当前值：${value}, 当前索引：${index}`);
     this.setState({ floorName: value, floorIndex: index, floorId: floorList[index].floorId });
   };
 
   private onSelectorOK = () => {
     const { floorId, projectId } = this.state;
     MapUsageRecord({ floorId, projectId });
-    FloorData({ floorId }).then((res: any) => {
-      console.log(res);
-      this.fixFloorData(res, false);
-    });
+    FloorData({ floorId }).then((res: any) => this.fixFloorData(res, false));
     this.setState({ selectorPopShow: false });
   };
 
@@ -240,33 +205,25 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   private renderFacilities = (facilityGroup: Array<any>) => {
     let itemTemp: Array<any> = [];
     for (let index: number = 0, item: any; (item = facilityGroup && facilityGroup[index++]); ) {
-      itemTemp.push(<FacilityItem key={index - 1} data={item} onItemClick={item.isLocation ? this.onItemClick.bind(this, item, index - 1) : null} />);
+      itemTemp.push(<FacilityItem key={index} data={item} onItemClick={item.isLocation ? this.onItemClick.bind(this, item, index - 1) : null} />);
     }
     return itemTemp;
   };
 
-  private onSearch = () => {
-    const { floorId } = this.state;
-    navigateTo({ url: `../search/index?current=${JSON.stringify({ floorId })}` });
-  };
+  private onSearch = () => navigateTo({ url: `../search/index?current=${JSON.stringify({ floorId: this.state.floorId })}` });
 
   private renderView = () => {
     const { mapWidth, mapHeight, drawings, facilityGroup, existent } = this.state;
     if (existent) {
       return (
         <MovableArea className={styles['floor-container']} style={{ height: '100vh', width: '100vw' }}>
-          <MovableView scale direction="all" className={styles['floor-map']} style={{ height: `${mapHeight}px`, width: `${mapWidth}px` }}>
+          <MovableView outOfBounds={true} scale direction="all" className={styles['floor-map']} style={{ height: `${mapHeight}px`, width: `${mapWidth}px` }}>
             <Image className={styles['floor-map-drawings']} src={drawings} />
             {this.renderFacilities(facilityGroup)}
           </MovableView>
         </MovableArea>
       );
-    } else {
-      Dialog.alert!({
-        title: '未检测到智能设备',
-        message: '对不起,您当前位置无法为您提供服务'
-      });
-    }
+    } else Dialog.alert!({ title: '未检测到智能设备', message: '对不起,您当前位置无法为您提供服务' });
   };
 
   render() {
@@ -277,7 +234,6 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     return (
       <View>
         <View className={styles['floor-wrap']}>
-          {/* <VantSearch value={this.context.global.searchText} shape="round" placeholder="请输入搜索关键词" custom-class={styles.search} bindfocus={this.onSearchFocus} /> */}
           {this.renderView()}
           <CircleButton icon={SearchIcon} imageStyle={{ width: 42 }} onClick={this.onSearch} style={{ float: 'right', position: 'fixed', top: 100, right: 32 }} />
           <CircleButton icon={LocationIcon} onClick={this.onLocationClick} style={{ float: 'left', position: 'fixed', bottom: 108, left: 32 }} />
