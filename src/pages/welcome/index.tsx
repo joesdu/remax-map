@@ -23,7 +23,7 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
   constructor(props: Readonly<WelcomeProps>) {
     super(props);
     this.state = {
-      version: 'Insider Preview 20200421-1650',
+      version: 'Insider Preview 20200424-1120',
       copyright: 'Copyright © 2020'
     };
   }
@@ -76,7 +76,7 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
           <View className={styles.footerLink}>{version}</View>
           <View className={styles.txtVersion}>{copyright}</View>
         </View>
-        <VantDialog id="van-dialog"></VantDialog>
+        <VantDialog id="van-dialog" />
       </View>
     );
   }

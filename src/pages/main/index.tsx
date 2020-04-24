@@ -1,11 +1,13 @@
 import { AddFavor, BuildList, DelFavor, FloorData, FloorList, Location } from '@/service';
 import { CircleButton, FloorSelector } from '@/components';
 import { FavoriteIcon, LocationIcon, MyLocation, NotFavoriteIcon, SearchIcon, ShareIcon } from '@/assets/icons';
-import { Image, MovableArea, MovableView, Text, View, navigateTo } from 'remax/wechat';
+import { Image, MovableArea, MovableView, Text, View, hideLoading, navigateTo, showLoading } from 'remax/wechat';
 
 import { AppContext } from '@/app';
+import Dialog from '@vant/weapp/dist/dialog/dialog';
 import FacilityItem from './components/facility-item';
 import React from 'react';
+import VantDialog from '@vant/weapp/dist/dialog';
 import VantPicker from '@vant/weapp/dist/picker';
 import VantPopup from '@vant/weapp/dist/popup';
 import VantToast from '@vant/weapp/dist/toast';
@@ -69,57 +71,65 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     let query = this.props.location.query;
     console.log('FROM:', query.from);
     if (query.from === 'favorite') {
-      // 从收藏跳转到主页
       console.log(query.current);
-      /**
-       * {"floorId":29,"facilityTypeName":"扶梯","buildName":"新建楼栋测试","facilityId":15,"facilityTypeUrl":"http://service-gw.winside.com:8080/uploadFile/facility/扶梯.svg","id":3,"facilityName":"扶梯","floorName":"测试地图问题5","facilityPosition":[1230,718],"projectName":"空地图测试","projectId":18}
-       */
+      let current = JSON.parse(query.current);
+      console.log(current);
+      FloorData({ floorId: current.floorId }).then((res: any) => this.fixFloorData(res, false));
     } else if (query.from === 'searchresult') {
-      //从结果页面跳转到主页
       console.log(query.current);
-      /**
-       * {"buildName":"新建楼栋测试","facilityTypeName":"卫生间","facilityId":13,"buildId":null,"point":[1186,356],"floorId":29,"wh":[null,null],"facilityTypeId":1,"facilityTypeUrl":"http://service-gw.winside.com:8080/uploadFile/facility/卫生间.svg","facilityName":"卫生间","floorName":"测试地图问题5","projectName":"空地图测试","projectId":18,"facilityOwner":2}
-       */
-    } else {
-      // 从欢迎页跳转到主页
-      this.onLocationClick();
-    }
+      let current = JSON.parse(query.current);
+      console.log(current);
+      FloorData({ floorId: current.floorId }).then((res: any) => this.fixFloorData(res, false));
+    } else this.onLocationClick();
   };
-
-  // 存储计时器ID
-  private timer: any = -1;
 
   private onLocationClick = () => {
     console.log('定位按钮点击');
+    this.setState({ existent: true });
     this.context.setGlobal({ allowUpdate: false });
-    // TODO 蓝牙未检测
-    Location({
-      data: JSON.stringify({
-        deviceData: [
-          { coordinateId: 618, rssi: -40, accuracy: 0.6 },
-          { coordinateId: 619, rssi: -40, accuracy: 0.6 },
-          { coordinateId: 620, rssi: -40, accuracy: 0.6 },
-          { coordinateId: 621, rssi: -40, accuracy: 0.6 },
-          { coordinateId: 622, rssi: -40, accuracy: 0.6 }
-        ]
+    let test = true;
+    if (test) {
+      showLoading({ title: '定位中', mask: true });
+      Location({
+        data: JSON.stringify({
+          deviceData: [
+            { coordinateId: 618, rssi: -40 },
+            { coordinateId: 619, rssi: -40 },
+            { coordinateId: 620, rssi: -40 },
+            { coordinateId: 621, rssi: -40 },
+            { coordinateId: 622, rssi: -40 }
+          ]
+        })
       })
-    }).then((res: any) => this.fixFloorData(res));
-    // this.context.SearchIBeacon();
-    this.timer = setInterval(() => {
-      if (this.context.global.allowUpdate) {
-        if (this.context.global.ibeacons.length <= 0) {
+        .then((res: any) => this.fixFloorData(res, true))
+        .catch(() => {
           this.setState({ existent: false });
-        } else {
-          Location(JSON.stringify({ deviceData: this.context.global.ibeacons })).then((res: any) => this.fixFloorData(res));
-          this.setState({ existent: true });
+        })
+        .finally(() => {
+          hideLoading();
+        });
+    } else {
+      showLoading({ title: '定位中', mask: true });
+      setInterval(() => {
+        if (this.context.global.allowUpdate) {
+          hideLoading();
+          this.context.setGlobal({ allowUpdate: false });
+          if (this.context.global.ibeacons.length <= 0) {
+            this.setState({ existent: false });
+          } else {
+            Location(JSON.stringify({ deviceData: this.context.global.ibeacons })).then((res: any) => this.fixFloorData(res, true));
+            this.setState({ existent: true });
+          }
         }
-      }
-    }, 1000);
+      }, 1000);
+    }
   };
 
-  private fixFloorData = (res: any) => {
-    console.log('MapDATA:', res);
-    const { floorMapUrl, facilityList, floorName, projectId, floorId, location } = res.result;
+  private fixFloorData = (res: any, isLocation: boolean) => {
+    console.log('MapData:', res);
+    let location: any;
+    const { floorMapUrl, facilityList, floorName, projectId, floorId } = res.result;
+    if (isLocation) location = res.result.location;
     let facilityGroup: Array<any> = [];
     for (let index: number = 0, item: any; (item = facilityList[index++]); ) {
       const { facilityId, facilityTypeUrl, point, facilityName, projectName, buildName, isFavor } = item;
@@ -134,16 +144,18 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
         shareData: facilityId
       });
     }
-    facilityGroup.push({
-      isLocation: false,
-      facilityId: '',
-      avatar: MyLocation,
-      point: location,
-      name: '',
-      address: '',
-      isFavorite: false,
-      shareData: ''
-    });
+    if (isLocation) {
+      facilityGroup.push({
+        isLocation: false,
+        facilityId: '',
+        avatar: MyLocation,
+        point: location,
+        name: '',
+        address: '',
+        isFavorite: false,
+        shareData: ''
+      });
+    }
     console.log('facilityGroup:', facilityGroup);
     this.setState({ facilityGroup, floorName: floorName, projectId, floorId });
     getImageInfo({ src: floorMapUrl })
@@ -151,8 +163,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
         const { width: mapWidth, height: mapHeight } = res;
         this.setState({ mapWidth, mapHeight, drawings: floorMapUrl });
       })
-      .catch((error: any) => console.error(error))
-      .finally(() => clearInterval(this.timer));
+      .catch((error: any) => console.error(error));
   };
 
   private onFavoriteClick = () => navigateTo({ url: '../favorite/index' });
@@ -213,10 +224,10 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   };
 
   private onSelectorOK = () => {
-    const { floorList, floorIndex } = this.state;
-    FloorData({ floorId: floorList[floorIndex].floorId }).then((res: any) => {
+    const { floorId } = this.state;
+    FloorData({ floorId }).then((res: any) => {
       console.log(res);
-      this.fixFloorData(res);
+      this.fixFloorData(res, false);
     });
     this.setState({ selectorPopShow: false });
   };
@@ -250,14 +261,16 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
         </MovableArea>
       );
     } else {
-      return <View>未检测到智能设备</View>;
+      Dialog.alert!({
+        title: '未检测到智能设备',
+        message: '对不起,您当前位置无法为您提供服务'
+      });
     }
   };
 
   render() {
     const { popShow, keep, itemData, selectorPopShow, floorName, buildNameList, floorNameList } = this.state;
     const { avatar, name, address } = itemData;
-
     const popStyle = 'background:#FFFFFFFF;box-shadow:0rpx 8rpx 24rpx 0rpx #00000019;border-radius:16rpx;border: 2rpx solid #00000019;margin-bottom:108rpx;width:686rpx;margin-left:32rpx';
 
     return (
@@ -318,6 +331,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
           </View>
         </VantPopup>
         <VantToast id="custom-selector" />
+        <VantDialog id="van-dialog" />
       </View>
     );
   }

@@ -4,6 +4,7 @@ import { closeBluetoothAdapter, onBeaconUpdate, openBluetoothAdapter, startBeaco
 
 import { CloseMap } from './service';
 import React from 'react';
+import { Util } from './utils/util';
 
 export const AppContext = React.createContext({});
 
@@ -33,7 +34,8 @@ class App extends React.Component<AppProps, AppState> {
     openBluetoothAdapter({
       success: (resOpen: any) => {
         console.log('openBluetoothAdapter', resOpen);
-        startBeaconDiscovery({ uuids: ['FDA50693-A4E2-4FB1-AFCF-C6EB07647825'] }) // TODO 补齐UUID
+        this.onStopBeaconDiscovery();
+        startBeaconDiscovery({ uuids: ['FDA50693-A4E2-4FB1-AFCF-C6EB07647825'] })
           .then((resStart: any) => {
             console.log('startBeaconDiscovery', resStart);
             onBeaconUpdate((res: any) => {
@@ -44,7 +46,7 @@ class App extends React.Component<AppProps, AppState> {
                 for (let index: number = 0, item: any; (item = beacons[index++]); ) {
                   console.log(`${index - 1}:`, item);
                   if (index < 7) {
-                    ibeacons.push({ coordinateId: '', rssi: item.rssi, accuracy: item.accuracy });
+                    ibeacons.push({ coordinateId: Util.FixCoordinateId(item.major, item.minor), rssi: item.rssi });
                   }
                 }
                 this.setGlobal({ allowUpdate: true, ibeacons });
@@ -64,7 +66,7 @@ class App extends React.Component<AppProps, AppState> {
     });
   };
 
-  private onStopBeaconDiscovery = () => {
+  onStopBeaconDiscovery = () => {
     stopBeaconDiscovery()
       .then((res: any) => {
         console.log('stopBeaconDiscovery', res);
@@ -85,8 +87,8 @@ class App extends React.Component<AppProps, AppState> {
 
   render() {
     const { global } = this.state;
-    const { setGlobal, SearchIBeacon } = this;
-    return <AppContext.Provider value={{ global, setGlobal, SearchIBeacon }}>{this.props.children}</AppContext.Provider>;
+    const { setGlobal, SearchIBeacon, onStopBeaconDiscovery } = this;
+    return <AppContext.Provider value={{ global, setGlobal, SearchIBeacon, onStopBeaconDiscovery }}>{this.props.children}</AppContext.Provider>;
   }
 }
 export default App;

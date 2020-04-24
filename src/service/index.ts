@@ -194,11 +194,15 @@ export const FavoriteList = (): Promise<any> =>
  * 关闭地图,切换到后台调用.
  */
 export const CloseMap = () => {
-  getStorage({ key: 'token' }).then((token: any) => {
-    request({
-      url: `${BaseUrl}wxuser/closeMap`,
-      header: { Authorization: token.data, 'content-type': 'application/x-www-form-urlencoded' },
-      method: 'POST'
+  new Promise((resolve, reject) => {
+    getStorage({ key: 'token' }).then((token: any) => {
+      request({
+        url: `${BaseUrl}wxuser/closeMap`,
+        header: { Authorization: token.data, 'content-type': 'application/x-www-form-urlencoded' },
+        method: 'POST'
+      })
+        .then((res: any) => resolve(res))
+        .catch((error: any) => reject(error));
     });
   });
 };
