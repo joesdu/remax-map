@@ -1,13 +1,6 @@
-# Remax Wechat Template TypeScript
+# Remax Wechat TypeScript
 
-使用 Remax 开发微信小程序的 TypeScript 模板。
-
-通过该模板创建一个新项目：
-
-```bash
-npx degit remaxjs/template-wechat-typescript my-app
-cd my-app
-```
+使用 Remax 开发微信小程序
 
 ## 开始开发
 
@@ -23,7 +16,7 @@ yarn install
 yarn start
 ```
 
-使用微信小程序开发者工具打开项目目录。
+使用微信小程序开发者工具打开项目 dist 目录。
 
 ```bash
 yarn start:no-watch

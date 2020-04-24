@@ -42,7 +42,8 @@ class App extends React.Component<AppProps, AppState> {
                 const { beacons } = res;
                 let ibeacons: any = [];
                 for (let index: number = 0, item: any; (item = beacons[index++]); ) {
-                  console.log(`${index - 1}:`, item);
+                  const { major, minor, rssi } = item;
+                  console.log({ major, minor, rssi });
                   if (index < 7) {
                     ibeacons.push({ coordinateId: Util.FixCoordinateId(item.major, item.minor), rssi: item.rssi });
                   }
@@ -52,7 +53,7 @@ class App extends React.Component<AppProps, AppState> {
             });
           })
           .catch((error: any) => {
-            console.error('startBeaconDiscovery', error);
+            console.error(error);
             this.onStopBeaconDiscovery();
           });
       }
@@ -62,7 +63,7 @@ class App extends React.Component<AppProps, AppState> {
   onStopBeaconDiscovery = () =>
     stopBeaconDiscovery()
       .then(() => closeBluetoothAdapter())
-      .catch((error: any) => console.error('stopBeaconDiscovery', error));
+      .catch((error: any) => console.error(error));
 
   onHide = () => CloseMap();
 
