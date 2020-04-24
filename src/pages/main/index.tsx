@@ -37,9 +37,12 @@ interface MainPageState {
   projectId: string;
   floorId: string;
   existent: boolean;
+  mapX: number;
+  mapY: number;
 }
 class MainPage extends React.Component<MainPageProps, MainPageState> {
   static contextType = AppContext;
+
   constructor(props: Readonly<MainPageProps>) {
     super(props);
     this.state = {
@@ -61,7 +64,9 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
       floorIndex: 0,
       projectId: '',
       floorId: '',
-      existent: true
+      existent: true,
+      mapX: 0,
+      mapY: 0
     };
   }
 
@@ -144,7 +149,25 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     getImageInfo({ src: floorMapUrl })
       .then((res: any) => {
         const { width: mapWidth, height: mapHeight } = res;
-        this.setState({ mapWidth, mapHeight, drawings: floorMapUrl });
+        const { screenHeight, screenWidth } = this.context.global.systemInfo;
+        // TODO 通过屏幕显示像素以及中心坐标来计算偏移位置.
+        console.log('res:', res);
+        let mapX: number = -mapWidth / 2;
+        let mapY: number = -mapHeight / 2;
+        if (isLocation) {
+          mapX = -location[0] / 2;
+          mapY = -location[1] / 2;
+          console.log('location:', location);
+        }
+        if (favorResult) {
+          const { point } = favorData;
+          mapX = -point[0] / 2;
+          mapY = -point[1] / 2;
+          console.log('point:', point);
+        }
+        console.log('mapX:', mapX);
+        console.log('mapY:', mapY);
+        this.setState({ mapWidth, mapHeight, drawings: floorMapUrl, mapX, mapY });
       })
       .catch((error: any) => console.error(error));
   };
@@ -227,11 +250,11 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   private onSearch = () => navigateTo({ url: `../search/index?current=${JSON.stringify({ floorId: this.state.floorId })}` });
 
   private renderView = () => {
-    const { mapWidth, mapHeight, drawings, facilityGroup, existent } = this.state;
+    const { mapWidth, mapHeight, drawings, facilityGroup, existent, mapX, mapY } = this.state;
     if (existent) {
       return (
         <MovableArea className={styles['floor-container']} style={{ height: '100vh', width: '100vw' }}>
-          <MovableView outOfBounds={true} scale direction="all" className={styles['floor-map']} style={{ height: `${mapHeight}px`, width: `${mapWidth}px` }}>
+          <MovableView outOfBounds={true} scale direction="all" className={styles['floor-map']} x={mapX} y={mapY} style={{ height: `${mapHeight}px`, width: `${mapWidth}px` }}>
             <Image className={styles['floor-map-drawings']} src={drawings} />
             {this.renderFacilities(facilityGroup)}
           </MovableView>

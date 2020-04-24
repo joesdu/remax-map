@@ -18,6 +18,7 @@ interface SearchState {
 }
 class Search extends React.Component<SearchProps, SearchState> {
   static contextType = AppContext;
+
   constructor(props: Readonly<SearchProps>) {
     super(props);
     this.state = {

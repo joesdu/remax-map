@@ -19,6 +19,7 @@ class App extends React.Component<AppProps, AppState> {
     super(props);
     this.state = {
       global: {
+        systemInfo: {},
         searchText: '',
         allowUpdate: false,
         ibeacons: []

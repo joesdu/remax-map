@@ -1,4 +1,4 @@
-import { Image, Text, View } from 'remax/wechat';
+import { Image, View } from 'remax/wechat';
 
 import React from 'react';
 import styles from '../index.module.less';

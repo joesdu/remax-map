@@ -1,6 +1,7 @@
 import { DelFavor, FavoriteList } from '@/service';
-import { ScrollView, View, getSystemInfo, redirectTo } from 'remax/wechat';
+import { ScrollView, View, redirectTo } from 'remax/wechat';
 
+import { AppContext } from '@/app';
 import React from 'react';
 import ResultItem from '@/components/resultItem';
 import styles from './index.module.less';
@@ -15,6 +16,8 @@ interface FavoriteState {
   favorites: Array<any>;
 }
 class Favorite extends React.Component<FavoriteProps, FavoriteState> {
+  static contextType = AppContext;
+
   constructor(props: Readonly<FavoriteProps>) {
     super(props);
     this.state = {
@@ -27,7 +30,7 @@ class Favorite extends React.Component<FavoriteProps, FavoriteState> {
 
   onShow() {
     FavoriteList().then((res: any) => this.setState({ favorites: res.result }));
-    getSystemInfo().then((res: any) => this.setState({ scrollHight: res.screenHeight }));
+    this.setState({ scrollHight: this.context.global.systemInfo.screenHeight });
   }
 
   private onManage = () => {

@@ -1,5 +1,6 @@
 import { ScrollView, redirectTo } from 'remax/wechat';
 
+import { AppContext } from '@/app';
 import React from 'react';
 import ResultItem from '@/components/resultItem';
 
@@ -11,6 +12,8 @@ interface SearchResultState {
   results: Array<any>;
 }
 class SearchResult extends React.Component<SearchResultProps, SearchResultState> {
+  static contextType = AppContext;
+
   constructor(props: Readonly<SearchResultProps>) {
     super(props);
     this.state = {
