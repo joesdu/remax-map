@@ -23,7 +23,7 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
   constructor(props: Readonly<WelcomeProps>) {
     super(props);
     this.state = {
-      version: 'Insider Preview 20200424-1120',
+      version: 'Insider Preview 20200424-1820',
       copyright: 'Copyright © 2020'
     };
   }
