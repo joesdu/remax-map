@@ -21,6 +21,7 @@ export class Util {
    * @param screenWidth 屏幕宽度
    * @param pointX 位置X
    * @param pointY 位置Y
+   * @param pixelRatio 屏幕像素比
    */
   public static GetCenterPoint(mapWidth: number, mapHeight: number, screenHeight: number, screenWidth: number, pointX: number, pointY: number, pixelRatio: number): [number, number] {
     let negativelyX: boolean = false,
