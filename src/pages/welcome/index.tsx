@@ -57,19 +57,13 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
     return (
       <View className={styles.app}>
         <View className={styles.header}>
-          <Image src={LogoIcon} className={styles.logo} />
+          <Image src={LogoIcon} className={styles.logo} onLoad={(event: any) => console.log(event)} />
           <View className={styles.text}>欢迎使用</View>
         </View>
         <View className={styles.into}>
           <VantButton custom-style={'width:250px'} color="#1B73FA" round open-type="getUserInfo" bindclick={this.onInto}>
             进入小程序
           </VantButton>
-          <Image
-            src="http://service-gw.winside.com:8080/uploadFile/map/8a51523e-1ab2-41f3-83e8-c46d1be674af.svg"
-            onLoad={(event: any) => {
-              console.log(event);
-            }}
-          />
         </View>
         <View className={styles.viewFooter}>
           <View className={styles.footerLink}>{version}</View>
