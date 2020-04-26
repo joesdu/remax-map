@@ -37,7 +37,6 @@ interface MainPageState {
   facilityGroup: Array<any>;
   projectId: string;
   floorId: string;
-  existent: boolean;
   mapX: number;
   mapY: number;
 }
@@ -65,7 +64,6 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
       floorIndex: 0,
       projectId: '',
       floorId: '',
-      existent: true,
       mapX: 0,
       mapY: 0
     };
@@ -75,7 +73,6 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     let query = this.props.location.query;
     if (query.from === 'welcome') this.onLocationClick();
     else {
-      console.log(query.current);
       let current = JSON.parse(query.current);
       let args = {
         isLocation: true,
@@ -91,24 +88,31 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     }
   };
 
+  private timer: any = -1;
+
   private onLocationClick = () => {
-    this.setState({ existent: true });
+    clearInterval(this.timer);
     this.context.setGlobal({ allowUpdate: false });
     showLoading({ title: '定位中', mask: true });
-    if (!this.context.global.bluetooth) this.context.SearchIBeacon();
-    setInterval(() => {
+    if (!this.context.global.bluetooth) {
+      console.log('蓝牙未开启,开启搜索!');
+      this.context.SearchIBeacon();
+    }
+    this.timer = setInterval(() => {
       if (this.context.global.allowUpdate) {
         hideLoading();
         this.context.setGlobal({ allowUpdate: false });
-        Location(JSON.stringify({ deviceData: this.context.global.ibeacons }))
+        Location({ data: JSON.stringify({ deviceData: this.context.global.ibeacons }) })
           .then((res: any) => this.fixFloorData(res, true))
-          .catch(() => this.setState({ existent: false }));
+          .catch(() => {
+            clearInterval(this.timer);
+            Dialog.alert!({ title: '未检测到智能设备', message: '对不起,您当前位置无法为您提供服务' });
+          });
       }
     }, 1000);
   };
 
   private fixFloorData = (res: any, isLocation: boolean, favorResult: boolean = false, favorData: any = null) => {
-    console.log('MapData:', res);
     let location: any;
     const { floorMapUrl, facilityList, floorName, projectId, floorId } = res.result;
     if (isLocation) location = res.result.location;
@@ -180,7 +184,6 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     const { buildList } = this.state;
     const { index } = event.detail;
     let item: any = buildList[index];
-    console.log('buildItem:', item);
     FloorList({ buildId: item.buildId }).then((res: any) => {
       console.log(res);
       const { result } = res;
@@ -219,29 +222,21 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
 
   private onSearch = () => navigateTo({ url: `../search/index?current=${JSON.stringify({ floorId: this.state.floorId })}` });
 
-  private renderView = () => {
-    const { mapWidth, mapHeight, drawings, facilityGroup, existent, mapX, mapY } = this.state;
-    if (existent) {
-      return (
-        <MovableArea className={styles['floor-container']} style={{ height: '100vh', width: '100vw' }}>
-          <MovableView outOfBounds={true} scale direction="all" className={styles['floor-map']} x={mapX} y={mapY} style={{ height: `${mapHeight}px`, width: `${mapWidth}px` }}>
-            <Image className={styles['floor-map-drawings']} src={drawings} />
-            {this.renderFacilities(facilityGroup)}
-          </MovableView>
-        </MovableArea>
-      );
-    } else Dialog.alert!({ title: '未检测到智能设备', message: '对不起,您当前位置无法为您提供服务' });
-  };
-
   render() {
     const { popShow, keep, itemData, selectorPopShow, floorName, buildNameList, floorNameList } = this.state;
+    const { mapWidth, mapHeight, drawings, facilityGroup, mapX, mapY } = this.state;
     const { avatar, name, address } = itemData;
     const popStyle = 'background:#FFFFFFFF;box-shadow:0rpx 8rpx 24rpx 0rpx #00000019;border-radius:16rpx;border: 2rpx solid #00000019;margin-bottom:108rpx;width:686rpx;margin-left:32rpx';
 
     return (
       <View>
         <View className={styles['floor-wrap']}>
-          {this.renderView()}
+          <MovableArea className={styles['floor-container']} style={{ height: '100vh', width: '100vw' }}>
+            <MovableView outOfBounds={true} scale direction="all" className={styles['floor-map']} x={mapX} y={mapY} style={{ height: `${mapHeight}px`, width: `${mapWidth}px` }}>
+              <Image className={styles['floor-map-drawings']} src={drawings} />
+              {this.renderFacilities(facilityGroup)}
+            </MovableView>
+          </MovableArea>
           <CircleButton icon={SearchIcon} imageStyle={{ width: 42 }} onClick={this.onSearch} style={{ float: 'right', position: 'fixed', top: 100, right: 32 }} />
           <CircleButton icon={LocationIcon} onClick={this.onLocationClick} style={{ float: 'left', position: 'fixed', bottom: 108, left: 32 }} />
           <FloorSelector text={floorName} onClick={this.onSelector} style={{ position: 'absolute', bottom: 104, left: 250 }} />

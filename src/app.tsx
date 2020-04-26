@@ -38,9 +38,11 @@ class App extends React.Component<AppProps, AppState> {
       success: () => {
         this.onStopBeaconDiscovery();
         startBeaconDiscovery({ uuids: ['FDA50693-A4E2-4FB1-AFCF-C6EB07647825'] })
-          .then(() => {
+          .then((startRes: any) => {
+            console.log('打开搜索:', startRes);
             this.setGlobal({ bluetooth: true });
             let date: number = Date.now();
+            let firstTime: boolean = true;
             onBeaconUpdate((res: any) => {
               if (res && res.beacons && res.beacons.length > 0) {
                 const { beacons } = res;
@@ -50,7 +52,11 @@ class App extends React.Component<AppProps, AppState> {
                   console.log({ major, minor, rssi });
                   if (index < 7) ibeacons.push({ coordinateId: Util.FixCoordinateId(item.major, item.minor), rssi: item.rssi });
                 }
-                if (Date.now() - date >= 15000) this.setGlobal({ allowUpdate: true, ibeacons });
+                if (Date.now() - date >= 15000 || firstTime) {
+                  this.setGlobal({ allowUpdate: true, ibeacons });
+                  date = Date.now();
+                  firstTime = false;
+                }
               }
             });
           })

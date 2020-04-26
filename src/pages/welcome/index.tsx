@@ -23,19 +23,18 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
   constructor(props: Readonly<WelcomeProps>) {
     super(props);
     this.state = {
-      version: 'Insider Preview 20200426-1820',
+      version: 'Insider Preview 20200426-1640',
       copyright: 'Copyright © 2020'
     };
   }
 
   onInto = () => {
     getUserInfo({ withCredentials: true }).then((res: any) => {
-      let userInfo = res.userInfo;
       login()
-        .then((res: any) => Login(res.code))
+        .then((loginRes: any) => Login(loginRes.code))
         .then(() => redirectTo({ url: '../main/index?from=welcome' }))
         .finally(() => {
-          const { nickName, avatarUrl, gender, country, province, city, language, encryptedData, iv } = userInfo;
+          const { nickName, avatarUrl, gender, country, province, city, language, encryptedData, iv } = res.userInfo;
           UpdateUserInfo({ nickName, avatarUrl, gender, country, province, city, language });
           UpdatePhone({ encryptedData, iv });
         });
