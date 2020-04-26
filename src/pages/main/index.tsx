@@ -6,10 +6,9 @@ import { Image, MovableArea, MovableView, Text, View, hideLoading, navigateTo, s
 import { AppContext } from '@/app';
 import FacilityItem from './components/facility-item';
 import React from 'react';
-import { Util } from '@/utils/util';
+import Util from '@/utils/util';
 import VantPicker from '@vant/weapp/dist/picker';
 import VantPopup from '@vant/weapp/dist/popup';
-import { getImageInfo } from 'remax/wechat';
 import styles from './index.module.less';
 
 export interface MainPageProps {

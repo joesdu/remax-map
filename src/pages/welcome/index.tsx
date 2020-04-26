@@ -2,6 +2,7 @@ import { Image, View, getSystemInfo, getUserInfo, login, redirectTo, showModal }
 import { Login, UpdatePhone, UpdateUserInfo } from '@/service';
 
 import { AppContext } from '@/app';
+import Config from '@/utils/config';
 import { LogoIcon } from '@/assets/icons';
 import React from 'react';
 import VantButton from '@vant/weapp/dist/button';
@@ -10,20 +11,13 @@ import styles from './index.module.less';
 export interface WelcomeProps {
   location: any;
 }
-interface WelcomeState {
-  version: string;
-  copyright: string;
-}
+interface WelcomeState {}
 
 class Welcome extends React.Component<WelcomeProps, WelcomeState> {
   static contextType = AppContext;
 
   constructor(props: Readonly<WelcomeProps>) {
     super(props);
-    this.state = {
-      version: 'Insider Preview 20200426-1730',
-      copyright: 'Copyright © 2020'
-    };
   }
 
   onInto = () => {
@@ -52,8 +46,6 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
   };
 
   render() {
-    const { version, copyright } = this.state;
-
     return (
       <View className={styles.app}>
         <View className={styles.header}>
@@ -66,8 +58,8 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
           </VantButton>
         </View>
         <View className={styles.viewFooter}>
-          <View className={styles.footerLink}>{version}</View>
-          <View className={styles.txtVersion}>{copyright}</View>
+          <View className={styles.footerLink}>{Config.Version}</View>
+          <View className={styles.txtVersion}>{Config.Copyright}</View>
         </View>
       </View>
     );

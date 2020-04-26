@@ -4,7 +4,7 @@ import { closeBluetoothAdapter, onBeaconUpdate, openBluetoothAdapter, startBeaco
 
 import { CloseMap } from './service';
 import React from 'react';
-import { Util } from './utils/util';
+import Util from './utils/util';
 
 export const AppContext = React.createContext({});
 

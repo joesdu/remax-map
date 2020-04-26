@@ -3,7 +3,7 @@ import { request } from 'remax/wechat';
 /**
  * 静态工具类,主要用于处理一些算法.
  */
-export class Util {
+export default class Util {
   /**
    * 处理设备广播的设备ID
    * @param major 设备主ID值
