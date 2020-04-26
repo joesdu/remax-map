@@ -21,6 +21,7 @@ class App extends React.Component<AppProps, AppState> {
       global: {
         systemInfo: {},
         searchText: '',
+        bluetooth: false,
         allowUpdate: false,
         ibeacons: []
       }
@@ -38,6 +39,8 @@ class App extends React.Component<AppProps, AppState> {
         this.onStopBeaconDiscovery();
         startBeaconDiscovery({ uuids: ['FDA50693-A4E2-4FB1-AFCF-C6EB07647825'] })
           .then(() => {
+            this.setGlobal({ bluetooth: true });
+            let date: number = Date.now();
             onBeaconUpdate((res: any) => {
               if (res && res.beacons && res.beacons.length > 0) {
                 const { beacons } = res;
@@ -49,12 +52,15 @@ class App extends React.Component<AppProps, AppState> {
                     ibeacons.push({ coordinateId: Util.FixCoordinateId(item.major, item.minor), rssi: item.rssi });
                   }
                 }
-                this.setGlobal({ allowUpdate: true, ibeacons });
+                if (Date.now() - date >= 15000) {
+                  this.setGlobal({ allowUpdate: true, ibeacons });
+                }
               }
             });
           })
           .catch((error: any) => {
             console.error(error);
+            this.setGlobal({ bluetooth: false });
             this.onStopBeaconDiscovery();
           });
       }
@@ -63,7 +69,10 @@ class App extends React.Component<AppProps, AppState> {
 
   onStopBeaconDiscovery = () =>
     stopBeaconDiscovery()
-      .then(() => closeBluetoothAdapter())
+      .then(() => {
+        this.setGlobal({ bluetooth: true });
+        closeBluetoothAdapter();
+      })
       .catch((error: any) => console.error(error));
 
   onHide = () => CloseMap();

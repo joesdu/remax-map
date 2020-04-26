@@ -7,6 +7,7 @@ import { AppContext } from '@/app';
 import Dialog from '@vant/weapp/dist/dialog/dialog';
 import FacilityItem from './components/facility-item';
 import React from 'react';
+import { Util } from '@/utils/util';
 import VantDialog from '@vant/weapp/dist/dialog';
 import VantPicker from '@vant/weapp/dist/picker';
 import VantPopup from '@vant/weapp/dist/popup';
@@ -91,41 +92,19 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   };
 
   private onLocationClick = () => {
-    console.log('定位按钮点击');
     this.setState({ existent: true });
     this.context.setGlobal({ allowUpdate: false });
-    let test = true;
-    if (test) {
-      showLoading({ title: '定位中', mask: true });
-      Location({
-        data: JSON.stringify({
-          deviceData: [
-            { coordinateId: 618, rssi: -40 },
-            { coordinateId: 619, rssi: -40 },
-            { coordinateId: 620, rssi: -40 },
-            { coordinateId: 621, rssi: -40 },
-            { coordinateId: 622, rssi: -40 }
-          ]
-        })
-      })
-        .then((res: any) => this.fixFloorData(res, true))
-        .catch(() => this.setState({ existent: false }))
-        .finally(() => hideLoading());
-    } else {
-      showLoading({ title: '定位中', mask: true });
-      setInterval(() => {
-        if (this.context.global.allowUpdate) {
-          hideLoading();
-          this.context.setGlobal({ allowUpdate: false });
-          if (this.context.global.ibeacons.length <= 0) {
-            this.setState({ existent: false });
-          } else {
-            Location(JSON.stringify({ deviceData: this.context.global.ibeacons })).then((res: any) => this.fixFloorData(res, true));
-            this.setState({ existent: true });
-          }
-        }
-      }, 1000);
-    }
+    showLoading({ title: '定位中', mask: true });
+    if (!this.context.global.bluetooth) this.context.SearchIBeacon();
+    setInterval(() => {
+      if (this.context.global.allowUpdate) {
+        hideLoading();
+        this.context.setGlobal({ allowUpdate: false });
+        Location(JSON.stringify({ deviceData: this.context.global.ibeacons }))
+          .then((res: any) => this.fixFloorData(res, true))
+          .catch(() => this.setState({ existent: false }));
+      }
+    }, 1000);
   };
 
   private fixFloorData = (res: any, isLocation: boolean, favorResult: boolean = false, favorData: any = null) => {
@@ -149,24 +128,15 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     getImageInfo({ src: floorMapUrl })
       .then((res: any) => {
         const { width: mapWidth, height: mapHeight } = res;
-        const { screenHeight, screenWidth } = this.context.global.systemInfo;
-        // TODO 通过屏幕显示像素以及中心坐标来计算偏移位置.
-        console.log('res:', res);
-        let mapX: number = -mapWidth / 2;
-        let mapY: number = -mapHeight / 2;
+        const { screenHeight, screenWidth, pixelRatio } = this.context.global.systemInfo;
+        let [mapX, mapY] = Util.GetCenterPoint(mapWidth, mapHeight, screenHeight, screenWidth, mapWidth / pixelRatio, mapHeight / pixelRatio, pixelRatio);
         if (isLocation) {
-          mapX = -location[0] / 2;
-          mapY = -location[1] / 2;
-          console.log('location:', location);
+          [mapX, mapY] = Util.GetCenterPoint(mapWidth, mapHeight, screenHeight, screenWidth, location[0], location[1], pixelRatio);
         }
         if (favorResult) {
           const { point } = favorData;
-          mapX = -point[0] / 2;
-          mapY = -point[1] / 2;
-          console.log('point:', point);
+          [mapX, mapY] = Util.GetCenterPoint(mapWidth, mapHeight, screenHeight, screenWidth, point[0], point[1], pixelRatio);
         }
-        console.log('mapX:', mapX);
-        console.log('mapY:', mapY);
         this.setState({ mapWidth, mapHeight, drawings: floorMapUrl, mapX, mapY });
       })
       .catch((error: any) => console.error(error));
