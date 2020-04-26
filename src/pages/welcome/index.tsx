@@ -1,4 +1,4 @@
-import { Image, View, getImageInfo, getSystemInfo, getUserInfo, login, redirectTo, showModal } from 'remax/wechat';
+import { Image, View, getSystemInfo, getUserInfo, login, redirectTo, showModal } from 'remax/wechat';
 import { Login, UpdatePhone, UpdateUserInfo } from '@/service';
 
 import { AppContext } from '@/app';
@@ -49,10 +49,6 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
         } else if (!this.context.global.bluetooth) this.context.SearchIBeacon();
       })
       .catch((error: any) => console.error(error));
-
-    getImageInfo({ src: 'http://service-gw.winside.com:8080/uploadFile/map/8a51523e-1ab2-41f3-83e8-c46d1be674af.svg' })
-      .then((res: any) => console.log('image:', res))
-      .catch((error: any) => console.error(error));
   };
 
   render() {
@@ -68,6 +64,12 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
           <VantButton custom-style={'width:250px'} color="#1B73FA" round open-type="getUserInfo" bindclick={this.onInto}>
             进入小程序
           </VantButton>
+          <Image
+            src="http://service-gw.winside.com:8080/uploadFile/map/8a51523e-1ab2-41f3-83e8-c46d1be674af.svg"
+            onLoad={(event: any) => {
+              console.log(event);
+            }}
+          />
         </View>
         <View className={styles.viewFooter}>
           <View className={styles.footerLink}>{version}</View>

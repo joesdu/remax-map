@@ -36,6 +36,10 @@ interface MainPageState {
   floorId: string;
   mapX: number;
   mapY: number;
+  isLocation?: boolean;
+  location?: [number, number];
+  favorResult?: boolean;
+  favorData?: any;
 }
 class MainPage extends React.Component<MainPageProps, MainPageState> {
   static contextType = AppContext;
@@ -124,23 +128,23 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
         facilityGroup.push({ isLocation: false, facilityId: '', avatar: MyLocation, point: location, name: '', address: '', isFavorite: false, shareData: '' });
       }
     }
-    this.setState({ facilityGroup, floorName: floorName, projectId, floorId });
-    getImageInfo({ src: floorMapUrl })
-      .then((res: any) => {
-        console.log('image:', res);
-        const { width: mapWidth, height: mapHeight } = res;
-        const { screenHeight, screenWidth, pixelRatio } = this.context.global.systemInfo;
-        let [mapX, mapY] = Util.GetCenterPoint(mapWidth, mapHeight, screenHeight, screenWidth, mapWidth / pixelRatio, mapHeight / pixelRatio, pixelRatio);
-        if (isLocation && location) {
-          [mapX, mapY] = Util.GetCenterPoint(mapWidth, mapHeight, screenHeight, screenWidth, location[0], location[1], pixelRatio);
-        }
-        if (favorResult) {
-          const { point } = favorData;
-          [mapX, mapY] = Util.GetCenterPoint(mapWidth, mapHeight, screenHeight, screenWidth, point[0], point[1], pixelRatio);
-        }
-        this.setState({ mapWidth, mapHeight, drawings: floorMapUrl, mapX, mapY });
-      })
-      .catch((error: any) => console.error(error));
+    this.setState({ facilityGroup, floorName: floorName, projectId, floorId, drawings: floorMapUrl, isLocation, location, favorResult, favorData });
+  };
+
+  private onDrawingsLoad = (event: any) => {
+    console.log('image:', event);
+    const { width: mapWidth, height: mapHeight } = event.detail;
+    const { screenHeight, screenWidth, pixelRatio } = this.context.global.systemInfo;
+    const { isLocation, location, favorResult, favorData } = this.state;
+    let [mapX, mapY] = Util.GetCenterPoint(mapWidth, mapHeight, screenHeight, screenWidth, mapWidth / pixelRatio, mapHeight / pixelRatio, pixelRatio);
+    if (isLocation && location) {
+      [mapX, mapY] = Util.GetCenterPoint(mapWidth, mapHeight, screenHeight, screenWidth, location[0], location[1], pixelRatio);
+    }
+    if (favorResult) {
+      const { point } = favorData;
+      [mapX, mapY] = Util.GetCenterPoint(mapWidth, mapHeight, screenHeight, screenWidth, point[0], point[1], pixelRatio);
+    }
+    this.setState({ mapWidth, mapHeight, mapX, mapY });
   };
 
   private onFavoriteClick = () => navigateTo({ url: '../favorite/index' });
@@ -227,7 +231,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
       return (
         <MovableArea className={styles['floor-container']} style={{ height: '100vh', width: '100vw' }}>
           <MovableView outOfBounds={true} scale direction="all" className={styles['floor-map']} x={mapX} y={mapY} style={{ height: `${mapHeight}px`, width: `${mapWidth}px` }}>
-            <Image className={styles['floor-map-drawings']} src={drawings} />
+            <Image className={styles['floor-map-drawings']} src={drawings} onLoad={this.onDrawingsLoad} />
             {this.renderFacilities(facilityGroup)}
           </MovableView>
         </MovableArea>

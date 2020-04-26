@@ -7,11 +7,11 @@ export class Util {
    * @param major 设备主ID值
    * @param minor 设备次ID值
    */
-  public static FixDeviceId(major: string, minor: string): number {
+  public static FixDeviceId = (major: string, minor: string): number => {
     let major_16: string = parseInt(major).toString(16).padStart(4, '0');
     let minor_16: string = parseInt(minor).toString(16).padStart(4, '0');
     return parseInt(major_16 + minor_16, 16);
-  }
+  };
 
   /**
    * 获取偏移值
@@ -23,7 +23,7 @@ export class Util {
    * @param pointY 位置Y
    * @param pixelRatio 屏幕像素比
    */
-  public static GetCenterPoint(mapWidth: number, mapHeight: number, screenHeight: number, screenWidth: number, pointX: number, pointY: number, pixelRatio: number): [number, number] {
+  public static GetCenterPoint = (mapWidth: number, mapHeight: number, screenHeight: number, screenWidth: number, pointX: number, pointY: number, pixelRatio: number): [number, number] => {
     let negativelyX: boolean = false,
       negativelyY: boolean = false;
     if (mapWidth - pointX >= screenWidth / pixelRatio) negativelyX = true;
@@ -35,5 +35,5 @@ export class Util {
     if (negativelyX) centerPointX = -centerPointX;
     if (negativelyY) centerPointY = -centerPointY;
     return [centerPointX, centerPointY];
-  }
+  };
 }
