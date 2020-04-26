@@ -1,12 +1,10 @@
-import { Image, View, getSystemInfo, getUserInfo, login, redirectTo } from 'remax/wechat';
+import { Image, View, getImageInfo, getSystemInfo, getUserInfo, login, redirectTo, showModal } from 'remax/wechat';
 import { Login, UpdatePhone, UpdateUserInfo } from '@/service';
 
 import { AppContext } from '@/app';
-import Dialog from '@vant/weapp/dist/dialog/dialog';
 import { LogoIcon } from '@/assets/icons';
 import React from 'react';
 import VantButton from '@vant/weapp/dist/button';
-import VantDialog from '@vant/weapp/dist/dialog';
 import styles from './index.module.less';
 
 export interface WelcomeProps {
@@ -23,7 +21,7 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
   constructor(props: Readonly<WelcomeProps>) {
     super(props);
     this.state = {
-      version: 'Insider Preview 20200426-1640',
+      version: 'Insider Preview 20200426-1730',
       copyright: 'Copyright © 2020'
     };
   }
@@ -47,9 +45,13 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
         this.context.setGlobal({ systemInfo: res });
         const { locationAuthorized, bluetoothEnabled, locationEnabled } = res;
         if (!locationAuthorized || !bluetoothEnabled || !locationEnabled) {
-          Dialog.alert!({ title: '权限不足', message: '请到系统应用设置打开微信相关权限:允许微信使用定位的开关,以及打开操作系统的蓝牙的开关和地理位置的开关' });
+          showModal({ title: '权限不足', content: '请到系统应用设置打开微信相关权限:允许微信使用定位的开关,以及打开操作系统的蓝牙的开关和地理位置的开关', showCancel: false });
         } else if (!this.context.global.bluetooth) this.context.SearchIBeacon();
       })
+      .catch((error: any) => console.error(error));
+
+    getImageInfo({ src: 'http://service-gw.winside.com:8080/uploadFile/map/8a51523e-1ab2-41f3-83e8-c46d1be674af.svg' })
+      .then((res: any) => console.log('image:', res))
       .catch((error: any) => console.error(error));
   };
 
@@ -71,7 +73,6 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
           <View className={styles.footerLink}>{version}</View>
           <View className={styles.txtVersion}>{copyright}</View>
         </View>
-        <VantDialog id="van-dialog" />
       </View>
     );
   }

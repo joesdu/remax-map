@@ -1,17 +1,14 @@
 import { AddFavor, BuildList, DelFavor, FloorData, FloorList, Location, MapUsageRecord } from '@/service';
 import { CircleButton, FloorSelector } from '@/components';
 import { FavoriteIcon, LocationIcon, MyLocation, NotFavoriteIcon, SearchIcon, ShareIcon } from '@/assets/icons';
-import { Image, MovableArea, MovableView, Text, View, hideLoading, navigateTo, showLoading } from 'remax/wechat';
+import { Image, MovableArea, MovableView, Text, View, hideLoading, navigateTo, showLoading, showModal } from 'remax/wechat';
 
 import { AppContext } from '@/app';
-import Dialog from '@vant/weapp/dist/dialog/dialog';
 import FacilityItem from './components/facility-item';
 import React from 'react';
 import { Util } from '@/utils/util';
-import VantDialog from '@vant/weapp/dist/dialog';
 import VantPicker from '@vant/weapp/dist/picker';
 import VantPopup from '@vant/weapp/dist/popup';
-import VantToast from '@vant/weapp/dist/toast';
 import { getImageInfo } from 'remax/wechat';
 import styles from './index.module.less';
 
@@ -94,10 +91,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     clearInterval(this.timer);
     this.context.setGlobal({ allowUpdate: false });
     showLoading({ title: '定位中', mask: true });
-    if (!this.context.global.bluetooth) {
-      console.log('蓝牙未开启,开启搜索!');
-      this.context.SearchIBeacon();
-    }
+    if (!this.context.global.bluetooth) this.context.SearchIBeacon();
     this.timer = setInterval(() => {
       if (this.context.global.allowUpdate) {
         hideLoading();
@@ -106,7 +100,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
           .then((res: any) => this.fixFloorData(res, true))
           .catch(() => {
             clearInterval(this.timer);
-            Dialog.alert!({ title: '未检测到智能设备', message: '对不起,您当前位置无法为您提供服务' });
+            showModal({ title: '未检测到智能设备', content: '对不起,您当前位置无法为您提供服务', showCancel: false });
           });
       }
     }, 1000);
@@ -120,21 +114,24 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     if (favorResult) {
       facilityGroup = [favorData];
     } else {
-      for (let index: number = 0, item: any; (item = facilityList[index++]); ) {
-        const { facilityId, facilityTypeUrl, point, facilityName, projectName, buildName, isFavor } = item;
-        facilityGroup.push({ isLocation: true, facilityId, avatar: facilityTypeUrl, point, name: facilityName, address: `${projectName}-${buildName}-${floorName}`, isFavorite: isFavor, shareData: facilityId });
+      if (facilityList.length > 0) {
+        for (let index: number = 0, item: any; (item = facilityList[index++]); ) {
+          const { facilityId, facilityTypeUrl, point, facilityName, projectName, buildName, isFavor } = item;
+          facilityGroup.push({ isLocation: true, facilityId, avatar: facilityTypeUrl, point, name: facilityName, address: `${projectName}-${buildName}-${floorName}`, isFavorite: isFavor, shareData: facilityId });
+        }
       }
-      if (isLocation) {
+      if (isLocation && location) {
         facilityGroup.push({ isLocation: false, facilityId: '', avatar: MyLocation, point: location, name: '', address: '', isFavorite: false, shareData: '' });
       }
     }
     this.setState({ facilityGroup, floorName: floorName, projectId, floorId });
     getImageInfo({ src: floorMapUrl })
       .then((res: any) => {
+        console.log('image:', res);
         const { width: mapWidth, height: mapHeight } = res;
         const { screenHeight, screenWidth, pixelRatio } = this.context.global.systemInfo;
         let [mapX, mapY] = Util.GetCenterPoint(mapWidth, mapHeight, screenHeight, screenWidth, mapWidth / pixelRatio, mapHeight / pixelRatio, pixelRatio);
-        if (isLocation) {
+        if (isLocation && location) {
           [mapX, mapY] = Util.GetCenterPoint(mapWidth, mapHeight, screenHeight, screenWidth, location[0], location[1], pixelRatio);
         }
         if (favorResult) {
@@ -214,29 +211,39 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   // 动态渲染设施
   private renderFacilities = (facilityGroup: Array<any>) => {
     let itemTemp: Array<any> = [];
-    for (let index: number = 0, item: any; (item = facilityGroup && facilityGroup[index++]); ) {
-      itemTemp.push(<FacilityItem key={index} data={item} onItemClick={item.isLocation ? this.onItemClick.bind(this, item, index - 1) : null} />);
+    if (facilityGroup.length > 0) {
+      for (let index: number = 0, item: any; (item = facilityGroup[index++]); ) {
+        itemTemp.push(<FacilityItem key={index} data={item} onItemClick={item.isLocation ? this.onItemClick.bind(this, item, index - 1) : null} />);
+      }
     }
     return itemTemp;
   };
 
   private onSearch = () => navigateTo({ url: `../search/index?current=${JSON.stringify({ floorId: this.state.floorId })}` });
 
+  private renderView = () => {
+    const { mapWidth, mapHeight, drawings, facilityGroup, mapX, mapY } = this.state;
+    if (drawings) {
+      return (
+        <MovableArea className={styles['floor-container']} style={{ height: '100vh', width: '100vw' }}>
+          <MovableView outOfBounds={true} scale direction="all" className={styles['floor-map']} x={mapX} y={mapY} style={{ height: `${mapHeight}px`, width: `${mapWidth}px` }}>
+            <Image className={styles['floor-map-drawings']} src={drawings} />
+            {this.renderFacilities(facilityGroup)}
+          </MovableView>
+        </MovableArea>
+      );
+    }
+  };
+
   render() {
     const { popShow, keep, itemData, selectorPopShow, floorName, buildNameList, floorNameList } = this.state;
-    const { mapWidth, mapHeight, drawings, facilityGroup, mapX, mapY } = this.state;
     const { avatar, name, address } = itemData;
     const popStyle = 'background:#FFFFFFFF;box-shadow:0rpx 8rpx 24rpx 0rpx #00000019;border-radius:16rpx;border: 2rpx solid #00000019;margin-bottom:108rpx;width:686rpx;margin-left:32rpx';
 
     return (
       <View>
         <View className={styles['floor-wrap']}>
-          <MovableArea className={styles['floor-container']} style={{ height: '100vh', width: '100vw' }}>
-            <MovableView outOfBounds={true} scale direction="all" className={styles['floor-map']} x={mapX} y={mapY} style={{ height: `${mapHeight}px`, width: `${mapWidth}px` }}>
-              <Image className={styles['floor-map-drawings']} src={drawings} />
-              {this.renderFacilities(facilityGroup)}
-            </MovableView>
-          </MovableArea>
+          {this.renderView()}
           <CircleButton icon={SearchIcon} imageStyle={{ width: 42 }} onClick={this.onSearch} style={{ float: 'right', position: 'fixed', top: 100, right: 32 }} />
           <CircleButton icon={LocationIcon} onClick={this.onLocationClick} style={{ float: 'left', position: 'fixed', bottom: 108, left: 32 }} />
           <FloorSelector text={floorName} onClick={this.onSelector} style={{ position: 'absolute', bottom: 104, left: 250 }} />
@@ -289,8 +296,6 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
             </View>
           </View>
         </VantPopup>
-        <VantToast id="custom-selector" />
-        <VantDialog id="van-dialog" />
       </View>
     );
   }
