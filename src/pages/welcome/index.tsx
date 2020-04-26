@@ -57,7 +57,7 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
     return (
       <View className={styles.app}>
         <View className={styles.header}>
-          <Image src={LogoIcon} className={styles.logo} onLoad={(event: any) => console.log(event)} />
+          <Image src={LogoIcon} className={styles.logo} />
           <View className={styles.text}>欢迎使用</View>
         </View>
         <View className={styles.into}>
