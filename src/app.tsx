@@ -49,8 +49,8 @@ class App extends React.Component<AppProps, AppState> {
                 let ibeacons: any = [];
                 for (let index: number = 0, item: any; (item = beacons[index++]); ) {
                   const { major, minor, rssi } = item;
-                  console.log({ major, minor, rssi });
-                  if (index < 7) ibeacons.push({ coordinateId: Util.FixCoordinateId(item.major, item.minor), rssi: item.rssi });
+                  console.log({ deviceId: Util.FixDeviceId(major, minor), rssi });
+                  if (index < 7) ibeacons.push({ deviceId: Util.FixDeviceId(major, minor), rssi });
                 }
                 if (Date.now() - date >= 15000 || firstTime) {
                   this.setGlobal({ allowUpdate: true, ibeacons });
