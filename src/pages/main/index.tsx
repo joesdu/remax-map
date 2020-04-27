@@ -100,7 +100,12 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
       if (this.context.global.allowUpdate) {
         hideLoading();
         this.context.setGlobal({ allowUpdate: false });
-        Location({ data: JSON.stringify({ deviceData: this.context.global.ibeacons }) })
+        let iBeaconTemp: Array<any> = [];
+        for (let index: number = 0, item: any; (item = this.context.global.ibeacons[index++]); ) {
+          const { deviceId, rssi } = item;
+          iBeaconTemp.push({ deviceId, rssi });
+        }
+        Location({ data: JSON.stringify({ deviceData: iBeaconTemp }) })
           .then((res: any) => this.fixFloorData(res, true))
           .catch(() => {
             clearInterval(this.timer);
