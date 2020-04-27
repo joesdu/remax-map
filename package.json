@@ -18,7 +18,7 @@
   "devDependencies": {
     "@types/react": "^16.9.34",
     "@umijs/fabric": "^2.0.8",
-    "chokidar": "^3.3.1",
+    "chokidar": "^3.4.0",
     "miniprogram-api-typings": "^2.10.4",
     "remax-cli": "^1.21.3",
     "rimraf": "^3.0.2"

@@ -52,7 +52,7 @@ class App extends React.Component<AppProps, AppState> {
                   // console.log({ deviceId: Util.FixDeviceId(major, minor), rssi });
                   if (index < 7) ibeacons.push({ deviceId: Util.FixDeviceId(major, minor), rssi });
                 }
-                if (Date.now() - date >= 15000 || firstTime) {
+                if (Date.now() - date >= 8000 || firstTime) {
                   this.setGlobal({ allowUpdate: true, ibeacons });
                   date = Date.now();
                   firstTime = false;
