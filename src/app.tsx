@@ -49,7 +49,7 @@ class App extends React.Component<AppProps, AppState> {
                 let ibeacons: any = [];
                 for (let index: number = 0, item: any; (item = beacons[index++]); ) {
                   const { major, minor, rssi } = item;
-                  // console.log({ deviceId: Util.FixDeviceId(major, minor), rssi });
+                  console.log({ deviceId: Util.FixDeviceId(major, minor), rssi });
                   if (index < 7) ibeacons.push({ deviceId: Util.FixDeviceId(major, minor), rssi });
                 }
                 if (Date.now() - date >= 8000 || firstTime) {
@@ -62,7 +62,7 @@ class App extends React.Component<AppProps, AppState> {
           })
           .catch((error: any) => {
             console.error(error);
-            this.setGlobal({ bluetooth: false });
+            this.setGlobal({ bluetooth: false, allowUpdate: false });
             this.onStopBeaconDiscovery();
           });
       }
@@ -72,7 +72,7 @@ class App extends React.Component<AppProps, AppState> {
   onStopBeaconDiscovery = () =>
     stopBeaconDiscovery()
       .then(() => {
-        this.setGlobal({ bluetooth: true });
+        this.setGlobal({ bluetooth: true, allowUpdate: false });
         closeBluetoothAdapter();
       })
       .catch((error: any) => console.error(error));

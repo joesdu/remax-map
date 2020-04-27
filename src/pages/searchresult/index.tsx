@@ -26,7 +26,10 @@ class SearchResult extends React.Component<SearchResultProps, SearchResultState>
     this.setState({ results: data.result });
   }
 
-  onGotoClick = (record: any) => redirectTo({ url: `../main/index?current=${JSON.stringify(record)}&from=searchresult` });
+  onGotoClick = (record: any) => {
+    this.context.onStopBeaconDiscovery();
+    redirectTo({ url: `../main/index?current=${JSON.stringify(record)}&from=searchresult` });
+  };
 
   renderResultItem = () => {
     const { results } = this.state;

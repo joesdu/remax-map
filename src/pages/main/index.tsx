@@ -170,6 +170,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
 
   private onSelector = () => {
     const { projectId } = this.state;
+    this.context.onStopBeaconDiscovery();
     BuildList({ projectId }).then((res: any) => {
       const { result } = res;
       let temp: Array<string> = [];

@@ -41,6 +41,7 @@ class Favorite extends React.Component<FavoriteProps, FavoriteState> {
 
   private onFavorItemClick = (record: any) => {
     const { isManage } = this.state;
+    this.context.onStopBeaconDiscovery();
     if (isManage) DelFavor({ facilityId: record.facilityId }).then(() => FavoriteList().then((res: any) => this.setState({ favorites: res })));
     else redirectTo({ url: `../main/index?current=${JSON.stringify(record)}&from=favorite` });
   };
