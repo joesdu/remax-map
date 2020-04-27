@@ -131,7 +131,6 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   };
 
   private onDrawingsLoad = (event: any) => {
-    console.log('image:', event);
     const { width: mapWidth, height: mapHeight } = event.detail;
     const { screenHeight, screenWidth, pixelRatio } = this.context.global.systemInfo;
     const { isLocation, location, favorResult, favorData } = this.state;
