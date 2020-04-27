@@ -6,10 +6,11 @@ import { Image, MovableArea, MovableView, Text, View, hideLoading, navigateTo, s
 import { AppContext } from '@/app';
 import FacilityItem from './components/facility-item';
 import React from 'react';
-import Util from '@/utils/util';
 import VantPicker from '@vant/weapp/dist/picker';
 import VantPopup from '@vant/weapp/dist/popup';
 import styles from './index.module.less';
+
+// import Util from '@/utils/util';
 
 export interface MainPageProps {
   location: any;
@@ -110,9 +111,13 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   };
 
   private fixFloorData = (res: any, isLocation: boolean, favorResult: boolean = false, favorData: any = null) => {
+    console.log('楼层数据:', res);
     let location: any;
     const { floorMapUrl, facilityList, floorName, projectId, floorId } = res.result;
-    if (isLocation) location = res.result.location;
+    if (isLocation) {
+      location = res.result.location;
+      if (location === null) location = this.state.location;
+    }
     let facilityGroup: Array<any> = [];
     if (favorResult) {
       facilityGroup = [favorData];
@@ -127,22 +132,22 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
         facilityGroup.push({ isLocation: false, facilityId: '', avatar: MyLocation, point: location, name: '', address: '', isFavorite: false, shareData: '' });
       }
     }
-    this.setState({ facilityGroup, floorName: floorName, projectId, floorId, drawings: floorMapUrl, isLocation, location, favorResult, favorData });
+    this.setState({ facilityGroup, drawings: floorMapUrl, floorName: floorName, projectId, floorId, isLocation, location, favorResult, favorData });
   };
 
   private onDrawingsLoad = (event: any) => {
     const { width: mapWidth, height: mapHeight } = event.detail;
-    const { screenHeight, screenWidth, pixelRatio } = this.context.global.systemInfo;
-    const { isLocation, location, favorResult, favorData } = this.state;
-    let [mapX, mapY] = Util.GetCenterPoint(mapWidth, mapHeight, screenHeight, screenWidth, mapWidth / pixelRatio, mapHeight / pixelRatio, pixelRatio);
-    if (isLocation && location) {
-      [mapX, mapY] = Util.GetCenterPoint(mapWidth, mapHeight, screenHeight, screenWidth, location[0], location[1], pixelRatio);
-    }
-    if (favorResult) {
-      const { point } = favorData;
-      [mapX, mapY] = Util.GetCenterPoint(mapWidth, mapHeight, screenHeight, screenWidth, point[0], point[1], pixelRatio);
-    }
-    this.setState({ mapWidth, mapHeight, mapX, mapY });
+    // const { screenHeight, screenWidth, pixelRatio } = this.context.global.systemInfo;
+    // const { isLocation, location, favorResult, favorData } = this.state;
+    // let [mapX, mapY] = Util.GetCenterPoint(mapWidth, mapHeight, screenHeight, screenWidth, mapWidth / pixelRatio, mapHeight / pixelRatio, pixelRatio);
+    // if (isLocation && location) {
+    //   [mapX, mapY] = Util.GetCenterPoint(mapWidth, mapHeight, screenHeight, screenWidth, location[0], location[1], pixelRatio);
+    // }
+    // if (favorResult) {
+    //   const { point } = favorData;
+    //   [mapX, mapY] = Util.GetCenterPoint(mapWidth, mapHeight, screenHeight, screenWidth, point[0], point[1], pixelRatio);
+    // }
+    this.setState({ mapWidth, mapHeight });
   };
 
   private onFavoriteClick = () => navigateTo({ url: '../favorite/index' });
@@ -229,7 +234,20 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     if (drawings) {
       return (
         <MovableArea className={styles['floor-container']} style={{ height: '100vh', width: '100vw' }}>
-          <MovableView outOfBounds={true} scale direction="all" className={styles['floor-map']} x={mapX} y={mapY} style={{ height: `${mapHeight}px`, width: `${mapWidth}px` }}>
+          <MovableView
+            // onChange={({ x, y, source }) => {
+            //   if (source) this.setState({ mapX: x, mapY: y });
+            // }}
+            outOfBounds
+            scale
+            scaleMin={1}
+            scaleMax={3}
+            direction="all"
+            className={styles['floor-map']}
+            // x={mapX}
+            // y={mapY}
+            style={{ height: `${mapHeight}px`, width: `${mapWidth}px` }}
+          >
             <Image className={styles['floor-map-drawings']} src={drawings} onLoad={this.onDrawingsLoad} />
             {this.renderFacilities(facilityGroup)}
           </MovableView>

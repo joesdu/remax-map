@@ -43,16 +43,22 @@ class App extends React.Component<AppProps, AppState> {
             this.setGlobal({ bluetooth: true });
             let date: number = Date.now();
             let firstTime: boolean = true;
+            let ibeacons: Array<any> = [];
+            setInterval(() => {
+              let timeout = ibeacons.findIndex((x: { time: number }) => Date.now() - x.time > 8000);
+              if (timeout !== -1) ibeacons.splice(timeout, 1);
+            }, 1000);
             onBeaconUpdate((res: any) => {
               if (res && res.beacons && res.beacons.length > 0) {
                 const { beacons } = res;
-                let ibeacons: any = [];
                 for (let index: number = 0, item: any; (item = beacons[index++]); ) {
                   const { major, minor, rssi } = item;
                   console.log({ deviceId: Util.FixDeviceId(major, minor), rssi });
-                  if (index < 7) ibeacons.push({ deviceId: Util.FixDeviceId(major, minor), rssi });
+                  let exist = ibeacons.findIndex((x: { deviceId: number }) => x.deviceId === Util.FixDeviceId(major, minor));
+                  if (exist === -1) ibeacons.push({ deviceId: Util.FixDeviceId(major, minor), rssi, time: Date.now() });
+                  else ibeacons[exist].time = Date.now();
                 }
-                if (Date.now() - date >= 8000 || firstTime) {
+                if (Date.now() - date >= 8000 || ibeacons.length >= 3) {
                   this.setGlobal({ allowUpdate: true, ibeacons });
                   date = Date.now();
                   firstTime = false;
@@ -72,7 +78,7 @@ class App extends React.Component<AppProps, AppState> {
   onStopBeaconDiscovery = () =>
     stopBeaconDiscovery()
       .then(() => {
-        this.setGlobal({ bluetooth: true, allowUpdate: false });
+        this.setGlobal({ bluetooth: false, allowUpdate: false });
         closeBluetoothAdapter();
       })
       .catch((error: any) => console.error(error));
