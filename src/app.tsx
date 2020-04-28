@@ -37,7 +37,7 @@ class App extends React.Component<AppProps, AppState> {
     openBluetoothAdapter({
       success: () => {
         this.onStopBeaconDiscovery();
-        let date: number = Date.now();
+        let date: number = 0;
         let ibeacons: Array<any> = [];
         startBeaconDiscovery({ uuids: ['FDA50693-A4E2-4FB1-AFCF-C6EB07647825'] })
           .then((startRes: any) => {
@@ -45,12 +45,13 @@ class App extends React.Component<AppProps, AppState> {
             this.setGlobal({ bluetooth: true });
             setInterval(() => {
               if (ibeacons.length > 3) {
-                let timeout = ibeacons.findIndex((x: { time: number }) => Date.now() - x.time > 8000);
+                let timeout = ibeacons.findIndex((x: { time: number }) => Date.now() - x.time > 12000);
                 if (timeout !== -1) ibeacons.splice(timeout, 1);
               }
-            }, 1000);
+            }, 500);
             onBeaconUpdate((res: any) => {
               if (res && res.beacons && res.beacons.length > 0) {
+                if (Date.now() - date <= 9000) return;
                 const { beacons } = res;
                 for (let index: number = 0, item: any; (item = beacons[index++]); ) {
                   const { major, minor, rssi } = item;
