@@ -38,15 +38,16 @@ class App extends React.Component<AppProps, AppState> {
       success: () => {
         this.onStopBeaconDiscovery();
         let date: number = Date.now();
-        let firstTime: boolean = true;
         let ibeacons: Array<any> = [];
         startBeaconDiscovery({ uuids: ['FDA50693-A4E2-4FB1-AFCF-C6EB07647825'] })
           .then((startRes: any) => {
             console.log('打开搜索:', startRes);
             this.setGlobal({ bluetooth: true });
             setInterval(() => {
-              let timeout = ibeacons.findIndex((x: { time: number }) => Date.now() - x.time > 8000);
-              if (timeout !== -1) ibeacons.splice(timeout, 1);
+              if (ibeacons.length > 3) {
+                let timeout = ibeacons.findIndex((x: { time: number }) => Date.now() - x.time > 8000);
+                if (timeout !== -1) ibeacons.splice(timeout, 1);
+              }
             }, 1000);
             onBeaconUpdate((res: any) => {
               if (res && res.beacons && res.beacons.length > 0) {
@@ -56,12 +57,21 @@ class App extends React.Component<AppProps, AppState> {
                   console.log({ deviceId: Util.FixDeviceId(major, minor), rssi });
                   let exist = ibeacons.findIndex((x: { deviceId: number }) => x.deviceId === Util.FixDeviceId(major, minor));
                   if (exist === -1) ibeacons.push({ deviceId: Util.FixDeviceId(major, minor), rssi, time: Date.now() });
-                  else ibeacons[exist].time = Date.now();
+                  else {
+                    ibeacons[exist].time = Date.now();
+                    ibeacons[exist].rssi = rssi;
+                  }
                 }
-                if (Date.now() - date >= 8000 || ibeacons.length >= 3) {
-                  this.setGlobal({ allowUpdate: true, ibeacons });
+                if (Date.now() - date >= 5000 || ibeacons.length >= 3) {
+                  ibeacons.sort((a: { time: number }, b: { time: number }) => b.time - a.time);
+                  let iBeaconTemp: Array<any> = [];
+                  for (let index: number = 0; index < 3; index++) {
+                    let item = ibeacons[index];
+                    const { deviceId, rssi } = item;
+                    iBeaconTemp.push({ deviceId, rssi });
+                  }
+                  this.setGlobal({ allowUpdate: true, ibeacons: iBeaconTemp });
                   date = Date.now();
-                  firstTime = false;
                 }
               }
             });
