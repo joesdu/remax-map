@@ -44,7 +44,10 @@ class Search extends React.Component<SearchProps, SearchState> {
 
   private Search = (keywords: string) => this.LocationSearch({ floorId: this.state.floorId, keywords });
 
-  private LocationSearch = (args: any) => SearchLocation(args).then((res: any) => navigateTo({ url: `../searchresult/index?current=${JSON.stringify(res)}` }));
+  private LocationSearch = (args: any) =>
+    SearchLocation(args)
+      .then((res: any) => navigateTo({ url: `../searchresult/index?current=${JSON.stringify(res)}` }))
+      .catch((error) => console.warn(error));
 
   render() {
     const { range } = this.state;

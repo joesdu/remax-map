@@ -10,7 +10,6 @@ export interface FacilityItemData {
   name: string;
   address: string;
   isFavorite: boolean;
-  shareData: any;
 }
 export interface FacilityItemProps {
   itemUrl?: string;

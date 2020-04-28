@@ -11,29 +11,35 @@ import styles from './index.module.less';
 export interface WelcomeProps {
   location: any;
 }
-interface WelcomeState {}
+interface WelcomeState {
+  fromData: string;
+  fromShare: string;
+}
 
 class Welcome extends React.Component<WelcomeProps, WelcomeState> {
   static contextType = AppContext;
 
   constructor(props: Readonly<WelcomeProps>) {
     super(props);
+    this.state = { fromData: '', fromShare: 'mini' };
   }
 
   onInto = () => {
     getUserInfo({ withCredentials: true }).then((res: any) => {
       login()
         .then((loginRes: any) => Login(loginRes.code))
-        .then(() => redirectTo({ url: '../main/index?from=welcome' }))
+        .then(() => redirectTo({ url: `../main/index?from=welcome&sharedata=${this.state.fromData}&fromshare=${this.state.fromShare}` }))
         .finally(() => {
           const { nickName, avatarUrl, gender, country, province, city, language, encryptedData, iv } = res.userInfo;
-          UpdateUserInfo({ nickName, avatarUrl, gender, country, province, city, language });
-          UpdatePhone({ encryptedData, iv });
+          UpdateUserInfo({ nickName, avatarUrl, gender, country, province, city, language }).catch((error) => console.warn(error));
+          UpdatePhone({ encryptedData, iv }).catch((error) => console.warn(error));
         });
     });
   };
 
   onShow = () => {
+    let query = this.props.location.query;
+    if (query.from === 'share') this.setState({ fromData: JSON.stringify(query), fromShare: 'share' });
     getSystemInfo()
       .then((res: any) => {
         this.context.setGlobal({ systemInfo: res });

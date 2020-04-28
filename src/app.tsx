@@ -1,6 +1,6 @@
 import './app.less';
 
-import { closeBluetoothAdapter, onBeaconUpdate, openBluetoothAdapter, startBeaconDiscovery, stopBeaconDiscovery } from 'remax/wechat';
+import { closeBluetoothAdapter, onBeaconUpdate, openBluetoothAdapter, setKeepScreenOn, showModal, startBeaconDiscovery, stopBeaconDiscovery } from 'remax/wechat';
 
 import { CloseMap } from './service';
 import React from 'react';
@@ -37,13 +37,13 @@ class App extends React.Component<AppProps, AppState> {
     openBluetoothAdapter({
       success: () => {
         this.onStopBeaconDiscovery();
+        let date: number = Date.now();
+        let firstTime: boolean = true;
+        let ibeacons: Array<any> = [];
         startBeaconDiscovery({ uuids: ['FDA50693-A4E2-4FB1-AFCF-C6EB07647825'] })
           .then((startRes: any) => {
             console.log('打开搜索:', startRes);
             this.setGlobal({ bluetooth: true });
-            let date: number = Date.now();
-            let firstTime: boolean = true;
-            let ibeacons: Array<any> = [];
             setInterval(() => {
               let timeout = ibeacons.findIndex((x: { time: number }) => Date.now() - x.time > 8000);
               if (timeout !== -1) ibeacons.splice(timeout, 1);
@@ -70,6 +70,15 @@ class App extends React.Component<AppProps, AppState> {
             console.error(error);
             this.setGlobal({ bluetooth: false, allowUpdate: false });
             this.onStopBeaconDiscovery();
+          })
+          .finally(() => {
+            setTimeout(() => {
+              if (ibeacons.length <= 0) {
+                this.setGlobal({ allowUpdate: true, ibeacons });
+                showModal({ title: '未检测到智能设备', content: '对不起,您当前位置无法为您提供服务', showCancel: false });
+                this.onStopBeaconDiscovery();
+              }
+            }, 10000);
           });
       }
     });
@@ -84,6 +93,8 @@ class App extends React.Component<AppProps, AppState> {
       .catch((error: any) => console.error(error));
 
   onHide = () => CloseMap();
+
+  onShow = () => setKeepScreenOn({ keepScreenOn: true });
 
   render() {
     const { global } = this.state;

@@ -1,10 +1,11 @@
 import { AddFavor, BuildList, DelFavor, FloorData, FloorList, Location, MapUsageRecord } from '@/service';
+import { Button, Image, MovableArea, MovableView, Text, View, hideLoading, navigateTo, showLoading, showModal } from 'remax/wechat';
 import { CircleButton, FloorSelector } from '@/components';
 import { FavoriteIcon, LocationIcon, MyLocation, NotFavoriteIcon, SearchIcon, ShareIcon } from '@/assets/icons';
-import { Image, MovableArea, MovableView, Text, View, hideLoading, navigateTo, showLoading, showModal } from 'remax/wechat';
 
 import { AppContext } from '@/app';
-import FacilityItem from './components/facility-item';
+import Config from '@/utils/config';
+import FacilityItem from './components/facilityitem';
 import React from 'react';
 import VantPicker from '@vant/weapp/dist/picker';
 import VantPopup from '@vant/weapp/dist/popup';
@@ -34,12 +35,7 @@ interface MainPageState {
   facilityGroup: Array<any>;
   projectId: string;
   floorId: string;
-  mapX: number;
-  mapY: number;
-  isLocation?: boolean;
   location?: [number, number];
-  favorResult?: boolean;
-  favorData?: any;
 }
 class MainPage extends React.Component<MainPageProps, MainPageState> {
   static contextType = AppContext;
@@ -64,28 +60,35 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
       floorNameList: [],
       floorIndex: 0,
       projectId: '',
-      floorId: '',
-      mapX: 0,
-      mapY: 0
+      floorId: ''
     };
   }
 
   onShow = () => {
     let query = this.props.location.query;
-    if (query.from === 'welcome') this.onLocationClick();
-    else {
+    if (query.from === 'welcome') {
+      if (query.fromshare === 'share') {
+        let sharedata = JSON.parse(query.sharedata);
+        let current = JSON.parse(sharedata.current);
+        const { facilityId, avatar, point, name, address } = current;
+        let args = { facilityId, avatar, point, name, address, isFavorite: false };
+        FloorData({ floorId: sharedata.floorId })
+          .then((res: any) => this.fixFloorData(res, false, true, args))
+          .catch((error) => console.warn(error));
+      } else this.onLocationClick();
+    } else if (query.from === 'favorite' || query.from === 'searchresult') {
       let current = JSON.parse(query.current);
       let args = {
-        isLocation: true,
         facilityId: current.facilityId,
         avatar: current.facilityTypeUrl,
         point: query.from === 'favorite' ? current.facilityPosition : current.point,
         name: current.facilityName,
         address: `${current.projectName}-${current.buildName}-${current.floorName}`,
-        isFavorite: query.from === 'favorite',
-        shareData: ''
+        isFavorite: query.from === 'favorite'
       };
-      FloorData({ floorId: current.floorId }).then((res: any) => this.fixFloorData(res, false, true, args));
+      FloorData({ floorId: current.floorId })
+        .then((res: any) => this.fixFloorData(res, false, true, args))
+        .catch((error) => console.warn(error));
     }
   };
 
@@ -107,7 +110,8 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
         }
         Location({ data: JSON.stringify({ deviceData: iBeaconTemp }) })
           .then((res: any) => this.fixFloorData(res, true))
-          .catch(() => {
+          .catch((error) => {
+            console.warn(error);
             clearInterval(this.timer);
             showModal({ title: '未检测到智能设备', content: '对不起,您当前位置无法为您提供服务', showCancel: false });
           });
@@ -115,8 +119,14 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     }, 1000);
   };
 
+  /**
+   * 处理楼层数据
+   * @param res 楼层数据
+   * @param isLocation 是否是点击定位按钮或者从欢迎页进入的定位发起
+   * @param favorResult 是否是收藏或者搜索结果
+   * @param favorData 收藏或者搜索结果数据
+   */
   private fixFloorData = (res: any, isLocation: boolean, favorResult: boolean = false, favorData: any = null) => {
-    console.log('楼层数据:', res);
     let location: any;
     const { floorMapUrl, facilityList, floorName, projectId, floorId } = res.result;
     if (isLocation) {
@@ -130,28 +140,18 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
       if (facilityList.length > 0) {
         for (let index: number = 0, item: any; (item = facilityList[index++]); ) {
           const { facilityId, facilityTypeUrl, point, facilityName, projectName, buildName, isFavor } = item;
-          facilityGroup.push({ isLocation: true, facilityId, avatar: facilityTypeUrl, point, name: facilityName, address: `${projectName}-${buildName}-${floorName}`, isFavorite: isFavor, shareData: facilityId });
+          facilityGroup.push({ facilityId, avatar: facilityTypeUrl, point, name: facilityName, address: `${projectName}-${buildName}-${floorName}`, isFavorite: isFavor });
         }
       }
       if (isLocation && location) {
-        facilityGroup.push({ isLocation: false, facilityId: '', avatar: MyLocation, point: location, name: '', address: '', isFavorite: false, shareData: '' });
+        facilityGroup.push({ facilityId: '', avatar: MyLocation, point: location, name: '我的位置', address: '', isFavorite: false });
       }
     }
-    this.setState({ facilityGroup, drawings: floorMapUrl, floorName: floorName, projectId, floorId, isLocation, location, favorResult, favorData });
+    this.setState({ facilityGroup, drawings: floorMapUrl, floorName: floorName, projectId, floorId, location });
   };
 
   private onDrawingsLoad = (event: any) => {
     const { width: mapWidth, height: mapHeight } = event.detail;
-    // const { screenHeight, screenWidth, pixelRatio } = this.context.global.systemInfo;
-    // const { isLocation, location, favorResult, favorData } = this.state;
-    // let [mapX, mapY] = Util.GetCenterPoint(mapWidth, mapHeight, screenHeight, screenWidth, mapWidth / pixelRatio, mapHeight / pixelRatio, pixelRatio);
-    // if (isLocation && location) {
-    //   [mapX, mapY] = Util.GetCenterPoint(mapWidth, mapHeight, screenHeight, screenWidth, location[0], location[1], pixelRatio);
-    // }
-    // if (favorResult) {
-    //   const { point } = favorData;
-    //   [mapX, mapY] = Util.GetCenterPoint(mapWidth, mapHeight, screenHeight, screenWidth, point[0], point[1], pixelRatio);
-    // }
     this.setState({ mapWidth, mapHeight });
   };
 
@@ -162,31 +162,36 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   private onFavorite = () => {
     const { itemData, current, keep, facilityGroup } = this.state;
     const { facilityId } = itemData;
-    let facilities = facilityGroup;
-    if (keep) DelFavor({ facilityId });
-    else AddFavor({ facilityId });
-    facilities[current].isFavorite = !keep;
-    this.setState({ facilityGroup: facilities, keep: !keep });
+    if (facilityId === '') showModal({ title: '无法收藏', content: '定位位置暂不支持收藏', showCancel: false });
+    else {
+      let facilities = facilityGroup;
+      if (keep) DelFavor({ facilityId }).catch((error) => console.warn(error));
+      else AddFavor({ facilityId }).catch((error) => console.warn(error));
+      facilities[current].isFavorite = !keep;
+      this.setState({ facilityGroup: facilities, keep: !keep });
+    }
   };
 
-  private onShare = () => {
-    // Todo do share action
-    const {
-      itemData: { shareData, facilityId }
-    } = this.state;
-    console.log(shareData, facilityId);
+  onShareAppMessage = (res: any) => {
+    const { itemData, floorId } = this.state;
+    return {
+      title: Config.ShareTitle,
+      path: `/pages/welcome/index?floorId=${floorId}&current=${JSON.stringify(itemData)}&from=share&shareobj=${JSON.stringify(res)}`
+    };
   };
 
   private onSelector = () => {
     const { projectId } = this.state;
     this.context.onStopBeaconDiscovery();
-    BuildList({ projectId }).then((res: any) => {
-      const { result } = res;
-      let temp: Array<string> = [];
-      for (let index: number = 0, item: any; (item = result[index++]); ) temp.push(item.buildName);
-      this.setState({ buildList: result, buildNameList: temp });
-      this.onBuildChange({ detail: { index: 0 } });
-    });
+    BuildList({ projectId })
+      .then((res: any) => {
+        const { result } = res;
+        let temp: Array<string> = [];
+        for (let index: number = 0, item: any; (item = result[index++]); ) temp.push(item.buildName);
+        this.setState({ buildList: result, buildNameList: temp });
+        this.onBuildChange({ detail: { index: 0 } });
+      })
+      .catch((error) => console.warn(error));
     this.setState({ selectorPopShow: true });
   };
 
@@ -194,14 +199,16 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     const { buildList } = this.state;
     const { index } = event.detail;
     let item: any = buildList[index];
-    FloorList({ buildId: item.buildId }).then((res: any) => {
-      console.log(res);
-      const { result } = res;
-      let temp: Array<string> = [];
-      for (let index: number = 0, item: any; (item = result[index++]); ) temp.push(item.floorName);
-      this.setState({ floorList: result, floorNameList: temp });
-      this.onFloorChange({ detail: { index: 0, value: result[0].floorName } });
-    });
+    FloorList({ buildId: item.buildId })
+      .then((res: any) => {
+        console.log(res);
+        const { result } = res;
+        let temp: Array<string> = [];
+        for (let index: number = 0, item: any; (item = result[index++]); ) temp.push(item.floorName);
+        this.setState({ floorList: result, floorNameList: temp });
+        this.onFloorChange({ detail: { index: 0, value: result[0].floorName } });
+      })
+      .catch((error) => console.warn(error));
     this.setState({ buildIndex: index });
   };
 
@@ -213,8 +220,10 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
 
   private onSelectorOK = () => {
     const { floorId, projectId } = this.state;
-    MapUsageRecord({ floorId, projectId });
-    FloorData({ floorId }).then((res: any) => this.fixFloorData(res, false));
+    MapUsageRecord({ floorId, projectId }).catch((error) => console.warn(error));
+    FloorData({ floorId })
+      .then((res: any) => this.fixFloorData(res, false))
+      .catch((error) => console.warn(error));
     this.setState({ selectorPopShow: false });
   };
 
@@ -226,7 +235,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     let itemTemp: Array<any> = [];
     if (facilityGroup.length > 0) {
       for (let index: number = 0, item: any; (item = facilityGroup[index++]); ) {
-        itemTemp.push(<FacilityItem key={index} data={item} onItemClick={item.isLocation ? this.onItemClick.bind(this, item, index - 1) : null} />);
+        itemTemp.push(<FacilityItem key={index} data={item} onItemClick={this.onItemClick.bind(this, item, index - 1)} />);
       }
     }
     return itemTemp;
@@ -235,24 +244,11 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   private onSearch = () => navigateTo({ url: `../search/index?current=${JSON.stringify({ floorId: this.state.floorId })}` });
 
   private renderView = () => {
-    const { mapWidth, mapHeight, drawings, facilityGroup, mapX, mapY } = this.state;
+    const { mapWidth, mapHeight, drawings, facilityGroup } = this.state;
     if (drawings) {
       return (
         <MovableArea className={styles['floor-container']} style={{ height: '100vh', width: '100vw' }}>
-          <MovableView
-            // onChange={({ x, y, source }) => {
-            //   if (source) this.setState({ mapX: x, mapY: y });
-            // }}
-            outOfBounds
-            scale
-            scaleMin={1}
-            scaleMax={3}
-            direction="all"
-            className={styles['floor-map']}
-            // x={mapX}
-            // y={mapY}
-            style={{ height: `${mapHeight}px`, width: `${mapWidth}px` }}
-          >
+          <MovableView outOfBounds scale scaleMin={1} scaleMax={3} direction="all" className={styles['floor-map']} style={{ height: `${mapHeight}px`, width: `${mapWidth}px` }}>
             <Image className={styles['floor-map-drawings']} src={drawings} onLoad={this.onDrawingsLoad} />
             {this.renderFacilities(facilityGroup)}
           </MovableView>
@@ -291,9 +287,11 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
                 <Image className={styles.bottomImg} src={keep ? FavoriteIcon : NotFavoriteIcon} />
                 <Text className={styles.bottomTxt}>位置收藏</Text>
               </View>
-              <View className={styles.bottomRight} onClick={this.onShare}>
+              <View className={styles.bottomRight}>
                 <Image className={styles.bottomImg} src={ShareIcon} />
-                <Text className={styles.bottomTxt}>位置分享</Text>
+                <Button className={styles.bottomTxt} style={{ border: 'none', padding: 0 }} plain type="default" open-type="share">
+                  位置分享
+                </Button>
               </View>
             </View>
           </View>

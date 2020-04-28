@@ -10,5 +10,9 @@ export default class Config {
   /**
    * 版本号
    */
-  public static Version: string = 'Insider Preview 20200427-1735';
+  public static Version: string = 'Insider Preview 20200428-1420';
+  /**
+   * 分享后显示的标题
+   */
+  public static ShareTitle: string = '邀请您使用灯联网定位导航';
 }

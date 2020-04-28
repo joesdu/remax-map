@@ -29,7 +29,9 @@ class Favorite extends React.Component<FavoriteProps, FavoriteState> {
   }
 
   onShow() {
-    FavoriteList().then((res: any) => this.setState({ favorites: res.result }));
+    FavoriteList()
+      .then((res: any) => this.setState({ favorites: res.result }))
+      .catch((error) => console.warn(error));
     this.setState({ scrollHight: this.context.global.systemInfo.screenHeight });
   }
 
@@ -42,7 +44,10 @@ class Favorite extends React.Component<FavoriteProps, FavoriteState> {
   private onFavorItemClick = (record: any) => {
     const { isManage } = this.state;
     this.context.onStopBeaconDiscovery();
-    if (isManage) DelFavor({ facilityId: record.facilityId }).then(() => FavoriteList().then((res: any) => this.setState({ favorites: res })));
+    if (isManage)
+      DelFavor({ facilityId: record.facilityId })
+        .then(() => FavoriteList().then((res: any) => this.setState({ favorites: res })))
+        .catch((error) => console.warn(error));
     else redirectTo({ url: `../main/index?current=${JSON.stringify(record)}&from=favorite` });
   };
 
