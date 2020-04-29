@@ -65,7 +65,7 @@ class App extends React.Component<AppProps, AppState> {
                   if (exist === -1) this.ibeacons.push({ deviceId: Util.FixDeviceId(major, minor), rssi, time: Date.now() });
                   else {
                     this.ibeacons[exist].time = Date.now();
-                    this.ibeacons[exist].rssi = rssi;
+                    this.ibeacons[exist].rssi = (this.ibeacons[exist].rssi + rssi) / 2;
                   }
                 }
                 if (Date.now() - this.date >= 5000 || this.ibeacons.length >= 3) {
@@ -73,7 +73,7 @@ class App extends React.Component<AppProps, AppState> {
                   let iBeaconTemp: Array<any> = [];
                   for (let index: number = 0, item; (item = this.ibeacons[index++]); ) {
                     const { deviceId, rssi } = item;
-                    if (index < 8) iBeaconTemp.push({ deviceId, rssi });
+                    if (index < 20) iBeaconTemp.push({ deviceId, rssi });
                   }
                   this.setGlobal({ allowUpdate: true, ibeacons: iBeaconTemp });
                   this.date = Date.now();

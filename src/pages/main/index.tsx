@@ -38,7 +38,6 @@ interface MainPageState {
   mapY: number;
   location?: [number, number];
   centerPoint?: [number, number];
-  mapMove: boolean;
 }
 class MainPage extends React.Component<MainPageProps, MainPageState> {
   static contextType = AppContext;
@@ -65,8 +64,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
       projectId: '',
       floorId: '',
       mapX: 0,
-      mapY: 0,
-      mapMove: false
+      mapY: 0
     };
   }
 
@@ -77,7 +75,6 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
       let current = JSON.parse(sharedata.current);
       const { facilityId, avatar, point, name, address } = current;
       let args = { facilityId, avatar, point, name, address, isFavorite: false };
-      this.setState({ centerPoint: point, mapMove: true });
       FloorData({ floorId: sharedata.floorId })
         .then((res: any) => this.fixOnShowData(res, args))
         .catch((error) => console.warn(error));
@@ -86,7 +83,6 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
       const { facilityId, facilityTypeUrl, facilityName, projectName, buildName, floorName } = current;
       let point = query.from === 'favorite' ? current.facilityPosition : current.point;
       let args = { facilityId: facilityId, avatar: facilityTypeUrl, point, name: facilityName, address: `${projectName}-${buildName}-${floorName}`, isFavorite: query.from === 'favorite' };
-      this.setState({ centerPoint: point, mapMove: true });
       FloorData({ floorId: current.floorId })
         .then((res: any) => this.fixOnShowData(res, args))
         .catch((error) => console.warn(error));
@@ -126,7 +122,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
             this.context.setGlobal({ hadFail: true });
           });
       }
-    }, 1000);
+    }, 5000);
     this.context.setGlobal({ interval });
   };
   /**
@@ -153,7 +149,6 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     } else {
       console.log('相等');
       this.setState({ location });
-      if (!this.state.mapMove) this.setState({ centerPoint: location });
     }
   };
 
@@ -167,7 +162,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     this.context.setGlobal({ interval: -1 });
     const { floorMapUrl, floorName, projectId, floorId } = res.result;
     let facilityGroup = [fixData];
-    this.setState({ facilityGroup, drawings: floorMapUrl, floorName: floorName, projectId, floorId });
+    this.setState({ facilityGroup, drawings: floorMapUrl, floorName: floorName, projectId, floorId, location: fixData.point });
   };
 
   /**
@@ -189,14 +184,14 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   private onDrawingsLoad = (event: any) => {
     const { width: mapWidth, height: mapHeight } = event.detail;
     this.setState({ mapWidth, mapHeight });
-    this.fixMapMove();
   };
 
   private fixMapMove = () => {
-    const { mapWidth, mapHeight, centerPoint } = this.state;
+    console.log('fixMapMove');
+    const { mapWidth, mapHeight, location } = this.state;
     const { screenHeight, screenWidth, pixelRatio } = this.context.global.systemInfo;
     let point: [number, number] = [screenWidth / 2, screenHeight / 2];
-    if (centerPoint) point = centerPoint;
+    if (location) point = location;
     let [mapX, mapY] = Util.GetCenterPoint(mapWidth, mapHeight, screenHeight, screenWidth, point[0], point[1], pixelRatio);
     this.setState({ mapX, mapY });
   };
@@ -215,7 +210,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     vibrateShort();
     const { itemData, current, keep, facilityGroup } = this.state;
     const { facilityId } = itemData;
-    if (current === -1) showModal({ title: '无法收藏', content: '定位位置暂不支持收藏', showCancel: false });
+    if (current === -1) showModal({ title: '无法收藏', content: '我的位置暂不支持收藏', showCancel: false });
     else {
       let facilities = facilityGroup;
       if (keep) DelFavor({ facilityId }).catch((error) => console.warn(error));
@@ -321,27 +316,31 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     navigateTo({ url: `../search/index?current=${JSON.stringify({ floorId: this.state.floorId })}` });
   };
 
+  private fixMovableXY = (event: any) => {
+    const { x, y } = event.detail;
+    console.log(x, y);
+    // this.setState({ mapX: x, mapY: y });
+  };
+
   private renderView = () => {
-    const { mapWidth, mapHeight, drawings } = this.state;
+    const { mapWidth, mapHeight, drawings, mapX, mapY } = this.state;
     if (this.context.global.hadFail) {
       return (
-        <View style={{ height: '100vh', width: '100vw', textAlign: 'center', alignItems: 'center' }}>
-          <View style={{ fontSize: 36 }}>未找到智能设备,无法提供服务</View>
+        <View style={{ height: '100vh', width: '100vw', textAlign: 'center', alignItems: 'center', position: 'relative' }}>
+          <View style={{ fontSize: 36, textAlign: 'center', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }}>正在搜索服务...</View>
         </View>
       );
     } else {
       if (drawings) {
         return (
-          <MovableArea className={styles['floor-container']} style={{ height: '100vh', width: '100vw' }}>
+          <MovableArea scaleArea className={styles['floor-container']} style={{ height: '100vh', width: '100vw' }}>
             <MovableView
-              outOfBounds
+              // onChange={this.fixMovableXY} onScale={this.fixMovableXY} x={mapX} y={mapY}
               scale
               scaleMin={1}
               scaleMax={3}
               direction="all"
               className={styles['floor-map']}
-              // x={mapX}
-              // y={mapY}
               style={{ height: `${mapHeight}px`, width: `${mapWidth}px` }}
             >
               <Image className={styles['floor-map-drawings']} src={drawings} onLoad={this.onDrawingsLoad} />
