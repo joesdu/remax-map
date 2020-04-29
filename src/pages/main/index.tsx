@@ -38,6 +38,7 @@ interface MainPageState {
   mapY: number;
   location?: [number, number];
   centerPoint?: [number, number];
+  blankHeight: number;
 }
 class MainPage extends React.Component<MainPageProps, MainPageState> {
   static contextType = AppContext;
@@ -64,7 +65,8 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
       projectId: '',
       floorId: '',
       mapX: 0,
-      mapY: 0
+      mapY: 0,
+      blankHeight: 500
     };
   }
 
@@ -183,7 +185,12 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
 
   private onDrawingsLoad = (event: any) => {
     const { width: mapWidth, height: mapHeight } = event.detail;
-    this.setState({ mapWidth, mapHeight });
+    /**
+     * FixMovableArea
+     */
+    const { screenHeight } = this.context.global.systemInfo;
+    let blankHeight = (screenHeight - mapHeight) / 2;
+    this.setState({ mapWidth, mapHeight, blankHeight });
   };
 
   private fixMapMove = () => {
@@ -323,7 +330,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   };
 
   private renderView = () => {
-    const { mapWidth, mapHeight, drawings, mapX, mapY } = this.state;
+    const { mapWidth, mapHeight, drawings, mapX, mapY, blankHeight } = this.state;
     if (this.context.global.hadFail) {
       return (
         <View style={{ height: '100vh', width: '100vw', textAlign: 'center', alignItems: 'center', position: 'relative' }}>
@@ -333,9 +340,11 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     } else {
       if (drawings) {
         return (
-          <MovableArea scaleArea className={styles['floor-container']} style={{ height: '100vh', width: '100vw' }}>
+          <MovableArea scaleArea className={styles['floor-container']} style={{ height: mapHeight, width: '100vw', marginTop: blankHeight }}>
             <MovableView
-              // onChange={this.fixMovableXY} onScale={this.fixMovableXY} x={mapX} y={mapY}
+              // onChange={this.fixMovableXY} onScale={this.fixMovableXY}
+              x={mapX}
+              y={mapY}
               scale
               scaleMin={1}
               scaleMax={3}
