@@ -1,5 +1,5 @@
 import { DelFavor, FavoriteList } from '@/service';
-import { ScrollView, View, redirectTo } from 'remax/wechat';
+import { ScrollView, View, redirectTo, vibrateShort } from 'remax/wechat';
 
 import { AppContext } from '@/app';
 import React from 'react';
@@ -36,14 +36,15 @@ class Favorite extends React.Component<FavoriteProps, FavoriteState> {
   }
 
   private onManage = () => {
+    vibrateShort();
     const { isManage } = this.state;
     if (isManage) this.setState({ isManage: false, manageTxt: '管理' });
     else this.setState({ isManage: true, manageTxt: '完成' });
   };
 
   private onFavorItemClick = (record: any) => {
+    vibrateShort();
     const { isManage } = this.state;
-    this.context.onStopBeaconDiscovery();
     if (isManage)
       DelFavor({ facilityId: record.facilityId })
         .then(() => FavoriteList().then((res: any) => this.setState({ favorites: res })))

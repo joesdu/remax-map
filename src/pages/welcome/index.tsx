@@ -1,4 +1,4 @@
-import { Image, View, getSystemInfo, getUserInfo, login, redirectTo, showModal } from 'remax/wechat';
+import { Image, View, getUserInfo, login, redirectTo, vibrateShort } from 'remax/wechat';
 import { Login, UpdatePhone, UpdateUserInfo } from '@/service';
 
 import { AppContext } from '@/app';
@@ -25,6 +25,7 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
   }
 
   onInto = () => {
+    vibrateShort();
     getUserInfo({ withCredentials: true }).then((res: any) => {
       login()
         .then((loginRes: any) => Login(loginRes.code))
@@ -40,15 +41,6 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
   onShow = () => {
     let query = this.props.location.query;
     if (query.from === 'share') this.setState({ fromData: JSON.stringify(query), fromShare: 'share' });
-    getSystemInfo()
-      .then((res: any) => {
-        this.context.setGlobal({ systemInfo: res });
-        const { locationAuthorized, bluetoothEnabled, locationEnabled } = res;
-        if (!locationAuthorized || !bluetoothEnabled || !locationEnabled) {
-          showModal({ title: '权限不足', content: '请到系统应用设置打开微信相关权限:允许微信使用定位的开关,以及打开操作系统的蓝牙的开关和地理位置的开关', showCancel: false });
-        } else if (!this.context.global.bluetooth) this.context.SearchIBeacon();
-      })
-      .catch((error: any) => console.error(error));
   };
 
   render() {

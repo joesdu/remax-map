@@ -3,14 +3,6 @@ import { Image, View } from 'remax/wechat';
 import React from 'react';
 import styles from '../index.module.less';
 
-export interface FacilityItemData {
-  facilityId: string;
-  avatar: string;
-  point: [number, number];
-  name: string;
-  address: string;
-  isFavorite: boolean;
-}
 export interface FacilityItemProps {
   itemUrl?: string;
   data: any;

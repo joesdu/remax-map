@@ -1,5 +1,5 @@
 import { DeleteIcon, ElevatorIcon, EscalatorIcon, ExitIcon, NoResultIcon, RestroomIcon } from '@/assets/icons';
-import { Image, View, navigateTo } from 'remax/wechat';
+import { Image, View, navigateTo, vibrateShort } from 'remax/wechat';
 
 import { AppContext } from '@/app';
 import React from 'react';
@@ -33,16 +33,22 @@ class Search extends React.Component<SearchProps, SearchState> {
     this.setState({ floorId });
   }
 
-  private onRangeChange = (dropdown: any) => this.setState({ range: dropdown.detail });
+  private onRangeChange = (dropdown: any) => {
+    vibrateShort();
+    this.setState({ range: dropdown.detail });
+  };
 
   private onSearch = (event: any) => {
+    vibrateShort();
     const { range, floorId } = this.state;
-    this.context.setGlobal({ searchText: event.detail });
     let args = range === '0' ? { floorId, keywords: event.detail } : { keywords: event.detail };
     this.LocationSearch(args);
   };
 
-  private Search = (keywords: string) => this.LocationSearch({ floorId: this.state.floorId, keywords });
+  private Search = (keywords: string) => {
+    vibrateShort();
+    this.LocationSearch({ floorId: this.state.floorId, keywords });
+  };
 
   private LocationSearch = (args: any) =>
     SearchLocation(args)

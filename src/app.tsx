@@ -1,6 +1,6 @@
 import './app.less';
 
-import { closeBluetoothAdapter, onBeaconUpdate, openBluetoothAdapter, setKeepScreenOn, showModal, startBeaconDiscovery, stopBeaconDiscovery } from 'remax/wechat';
+import { closeBluetoothAdapter, getSystemInfo, onBeaconUpdate, openBluetoothAdapter, setKeepScreenOn, startBeaconDiscovery, stopBeaconDiscovery } from 'remax/wechat';
 
 import { CloseMap } from './service';
 import React from 'react';
@@ -20,10 +20,13 @@ class App extends React.Component<AppProps, AppState> {
     this.state = {
       global: {
         systemInfo: {},
-        searchText: '',
         bluetooth: false,
         allowUpdate: false,
-        ibeacons: []
+        ibeacons: [],
+        currentFloor: '',
+        atFirst: true,
+        interval: -1,
+        hadFail: false
       }
     };
   }
@@ -33,46 +36,47 @@ class App extends React.Component<AppProps, AppState> {
     this.setState({ global: { ...global, ...data } });
   };
 
+  private date: number = 0;
+  private ibeacons: Array<{ deviceId: number; rssi: number; time: number }> = [];
+  private cleanerInterval: any = -1;
+
   SearchIBeacon = () => {
     openBluetoothAdapter({
       success: () => {
         this.onStopBeaconDiscovery();
-        let date: number = 0;
-        let ibeacons: Array<any> = [];
         startBeaconDiscovery({ uuids: ['FDA50693-A4E2-4FB1-AFCF-C6EB07647825'] })
           .then((startRes: any) => {
-            console.log('打开搜索:', startRes);
+            console.warn('启动搜索:', startRes);
             this.setGlobal({ bluetooth: true });
-            setInterval(() => {
-              if (ibeacons.length > 3) {
-                let timeout = ibeacons.findIndex((x: { time: number }) => Date.now() - x.time > 12000);
-                if (timeout !== -1) ibeacons.splice(timeout, 1);
+            this.cleanerInterval = setInterval(() => {
+              if (this.ibeacons.length > 3) {
+                let timeout = this.ibeacons.findIndex((x: { time: number }) => Date.now() - x.time > 10000);
+                if (timeout !== -1) this.ibeacons.splice(timeout, 1);
               }
             }, 500);
             onBeaconUpdate((res: any) => {
               if (res && res.beacons && res.beacons.length > 0) {
-                if (Date.now() - date <= 9000) return;
                 const { beacons } = res;
                 for (let index: number = 0, item: any; (item = beacons[index++]); ) {
                   const { major, minor, rssi } = item;
                   console.log({ deviceId: Util.FixDeviceId(major, minor), rssi });
                   let exist: number = -1;
-                  if (ibeacons.length > 0) exist = ibeacons.findIndex((x: { deviceId: number }) => x.deviceId === Util.FixDeviceId(major, minor));
-                  if (exist === -1) ibeacons.push({ deviceId: Util.FixDeviceId(major, minor), rssi, time: Date.now() });
+                  if (this.ibeacons.length > 0) exist = this.ibeacons.findIndex((x: { deviceId: number }) => x.deviceId === Util.FixDeviceId(major, minor));
+                  if (exist === -1) this.ibeacons.push({ deviceId: Util.FixDeviceId(major, minor), rssi, time: Date.now() });
                   else {
-                    ibeacons[exist].time = Date.now();
-                    ibeacons[exist].rssi = rssi;
+                    this.ibeacons[exist].time = Date.now();
+                    this.ibeacons[exist].rssi = rssi;
                   }
                 }
-                if (Date.now() - date >= 5000 || ibeacons.length >= 3) {
-                  ibeacons.sort((a: { time: number }, b: { time: number }) => b.time - a.time);
+                if (Date.now() - this.date >= 5000 || this.ibeacons.length >= 3) {
+                  this.ibeacons.sort((a: { time: number }, b: { time: number }) => b.time - a.time);
                   let iBeaconTemp: Array<any> = [];
-                  for (let index: number = 0; index < 3; index++) {
-                    const { deviceId, rssi } = ibeacons[index];
-                    iBeaconTemp.push({ deviceId, rssi });
+                  for (let index: number = 0, item; (item = this.ibeacons[index++]); ) {
+                    const { deviceId, rssi } = item;
+                    if (index < 8) iBeaconTemp.push({ deviceId, rssi });
                   }
                   this.setGlobal({ allowUpdate: true, ibeacons: iBeaconTemp });
-                  date = Date.now();
+                  this.date = Date.now();
                 }
               }
             });
@@ -84,9 +88,8 @@ class App extends React.Component<AppProps, AppState> {
           })
           .finally(() => {
             setTimeout(() => {
-              if (ibeacons.length <= 0) {
-                this.setGlobal({ allowUpdate: true, ibeacons });
-                showModal({ title: '未检测到智能设备', content: '对不起,您当前位置无法为您提供服务', showCancel: false });
+              if (this.ibeacons.length <= 0) {
+                this.setGlobal({ allowUpdate: true, ibeacons: this.ibeacons, hadFail: true });
                 this.onStopBeaconDiscovery();
               }
             }, 10000);
@@ -99,18 +102,30 @@ class App extends React.Component<AppProps, AppState> {
     stopBeaconDiscovery()
       .then(() => {
         this.setGlobal({ bluetooth: false, allowUpdate: false });
+        clearInterval(this.cleanerInterval);
         closeBluetoothAdapter();
       })
       .catch((error: any) => console.error(error));
 
   onHide = () => CloseMap();
 
-  onShow = () => setKeepScreenOn({ keepScreenOn: true });
+  onShow = () => {
+    getSystemInfo()
+      .then((res: any) => {
+        this.setGlobal({ systemInfo: res });
+        const { locationAuthorized, bluetoothEnabled, locationEnabled } = res;
+        if (!locationAuthorized || !bluetoothEnabled || !locationEnabled) {
+          this.setGlobal({ hadFail: true });
+        } else this.SearchIBeacon();
+      })
+      .catch((error: any) => console.error(error));
+    setKeepScreenOn({ keepScreenOn: true });
+  };
 
   render() {
     const { global } = this.state;
-    const { setGlobal, SearchIBeacon, onStopBeaconDiscovery } = this;
-    return <AppContext.Provider value={{ global, setGlobal, SearchIBeacon, onStopBeaconDiscovery }}>{this.props.children}</AppContext.Provider>;
+    const { setGlobal } = this;
+    return <AppContext.Provider value={{ global, setGlobal }}>{this.props.children}</AppContext.Provider>;
   }
 }
 export default App;

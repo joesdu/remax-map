@@ -1,5 +1,5 @@
 import { AddFavor, BuildList, DelFavor, FloorData, FloorList, Location, MapUsageRecord } from '@/service';
-import { Button, Image, MovableArea, MovableView, Text, View, hideLoading, navigateTo, showLoading, showModal } from 'remax/wechat';
+import { Button, Image, MovableArea, MovableView, Text, View, navigateTo, showModal, vibrateShort } from 'remax/wechat';
 import { CircleButton, FloorSelector } from '@/components';
 import { FavoriteIcon, LocationIcon, MyLocation, NotFavoriteIcon, SearchIcon, ShareIcon } from '@/assets/icons';
 
@@ -7,11 +7,10 @@ import { AppContext } from '@/app';
 import Config from '@/utils/config';
 import FacilityItem from './components/facilityitem';
 import React from 'react';
+import Util from '@/utils/util';
 import VantPicker from '@vant/weapp/dist/picker';
 import VantPopup from '@vant/weapp/dist/popup';
 import styles from './index.module.less';
-
-// import Util from '@/utils/util';
 
 export interface MainPageProps {
   location: any;
@@ -35,7 +34,11 @@ interface MainPageState {
   facilityGroup: Array<any>;
   projectId: string;
   floorId: string;
+  mapX: number;
+  mapY: number;
   location?: [number, number];
+  centerPoint?: [number, number];
+  mapMove: boolean;
 }
 class MainPage extends React.Component<MainPageProps, MainPageState> {
   static contextType = AppContext;
@@ -60,104 +63,159 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
       floorNameList: [],
       floorIndex: 0,
       projectId: '',
-      floorId: ''
+      floorId: '',
+      mapX: 0,
+      mapY: 0,
+      mapMove: false
     };
   }
 
   onShow = () => {
     let query = this.props.location.query;
-    if (query.from === 'welcome') {
-      if (query.fromshare === 'share') {
-        let sharedata = JSON.parse(query.sharedata);
-        let current = JSON.parse(sharedata.current);
-        const { facilityId, avatar, point, name, address } = current;
-        let args = { facilityId, avatar, point, name, address, isFavorite: false };
-        FloorData({ floorId: sharedata.floorId })
-          .then((res: any) => this.fixFloorData(res, false, true, args))
-          .catch((error) => console.warn(error));
-      } else this.onLocationClick();
+    if (query.from === 'welcome' && query.fromshare === 'share') {
+      let sharedata = JSON.parse(query.sharedata);
+      let current = JSON.parse(sharedata.current);
+      const { facilityId, avatar, point, name, address } = current;
+      let args = { facilityId, avatar, point, name, address, isFavorite: false };
+      this.setState({ centerPoint: point, mapMove: true });
+      FloorData({ floorId: sharedata.floorId })
+        .then((res: any) => this.fixOnShowData(res, args))
+        .catch((error) => console.warn(error));
     } else if (query.from === 'favorite' || query.from === 'searchresult') {
       let current = JSON.parse(query.current);
-      let args = {
-        facilityId: current.facilityId,
-        avatar: current.facilityTypeUrl,
-        point: query.from === 'favorite' ? current.facilityPosition : current.point,
-        name: current.facilityName,
-        address: `${current.projectName}-${current.buildName}-${current.floorName}`,
-        isFavorite: query.from === 'favorite'
-      };
+      const { facilityId, facilityTypeUrl, facilityName, projectName, buildName, floorName } = current;
+      let point = query.from === 'favorite' ? current.facilityPosition : current.point;
+      let args = { facilityId: facilityId, avatar: facilityTypeUrl, point, name: facilityName, address: `${projectName}-${buildName}-${floorName}`, isFavorite: query.from === 'favorite' };
+      this.setState({ centerPoint: point, mapMove: true });
       FloorData({ floorId: current.floorId })
-        .then((res: any) => this.fixFloorData(res, false, true, args))
+        .then((res: any) => this.fixOnShowData(res, args))
         .catch((error) => console.warn(error));
+    }
+    if (this.context.global.atFirst) {
+      this.context.setGlobal({ atFirst: false });
+      this.getLocation();
     }
   };
 
-  private timer: any = -1;
-
   private onLocationClick = () => {
-    clearInterval(this.timer);
-    this.context.setGlobal({ allowUpdate: false });
-    showLoading({ title: '定位中', mask: true });
-    if (!this.context.global.bluetooth) this.context.SearchIBeacon();
-    this.timer = setInterval(() => {
-      if (this.context.global.allowUpdate) {
-        hideLoading();
-        this.context.setGlobal({ allowUpdate: false });
-        Location({ data: JSON.stringify({ deviceData: this.context.global.ibeacons }) })
-          .then((res: any) => this.fixFloorData(res, true))
-          .catch((error) => {
-            console.warn(error);
-            clearInterval(this.timer);
-            showModal({ title: '未检测到智能设备', content: '对不起,您当前位置无法为您提供服务', showCancel: false });
-          });
-      }
-    }, 1000);
+    vibrateShort();
+    const { floorId } = this.state;
+    if (floorId === this.context.global.currentFloor) {
+      console.log('move');
+      this.fixMapMove();
+    } else if (this.context.global.interval === -1) {
+      console.log('location');
+      this.getLocation();
+    }
   };
 
   /**
-   * 处理楼层数据
-   * @param res 楼层数据
-   * @param isLocation 是否是点击定位按钮或者从欢迎页进入的定位发起
-   * @param favorResult 是否是收藏或者搜索结果
-   * @param favorData 收藏或者搜索结果数据
+   * 获取定位数据
    */
-  private fixFloorData = (res: any, isLocation: boolean, favorResult: boolean = false, favorData: any = null) => {
+  private getLocation = () => {
+    let interval = setInterval(() => {
+      if (this.context.global.allowUpdate) {
+        this.context.setGlobal({ allowUpdate: false });
+        Location({ data: JSON.stringify({ deviceData: this.context.global.ibeacons }) })
+          .then((res: any) => {
+            this.context.setGlobal({ hadFail: false });
+            this.fixLocationData(res);
+          })
+          .catch((error) => {
+            console.warn(error);
+            this.context.setGlobal({ hadFail: true });
+          });
+      }
+    }, 1000);
+    this.context.setGlobal({ interval });
+  };
+  /**
+   * 处理定位数据
+   * @param res 服务端返回定位数据结果
+   */
+  private fixLocationData = (res: any) => {
+    console.log('定位数据:', res);
     let location: any;
     const { floorMapUrl, facilityList, floorName, projectId, floorId } = res.result;
-    if (isLocation) {
-      location = res.result.location;
-      if (location === null) location = this.state.location;
-    }
-    let facilityGroup: Array<any> = [];
-    if (favorResult) {
-      facilityGroup = [favorData];
-    } else {
+    location = res.result.location;
+    if (location === null) location = this.state.location;
+    if (floorId !== this.state.floorId) {
+      console.log('不相等');
+      let facilityGroup: Array<any> = [];
       if (facilityList.length > 0) {
         for (let index: number = 0, item: any; (item = facilityList[index++]); ) {
           const { facilityId, facilityTypeUrl, point, facilityName, projectName, buildName, isFavor } = item;
           facilityGroup.push({ facilityId, avatar: facilityTypeUrl, point, name: facilityName, address: `${projectName}-${buildName}-${floorName}`, isFavorite: isFavor });
         }
       }
-      if (isLocation && location) {
-        facilityGroup.push({ facilityId: '', avatar: MyLocation, point: location, name: '我的位置', address: '', isFavorite: false });
+      this.context.setGlobal({ currentFloor: floorId });
+      this.setState({ facilityGroup, drawings: floorMapUrl, floorName: floorName, projectId, floorId, location });
+    } else {
+      console.log('相等');
+      this.setState({ location });
+      if (!this.state.mapMove) this.setState({ centerPoint: location });
+    }
+  };
+
+  /**
+   * 处理其他页面跳转数据
+   * @param res 楼层数据
+   * @param fixData 页面跳转所带数据
+   */
+  private fixOnShowData = (res: any, fixData: any) => {
+    clearInterval(this.context.global.interval);
+    this.context.setGlobal({ interval: -1 });
+    const { floorMapUrl, floorName, projectId, floorId } = res.result;
+    let facilityGroup = [fixData];
+    this.setState({ facilityGroup, drawings: floorMapUrl, floorName: floorName, projectId, floorId });
+  };
+
+  /**
+   * 处理楼层数据
+   * @param res 楼层数据
+   */
+  private fixFloorData = (res: any) => {
+    const { floorMapUrl, facilityList, floorName, projectId, floorId } = res.result;
+    let facilityGroup: Array<any> = [];
+    if (facilityList.length > 0) {
+      for (let index: number = 0, item: any; (item = facilityList[index++]); ) {
+        const { facilityId, facilityTypeUrl, point, facilityName, projectName, buildName, isFavor } = item;
+        facilityGroup.push({ facilityId, avatar: facilityTypeUrl, point, name: facilityName, address: `${projectName}-${buildName}-${floorName}`, isFavorite: isFavor });
       }
     }
-    this.setState({ facilityGroup, drawings: floorMapUrl, floorName: floorName, projectId, floorId, location });
+    this.setState({ facilityGroup, drawings: floorMapUrl, floorName: floorName, projectId, floorId });
   };
 
   private onDrawingsLoad = (event: any) => {
     const { width: mapWidth, height: mapHeight } = event.detail;
     this.setState({ mapWidth, mapHeight });
+    this.fixMapMove();
   };
 
-  private onFavoriteClick = () => navigateTo({ url: '../favorite/index' });
+  private fixMapMove = () => {
+    const { mapWidth, mapHeight, centerPoint } = this.state;
+    const { screenHeight, screenWidth, pixelRatio } = this.context.global.systemInfo;
+    let point: [number, number] = [screenWidth / 2, screenHeight / 2];
+    if (centerPoint) point = centerPoint;
+    let [mapX, mapY] = Util.GetCenterPoint(mapWidth, mapHeight, screenHeight, screenWidth, point[0], point[1], pixelRatio);
+    this.setState({ mapX, mapY });
+  };
 
-  private onClose = () => this.setState({ popShow: false, selectorPopShow: false });
+  private onFavoriteClick = () => {
+    vibrateShort();
+    navigateTo({ url: '../favorite/index' });
+  };
+
+  private onClose = () => {
+    vibrateShort();
+    this.setState({ popShow: false, selectorPopShow: false });
+  };
 
   private onFavorite = () => {
+    vibrateShort();
     const { itemData, current, keep, facilityGroup } = this.state;
     const { facilityId } = itemData;
-    if (facilityId === '') showModal({ title: '无法收藏', content: '定位位置暂不支持收藏', showCancel: false });
+    if (current === -1) showModal({ title: '无法收藏', content: '定位位置暂不支持收藏', showCancel: false });
     else {
       let facilities = facilityGroup;
       if (keep) DelFavor({ facilityId }).catch((error) => console.warn(error));
@@ -167,6 +225,10 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     }
   };
 
+  /**
+   * 分享数据
+   * @param res
+   */
   onShareAppMessage = (res: any) => {
     const { itemData, floorId } = this.state;
     return {
@@ -176,8 +238,10 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   };
 
   private onSelector = () => {
+    vibrateShort();
+    clearInterval(this.context.global.interval);
+    this.context.setGlobal({ interval: -1 });
     const { projectId } = this.state;
-    this.context.onStopBeaconDiscovery();
     BuildList({ projectId })
       .then((res: any) => {
         const { result } = res;
@@ -214,19 +278,24 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   };
 
   private onSelectorOK = () => {
+    vibrateShort();
     const { floorId, projectId } = this.state;
     MapUsageRecord({ floorId, projectId }).catch((error) => console.warn(error));
     FloorData({ floorId })
-      .then((res: any) => this.fixFloorData(res, false))
+      .then((res: any) => this.fixFloorData(res))
       .catch((error) => console.warn(error));
     this.setState({ selectorPopShow: false });
   };
 
   // 点击设施时弹出收藏框
-  private onItemClick = (record: any, current: number) => this.setState({ itemData: record, popShow: true, current, keep: record.isFavorite });
+  private onItemClick = (record: any, current: number) => {
+    vibrateShort();
+    this.setState({ itemData: record, popShow: true, current, keep: record.isFavorite });
+  };
 
   // 动态渲染设施
-  private renderFacilities = (facilityGroup: Array<any>) => {
+  private renderFacilities = () => {
+    const { facilityGroup } = this.state;
     let itemTemp: Array<any> = [];
     if (facilityGroup.length > 0) {
       for (let index: number = 0, item: any; (item = facilityGroup[index++]); ) {
@@ -236,19 +305,52 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     return itemTemp;
   };
 
-  private onSearch = () => navigateTo({ url: `../search/index?current=${JSON.stringify({ floorId: this.state.floorId })}` });
+  /**
+   * 渲染位置
+   */
+  private renderLocation = () => {
+    const { location, floorId } = this.state;
+    if (location && floorId === this.context.global.currentFloor) {
+      let locationData = { facilityId: '', avatar: MyLocation, point: location, name: '我的位置', address: '', isFavorite: false };
+      return <FacilityItem data={locationData} onItemClick={this.onItemClick.bind(this, locationData, -1)} />;
+    }
+  };
+
+  private onSearch = () => {
+    vibrateShort();
+    navigateTo({ url: `../search/index?current=${JSON.stringify({ floorId: this.state.floorId })}` });
+  };
 
   private renderView = () => {
-    const { mapWidth, mapHeight, drawings, facilityGroup } = this.state;
-    if (drawings) {
+    const { mapWidth, mapHeight, drawings } = this.state;
+    if (this.context.global.hadFail) {
       return (
-        <MovableArea className={styles['floor-container']} style={{ height: '100vh', width: '100vw' }}>
-          <MovableView outOfBounds scale scaleMin={1} scaleMax={3} direction="all" className={styles['floor-map']} style={{ height: `${mapHeight}px`, width: `${mapWidth}px` }}>
-            <Image className={styles['floor-map-drawings']} src={drawings} onLoad={this.onDrawingsLoad} />
-            {this.renderFacilities(facilityGroup)}
-          </MovableView>
-        </MovableArea>
+        <View style={{ height: '100vh', width: '100vw', textAlign: 'center', alignItems: 'center' }}>
+          <View style={{ fontSize: 36 }}>未找到智能设备,无法提供服务</View>
+        </View>
       );
+    } else {
+      if (drawings) {
+        return (
+          <MovableArea className={styles['floor-container']} style={{ height: '100vh', width: '100vw' }}>
+            <MovableView
+              outOfBounds
+              scale
+              scaleMin={1}
+              scaleMax={3}
+              direction="all"
+              className={styles['floor-map']}
+              // x={mapX}
+              // y={mapY}
+              style={{ height: `${mapHeight}px`, width: `${mapWidth}px` }}
+            >
+              <Image className={styles['floor-map-drawings']} src={drawings} onLoad={this.onDrawingsLoad} />
+              {this.renderFacilities()}
+              {this.renderLocation()}
+            </MovableView>
+          </MovableArea>
+        );
+      }
     }
   };
 
@@ -266,7 +368,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
           <FloorSelector text={floorName} onClick={this.onSelector} style={{ position: 'absolute', bottom: 104, left: 250 }} />
           <CircleButton icon={NotFavoriteIcon} onClick={this.onFavoriteClick} style={{ float: 'right', position: 'fixed', bottom: 108, right: 32 }} />
         </View>
-        <VantPopup round show={popShow} closeable close-icon="close" position="bottom" custom-style={popStyle} bindclose={this.onClose}>
+        <VantPopup round show={popShow} close-on-click-overlay closeable close-icon="close" position="bottom" custom-style={popStyle} bindclose={this.onClose}>
           <View className={styles.popContainer}>
             <View className={styles.flexTop}>
               <View className={styles.topRight}>
@@ -284,7 +386,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
               </View>
               <View className={styles.bottomRight}>
                 <Image className={styles.bottomImg} src={ShareIcon} />
-                <Button className={styles.bottomTxt} style={{ border: 'none', padding: 0 }} plain type="default" open-type="share">
+                <Button className={styles.bottomTxt} style={{ border: 'none', padding: 0 }} plain type="default" open-type="share" onClick={() => vibrateShort()}>
                   位置分享
                 </Button>
               </View>

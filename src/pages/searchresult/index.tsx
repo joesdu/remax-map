@@ -1,4 +1,4 @@
-import { ScrollView, redirectTo } from 'remax/wechat';
+import { ScrollView, redirectTo, vibrateShort } from 'remax/wechat';
 
 import { AppContext } from '@/app';
 import React from 'react';
@@ -27,7 +27,7 @@ class SearchResult extends React.Component<SearchResultProps, SearchResultState>
   }
 
   onGotoClick = (record: any) => {
-    this.context.onStopBeaconDiscovery();
+    vibrateShort();
     redirectTo({ url: `../main/index?current=${JSON.stringify(record)}&from=searchresult` });
   };
 
