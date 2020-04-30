@@ -181,3 +181,37 @@
   z-index: 99;
   width: 100%;
 }
+
+.loading {
+  height: 100vh;
+  width: 100vw;
+  text-align: center;
+  align-items: center;
+  position: relative;
+  &-text {
+    font-size: 36px;
+    text-align: center;
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    .dotting {
+      height: 4px;
+      width: 4px;
+      display: inline-block;
+      border-radius: 2px;
+      animation: dotting 3s infinite step-start;
+    }
+    @keyframes dotting {
+      25% {
+        box-shadow: 4px 0 0 #000000ff;
+      }
+      50% {
+        box-shadow: 4px 0 0 #000000ff, 14px 0 0 #000000ff;
+      }
+      75% {
+        box-shadow: 4px 0 0 #000000ff, 14px 0 0 #000000ff, 24px 0 0 #000000ff;
+      }
+    }
+  }
+}

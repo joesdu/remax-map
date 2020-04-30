@@ -26,7 +26,7 @@ class App extends React.Component<AppProps, AppState> {
         currentFloor: '',
         atFirst: true,
         interval: -1,
-        hadFail: false
+        hadFail: true
       }
     };
   }
@@ -36,9 +36,19 @@ class App extends React.Component<AppProps, AppState> {
     this.setState({ global: { ...global, ...data } });
   };
 
-  private date: number = 0;
-  private ibeacons: Array<{ deviceId: number; rssi: number; time: number }> = [];
+  private ibeacons: Array<{ deviceId: number; rssi: number; time: number; count: number }> = [];
   private cleanerInterval: any = -1;
+
+  getIBeacons = () => {
+    this.ibeacons.sort((a: { time: number }, b: { time: number }) => b.time - a.time);
+    let iBeaconTemp: Array<any> = [];
+    for (let index: number = 0, item; (item = this.ibeacons[index++]); ) {
+      const { deviceId, rssi, count } = item;
+      let rssiAverage = rssi / count;
+      if (index < 20) iBeaconTemp.push({ deviceId, rssi: rssiAverage });
+    }
+    return iBeaconTemp;
+  };
 
   SearchIBeacon = () => {
     openBluetoothAdapter({
@@ -62,22 +72,14 @@ class App extends React.Component<AppProps, AppState> {
                   console.log({ deviceId: Util.FixDeviceId(major, minor), rssi });
                   let exist: number = -1;
                   if (this.ibeacons.length > 0) exist = this.ibeacons.findIndex((x: { deviceId: number }) => x.deviceId === Util.FixDeviceId(major, minor));
-                  if (exist === -1) this.ibeacons.push({ deviceId: Util.FixDeviceId(major, minor), rssi, time: Date.now() });
+                  if (exist === -1) this.ibeacons.push({ deviceId: Util.FixDeviceId(major, minor), rssi, time: Date.now(), count: 1 });
                   else {
                     this.ibeacons[exist].time = Date.now();
-                    this.ibeacons[exist].rssi = (this.ibeacons[exist].rssi + rssi) / 2;
+                    this.ibeacons[exist].rssi += rssi;
+                    this.ibeacons[exist].count += 1;
                   }
                 }
-                if (Date.now() - this.date >= 5000 || this.ibeacons.length >= 3) {
-                  this.ibeacons.sort((a: { time: number }, b: { time: number }) => b.time - a.time);
-                  let iBeaconTemp: Array<any> = [];
-                  for (let index: number = 0, item; (item = this.ibeacons[index++]); ) {
-                    const { deviceId, rssi } = item;
-                    if (index < 20) iBeaconTemp.push({ deviceId, rssi });
-                  }
-                  this.setGlobal({ allowUpdate: true, ibeacons: iBeaconTemp });
-                  this.date = Date.now();
-                }
+                this.setGlobal({ allowUpdate: true });
               }
             });
           })
@@ -124,8 +126,8 @@ class App extends React.Component<AppProps, AppState> {
 
   render() {
     const { global } = this.state;
-    const { setGlobal } = this;
-    return <AppContext.Provider value={{ global, setGlobal }}>{this.props.children}</AppContext.Provider>;
+    const { setGlobal, getIBeacons } = this;
+    return <AppContext.Provider value={{ global, setGlobal, getIBeacons }}>{this.props.children}</AppContext.Provider>;
   }
 }
 export default App;
