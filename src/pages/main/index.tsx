@@ -99,7 +99,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     if (floorId === this.context.global.currentFloor) {
       console.log('move');
       this.fixMapMove();
-    } else if (this.context.global.interval === -1) {
+    } else if (this.context.global.getLocationInterval === -1) {
       console.log('location');
       this.getLocation();
     }
@@ -109,7 +109,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
    * 获取定位数据
    */
   private getLocation = () => {
-    let interval = setInterval(() => {
+    let getLocationInterval = setInterval(() => {
       if (this.context.global.allowUpdate) {
         this.context.setGlobal({ allowUpdate: false });
         Location({ data: JSON.stringify({ deviceData: this.context.getIBeacons() }) })
@@ -123,7 +123,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
           });
       }
     }, 3000);
-    this.context.setGlobal({ interval });
+    this.context.setGlobal({ getLocationInterval });
   };
   /**
    * 处理定位数据
@@ -158,8 +158,8 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
    * @param fixData 页面跳转所带数据
    */
   private fixOnShowData = (res: any, fixData: any) => {
-    clearInterval(this.context.global.interval);
-    this.context.setGlobal({ interval: -1 });
+    clearInterval(this.context.global.getLocationInterval);
+    this.context.setGlobal({ getLocationInterval: -1 });
     const { floorMapUrl, floorName, projectId, floorId } = res.result;
     let facilityGroup = [fixData];
     this.setState({ facilityGroup, drawings: floorMapUrl, floorName: floorName, projectId, floorId, location: fixData.point });
@@ -235,8 +235,8 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
 
   private onSelector = () => {
     vibrateShort();
-    clearInterval(this.context.global.interval);
-    this.context.setGlobal({ interval: -1 });
+    clearInterval(this.context.global.getLocationInterval);
+    this.context.setGlobal({ getLocationInterval: -1 });
     const { projectId } = this.state;
     BuildList({ projectId })
       .then((res: any) => {

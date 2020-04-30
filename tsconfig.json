@@ -7,7 +7,7 @@
     "esModuleInterop": true,
     "jsx": "react",
     "rootDir": "src",
-    "baseUrl": "./",
+    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
       "@vant/weapp/*": ["./node_modules/@vant/weapp/dist/*"],

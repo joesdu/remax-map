@@ -11,27 +11,32 @@ export const AppContext = React.createContext({});
 export interface AppProps {
   location: any;
 }
+export interface Global {
+  systemInfo?: WechatMiniprogram.GetSystemInfoSuccessCallbackResult;
+  allowUpdate?: boolean;
+  currentFloor?: string;
+  atFirst?: boolean;
+  getLocationInterval?: number;
+  hadFail?: boolean;
+}
 interface AppState {
-  global: any;
+  global: Global;
 }
 class App extends React.Component<AppProps, AppState> {
   constructor(props: Readonly<AppProps>) {
     super(props);
     this.state = {
       global: {
-        systemInfo: {},
-        bluetooth: false,
         allowUpdate: false,
-        ibeacons: [],
         currentFloor: '',
         atFirst: true,
-        interval: -1,
+        getLocationInterval: -1,
         hadFail: true
       }
     };
   }
 
-  setGlobal = (data: any) => {
+  setGlobal = (data: Global): void => {
     const { global } = this.state;
     this.setState({ global: { ...global, ...data } });
   };
@@ -39,9 +44,9 @@ class App extends React.Component<AppProps, AppState> {
   private ibeacons: Array<{ deviceId: number; rssi: number; time: number; count: number }> = [];
   private cleanerInterval: any = -1;
 
-  getIBeacons = () => {
+  getIBeacons = (): Array<{ deviceId: number; rssi: number }> => {
     this.ibeacons.sort((a: { time: number }, b: { time: number }) => b.time - a.time);
-    let iBeaconTemp: Array<any> = [];
+    let iBeaconTemp: Array<{ deviceId: number; rssi: number }> = [];
     for (let index: number = 0, item; (item = this.ibeacons[index++]); ) {
       const { deviceId, rssi, count } = item;
       let rssiAverage = rssi / count;
@@ -50,21 +55,20 @@ class App extends React.Component<AppProps, AppState> {
     return iBeaconTemp;
   };
 
-  SearchIBeacon = () => {
+  SearchIBeacon = (): void => {
     openBluetoothAdapter({
       success: () => {
         this.onStopBeaconDiscovery();
         startBeaconDiscovery({ uuids: ['FDA50693-A4E2-4FB1-AFCF-C6EB07647825'] })
-          .then((startRes: any) => {
+          .then((startRes: WechatMiniprogram.IBeaconError) => {
             console.warn('启动搜索:', startRes);
-            this.setGlobal({ bluetooth: true });
             this.cleanerInterval = setInterval(() => {
               if (this.ibeacons.length > 3) {
                 let timeout = this.ibeacons.findIndex((x: { time: number }) => Date.now() - x.time > 10000);
                 if (timeout !== -1) this.ibeacons.splice(timeout, 1);
               }
             }, 500);
-            onBeaconUpdate((res: any) => {
+            onBeaconUpdate((res: WechatMiniprogram.OnBeaconUpdateCallbackResult) => {
               if (res && res.beacons && res.beacons.length > 0) {
                 const { beacons } = res;
                 for (let index: number = 0, item: any; (item = beacons[index++]); ) {
@@ -83,15 +87,15 @@ class App extends React.Component<AppProps, AppState> {
               }
             });
           })
-          .catch((error: any) => {
+          .catch((error: WechatMiniprogram.IBeaconError) => {
             console.error(error);
-            this.setGlobal({ bluetooth: false, allowUpdate: false });
+            this.setGlobal({ allowUpdate: false });
             this.onStopBeaconDiscovery();
           })
           .finally(() => {
             setTimeout(() => {
               if (this.ibeacons.length <= 0) {
-                this.setGlobal({ allowUpdate: true, ibeacons: this.ibeacons, hadFail: true });
+                this.setGlobal({ allowUpdate: true, hadFail: true });
                 this.onStopBeaconDiscovery();
               }
             }, 10000);
@@ -100,20 +104,20 @@ class App extends React.Component<AppProps, AppState> {
     });
   };
 
-  onStopBeaconDiscovery = () =>
+  onStopBeaconDiscovery = (): Promise<void> =>
     stopBeaconDiscovery()
       .then(() => {
-        this.setGlobal({ bluetooth: false, allowUpdate: false });
+        this.setGlobal({ allowUpdate: false });
         clearInterval(this.cleanerInterval);
         closeBluetoothAdapter();
       })
-      .catch((error: any) => console.error(error));
+      .catch((error: WechatMiniprogram.IBeaconError) => console.error(error));
 
-  onHide = () => CloseMap();
+  onHide = (): void => CloseMap();
 
-  onShow = () => {
+  onShow = (): void => {
     getSystemInfo()
-      .then((res: any) => {
+      .then((res: WechatMiniprogram.GetSystemInfoSuccessCallbackResult) => {
         this.setGlobal({ systemInfo: res });
         const { locationAuthorized, bluetoothEnabled, locationEnabled } = res;
         if (!locationAuthorized || !bluetoothEnabled || !locationEnabled) {
