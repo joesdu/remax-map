@@ -55,56 +55,68 @@ class App extends React.Component<AppProps, AppState> {
     return iBeaconTemp;
   };
 
+  private checkIBeaconsTimeout = (): void => {
+    this.cleanerInterval = setInterval(() => {
+      if (this.ibeacons.length > 3) {
+        let timeout = this.ibeacons.findIndex((x: { time: number }) => Date.now() - x.time > 10000);
+        if (timeout !== -1) this.ibeacons.splice(timeout, 1);
+      }
+    }, 500);
+  };
+
   SearchIBeacon = (): void => {
     openBluetoothAdapter({
       success: () => {
         this.onStopBeaconDiscovery();
-        startBeaconDiscovery({ uuids: ['FDA50693-A4E2-4FB1-AFCF-C6EB07647825'] })
-          .then((startRes: WechatMiniprogram.IBeaconError) => {
-            console.warn('启动搜索:', startRes);
-            this.cleanerInterval = setInterval(() => {
-              if (this.ibeacons.length > 3) {
-                let timeout = this.ibeacons.findIndex((x: { time: number }) => Date.now() - x.time > 10000);
-                if (timeout !== -1) this.ibeacons.splice(timeout, 1);
-              }
-            }, 500);
-            onBeaconUpdate((res: WechatMiniprogram.OnBeaconUpdateCallbackResult) => {
-              if (res && res.beacons && res.beacons.length > 0) {
-                const { beacons } = res;
-                for (let index: number = 0, item: any; (item = beacons[index++]); ) {
-                  const { major, minor, rssi } = item;
-                  console.log({ deviceId: Util.FixDeviceId(major, minor), rssi });
-                  let exist: number = -1;
-                  if (this.ibeacons.length > 0) exist = this.ibeacons.findIndex((x: { deviceId: number }) => x.deviceId === Util.FixDeviceId(major, minor));
-                  if (exist === -1) this.ibeacons.push({ deviceId: Util.FixDeviceId(major, minor), rssi, time: Date.now(), count: 1 });
-                  else {
-                    this.ibeacons[exist].time = Date.now();
-                    this.ibeacons[exist].rssi += rssi;
-                    this.ibeacons[exist].count += 1;
-                  }
-                }
-                this.setGlobal({ allowUpdate: true });
-              }
-            });
-          })
-          .catch((error: WechatMiniprogram.IBeaconError) => {
-            console.error(error);
-            this.setGlobal({ allowUpdate: false });
-            this.onStopBeaconDiscovery();
-          })
-          .finally(() => {
-            setTimeout(() => {
-              if (this.ibeacons.length <= 0) {
-                this.setGlobal({ allowUpdate: true, hadFail: true });
-                this.onStopBeaconDiscovery();
-              }
-            }, 10000);
-          });
+        this.onStartBeaconDiscovery();
       }
     });
   };
 
-  onStopBeaconDiscovery = (): Promise<void> =>
+  private onIBeaconUpdate = (): void => {
+    onBeaconUpdate((res: WechatMiniprogram.OnBeaconUpdateCallbackResult) => {
+      if (res && res.beacons && res.beacons.length > 0) {
+        const { beacons } = res;
+        for (let index: number = 0, item: any; (item = beacons[index++]); ) {
+          const { major, minor, rssi } = item;
+          console.log({ deviceId: Util.FixDeviceId(major, minor), rssi });
+          let exist: number = -1;
+          if (this.ibeacons.length > 0) exist = this.ibeacons.findIndex((x: { deviceId: number }) => x.deviceId === Util.FixDeviceId(major, minor));
+          if (exist === -1) this.ibeacons.push({ deviceId: Util.FixDeviceId(major, minor), rssi, time: Date.now(), count: 1 });
+          else {
+            this.ibeacons[exist].time = Date.now();
+            this.ibeacons[exist].rssi += rssi;
+            this.ibeacons[exist].count += 1;
+          }
+        }
+        this.setGlobal({ allowUpdate: true });
+      }
+    });
+  };
+
+  private onStartBeaconDiscovery = (): void => {
+    startBeaconDiscovery({ uuids: ['FDA50693-A4E2-4FB1-AFCF-C6EB07647825'] })
+      .then((startRes: WechatMiniprogram.IBeaconError) => {
+        console.warn('启动搜索:', startRes);
+        this.checkIBeaconsTimeout();
+        this.onIBeaconUpdate();
+      })
+      .catch((error: WechatMiniprogram.IBeaconError) => {
+        console.error(error);
+        this.setGlobal({ allowUpdate: false });
+        this.onStopBeaconDiscovery();
+      })
+      .finally(() => {
+        setTimeout(() => {
+          if (this.ibeacons.length <= 0) {
+            this.setGlobal({ allowUpdate: true, hadFail: true });
+            this.onStopBeaconDiscovery();
+          }
+        }, 10000);
+      });
+  };
+
+  private onStopBeaconDiscovery = (): void => {
     stopBeaconDiscovery()
       .then(() => {
         this.setGlobal({ allowUpdate: false });
@@ -112,10 +124,11 @@ class App extends React.Component<AppProps, AppState> {
         closeBluetoothAdapter();
       })
       .catch((error: WechatMiniprogram.IBeaconError) => console.error(error));
+  };
 
   onHide = (): void => CloseMap();
 
-  onShow = (): void => {
+  componentDidMount = () => {
     getSystemInfo()
       .then((res: WechatMiniprogram.GetSystemInfoSuccessCallbackResult) => {
         this.setGlobal({ systemInfo: res });
@@ -127,6 +140,20 @@ class App extends React.Component<AppProps, AppState> {
       .catch((error: any) => console.error(error));
     setKeepScreenOn({ keepScreenOn: true });
   };
+
+  // onShow = (): void => {
+  //   console.log('AppOnShow');
+  //   getSystemInfo()
+  //     .then((res: WechatMiniprogram.GetSystemInfoSuccessCallbackResult) => {
+  //       this.setGlobal({ systemInfo: res });
+  //       const { locationAuthorized, bluetoothEnabled, locationEnabled } = res;
+  //       if (!locationAuthorized || !bluetoothEnabled || !locationEnabled) {
+  //         this.setGlobal({ hadFail: true });
+  //       } else this.SearchIBeacon();
+  //     })
+  //     .catch((error: any) => console.error(error));
+  //   setKeepScreenOn({ keepScreenOn: true });
+  // };
 
   render() {
     const { global } = this.state;

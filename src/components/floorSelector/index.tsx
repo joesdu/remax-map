@@ -2,7 +2,7 @@ import { Button, Image, Text } from 'remax/wechat';
 import { LaminatedIcon, UpIcon } from '@/assets/icons';
 
 import React from 'react';
-import styles from './index.module.less';
+import styles from './index.less';
 
 export interface FloorSelectorProps {
   text: string;

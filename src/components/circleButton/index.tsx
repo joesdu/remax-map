@@ -1,7 +1,7 @@
 import { Button, Image } from 'remax/wechat';
 
 import React from 'react';
-import styles from './index.module.less';
+import styles from './index.less';
 
 export interface CircleButtonProps {
   icon: string;

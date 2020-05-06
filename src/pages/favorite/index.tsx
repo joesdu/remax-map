@@ -4,7 +4,7 @@ import { ScrollView, View, redirectTo, vibrateShort } from 'remax/wechat';
 import { AppContext } from '@/app';
 import React from 'react';
 import ResultItem from '@/components/resultItem';
-import styles from './index.module.less';
+import styles from './index.less';
 
 export interface FavoriteProps {
   location: any;

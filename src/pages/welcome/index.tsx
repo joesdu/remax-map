@@ -6,7 +6,7 @@ import Config from '@/utils/config';
 import { LogoIcon } from '@/assets/icons';
 import React from 'react';
 import VantButton from '@vant/weapp/dist/button';
-import styles from './index.module.less';
+import styles from './index.less';
 
 export interface WelcomeProps {
   location: any;

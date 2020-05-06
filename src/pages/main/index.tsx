@@ -10,7 +10,7 @@ import React from 'react';
 import Util from '@/utils/util';
 import VantPicker from '@vant/weapp/dist/picker';
 import VantPopup from '@vant/weapp/dist/popup';
-import styles from './index.module.less';
+import styles from './index.less';
 
 export interface MainPageProps {
   location: any;
@@ -130,13 +130,13 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
    * @param res 服务端返回定位数据结果
    */
   private fixLocationData = (res: any) => {
-    console.log('定位数据:', res);
+    // console.log('定位数据:', res);
     let location: any;
     const { floorMapUrl, facilityList, floorName, projectId, floorId } = res.result;
     location = res.result.location;
     if (location === null) location = this.state.location;
     if (floorId !== this.state.floorId) {
-      console.log('不相等');
+      // console.log('不相等');
       let facilityGroup: Array<any> = [];
       if (facilityList.length > 0) {
         for (let index: number = 0, item: any; (item = facilityList[index++]); ) {
@@ -147,7 +147,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
       this.context.setGlobal({ currentFloor: floorId });
       this.setState({ facilityGroup, drawings: floorMapUrl, floorName: floorName, projectId, floorId, location });
     } else {
-      console.log('相等');
+      // console.log('相等');
       this.setState({ location });
     }
   };
@@ -161,8 +161,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     clearInterval(this.context.global.getLocationInterval);
     this.context.setGlobal({ getLocationInterval: -1 });
     const { floorMapUrl, floorName, projectId, floorId } = res.result;
-    let facilityGroup = [fixData];
-    this.setState({ facilityGroup, drawings: floorMapUrl, floorName: floorName, projectId, floorId, location: fixData.point });
+    this.setState({ facilityGroup: [fixData], drawings: floorMapUrl, floorName: floorName, projectId, floorId });
   };
 
   /**
@@ -219,18 +218,6 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
       facilities[current].isFavorite = !keep;
       this.setState({ facilityGroup: facilities, keep: !keep });
     }
-  };
-
-  /**
-   * 分享数据
-   * @param res
-   */
-  onShareAppMessage = (res: any) => {
-    const { itemData, floorId } = this.state;
-    return {
-      title: Config.ShareTitle,
-      path: `/pages/welcome/index?floorId=${floorId}&current=${JSON.stringify(itemData)}&from=share&shareobj=${JSON.stringify(res)}`
-    };
   };
 
   private onSelector = () => {
@@ -323,6 +310,19 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     // this.setState({ mapX: x, mapY: y });
   };
 
+  /**
+   * 分享数据
+   * @param res
+   */
+  onShareAppMessage = (res: any) => {
+    console.log('onShareAppMessage:', res);
+    const { itemData, floorId } = this.state;
+    return {
+      title: Config.ShareTitle,
+      path: `/pages/welcome/index?floorId=${floorId}&current=${JSON.stringify(itemData)}&from=share&shareobj=${JSON.stringify(res)}`
+    };
+  };
+
   private renderView = () => {
     const { mapWidth, mapHeight, drawings, mapX, mapY } = this.state;
     if (this.context.global.hadFail) {
@@ -368,7 +368,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     return (
       <View>
         <View className={styles['floor-wrap']}>
-          <View style={{ fontSize: 14, color: '#696969' }}>{Config.Version}</View>
+          <View style={{ fontSize: 14, color: '#696969', float: 'left', position: 'fixed', left: 42 }}>{Config.Version}</View>
           {this.renderView()}
           <CircleButton icon={SearchIcon} imageStyle={{ width: 42 }} onClick={this.onSearch} style={{ float: 'right', position: 'fixed', top: 100, right: 32 }} />
           <CircleButton icon={LocationIcon} onClick={this.onLocationClick} style={{ float: 'left', position: 'fixed', bottom: 108, left: 32 }} />
@@ -393,7 +393,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
               </View>
               <View className={styles.bottomRight}>
                 <Image className={styles.bottomImg} src={ShareIcon} />
-                <Button className={styles.bottomTxt} style={{ border: 'none', padding: 0 }} plain type="default" open-type="share" onClick={() => vibrateShort()}>
+                <Button className={styles.bottomTxt} style={{ border: 'none', padding: 0 }} plain type="default" openType="share" onClick={() => vibrateShort()}>
                   位置分享
                 </Button>
               </View>

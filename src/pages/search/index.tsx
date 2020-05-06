@@ -7,7 +7,7 @@ import { SearchLocation } from '@/service';
 import VantDropdownItem from '@vant/weapp/dist/dropdown-item';
 import VantDropdownMenu from '@vant/weapp/dist/dropdown-menu';
 import VantSearch from '@vant/weapp/dist/search';
-import styles from './index.module.less';
+import styles from './index.less';
 
 export interface SearchProps {
   location: any;
