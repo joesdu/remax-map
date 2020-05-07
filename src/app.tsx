@@ -89,7 +89,7 @@ class App extends React.Component<AppProps, AppState> {
             this.ibeacons[exist].count += 1;
           }
         }
-        this.setGlobal({ allowUpdate: true });
+        this.setGlobal({ allowUpdate: true, hadFail: false });
       }
     });
   };
