@@ -1,6 +1,6 @@
 import './app.less';
 
-import { closeBluetoothAdapter, getSystemInfo, onBeaconUpdate, openBluetoothAdapter, setKeepScreenOn, startBeaconDiscovery, stopBeaconDiscovery } from 'remax/wechat';
+import { closeBluetoothAdapter, getSystemInfo, getUpdateManager, onBeaconUpdate, openBluetoothAdapter, setKeepScreenOn, showModal, startBeaconDiscovery, stopBeaconDiscovery } from 'remax/wechat';
 
 import { CloseMap } from './service';
 import React from 'react';
@@ -126,6 +126,29 @@ class App extends React.Component<AppProps, AppState> {
       .catch((error: WechatMiniprogram.IBeaconError) => console.error(error));
   };
 
+  private checkUpgrade = () => {
+    let updateManager: WechatMiniprogram.UpdateManager = getUpdateManager();
+    updateManager.onCheckForUpdate((res: WechatMiniprogram.OnCheckForUpdateCallbackResult) => {
+      if (res.hasUpdate) {
+        updateManager.onUpdateReady(() => {
+          showModal({
+            title: '更新提示',
+            content: '新版本已经准备好，是否重启应用进行更新？',
+            success: (res: WechatMiniprogram.ShowModalSuccessCallbackResult) => {
+              if (res.confirm) updateManager.applyUpdate();
+            }
+          });
+        });
+        updateManager.onUpdateFailed(() =>
+          showModal({
+            title: '已经有新版本了哟~',
+            content: '新版本已经上线啦~，请您删除当前小程序，重新搜索打开哟~'
+          })
+        );
+      }
+    });
+  };
+
   onHide = (): void => CloseMap();
 
   componentDidMount = () => {
@@ -139,6 +162,7 @@ class App extends React.Component<AppProps, AppState> {
       })
       .catch((error: any) => console.error(error));
     setKeepScreenOn({ keepScreenOn: true });
+    this.checkUpgrade();
   };
 
   // onShow = (): void => {
