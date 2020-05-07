@@ -151,7 +151,8 @@ class App extends React.Component<AppProps, AppState> {
 
   onHide = (): void => CloseMap();
 
-  componentDidMount = () => {
+  onShow = (): void => {
+    console.log('AppOnShow');
     getSystemInfo()
       .then((res: WechatMiniprogram.GetSystemInfoSuccessCallbackResult) => {
         this.setGlobal({ systemInfo: res });
@@ -164,20 +165,6 @@ class App extends React.Component<AppProps, AppState> {
     setKeepScreenOn({ keepScreenOn: true });
     this.checkUpgrade();
   };
-
-  // onShow = (): void => {
-  //   console.log('AppOnShow');
-  //   getSystemInfo()
-  //     .then((res: WechatMiniprogram.GetSystemInfoSuccessCallbackResult) => {
-  //       this.setGlobal({ systemInfo: res });
-  //       const { locationAuthorized, bluetoothEnabled, locationEnabled } = res;
-  //       if (!locationAuthorized || !bluetoothEnabled || !locationEnabled) {
-  //         this.setGlobal({ hadFail: true });
-  //       } else this.SearchIBeacon();
-  //     })
-  //     .catch((error: any) => console.error(error));
-  //   setKeepScreenOn({ keepScreenOn: true });
-  // };
 
   render() {
     const { global } = this.state;

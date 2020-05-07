@@ -1,5 +1,5 @@
 import { Image, View, getUserInfo, login, redirectTo, vibrateShort } from 'remax/wechat';
-import { Login, UpdateUserInfo } from '@/service';
+import { Login, UpdatePhone, UpdateUserInfo } from '@/service';
 
 import { AppContext } from '@/app';
 import Config from '@/utils/config';
@@ -26,16 +26,17 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
 
   onInto = () => {
     vibrateShort();
-    getUserInfo({ withCredentials: true }).then((res: WechatMiniprogram.GetUserInfoSuccessCallbackResult) => {
-      login()
-        .then((loginRes: WechatMiniprogram.LoginSuccessCallbackResult) => Login(loginRes.code))
-        .then(() => redirectTo({ url: `../main/index?from=welcome&sharedata=${this.state.fromData}&fromshare=${this.state.fromShare}` }))
-        .finally(() => {
+    login()
+      .then((loginRes: WechatMiniprogram.LoginSuccessCallbackResult) => Login(loginRes.code))
+      .then(() => redirectTo({ url: `../main/index?from=welcome&sharedata=${this.state.fromData}&fromshare=${this.state.fromShare}` }))
+      .finally(() => {
+        getUserInfo({ withCredentials: true }).then((res: WechatMiniprogram.GetUserInfoSuccessCallbackResult) => {
+          const { encryptedData, iv } = res;
           const { nickName, avatarUrl, gender, country, province, city, language } = res.userInfo;
           UpdateUserInfo({ nickName, avatarUrl, gender, country, province, city, language }).catch((error: any) => console.warn(error));
-          // UpdatePhone({ encryptedData, iv }).catch((error) => console.warn(error));
+          UpdatePhone({ encryptedData, iv }).catch((error) => console.warn(error));
         });
-    });
+      });
   };
 
   onShow = () => {

@@ -7,10 +7,11 @@ import { AppContext } from '@/app';
 import Config from '@/utils/config';
 import FacilityItem from './components/facilityitem';
 import React from 'react';
-import Util from '@/utils/util';
 import VantPicker from '@vant/weapp/dist/picker';
 import VantPopup from '@vant/weapp/dist/popup';
 import styles from './index.less';
+
+// import Util from '@/utils/util';
 
 export interface MainPageProps {
   location: any;
@@ -34,8 +35,8 @@ interface MainPageState {
   facilityGroup: Array<any>;
   projectId: string;
   floorId: string;
-  mapX: number;
-  mapY: number;
+  // mapX: number;
+  // mapY: number;
   location?: [number, number];
   centerPoint?: [number, number];
 }
@@ -62,9 +63,9 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
       floorNameList: [],
       floorIndex: 0,
       projectId: '',
-      floorId: '',
-      mapX: 0,
-      mapY: 0
+      floorId: ''
+      // mapX: 0,
+      // mapY: 0
     };
   }
 
@@ -98,7 +99,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     const { floorId } = this.state;
     if (floorId === this.context.global.currentFloor) {
       console.log('move');
-      this.fixMapMove();
+      // this.fixMapMove();
     } else if (this.context.global.getLocationInterval === -1) {
       console.log('location');
       this.getLocation();
@@ -186,15 +187,15 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     // this.fixMapMove();
   };
 
-  private fixMapMove = () => {
-    console.log('fixMapMove');
-    const { mapWidth, mapHeight, location } = this.state;
-    const { screenHeight, screenWidth, pixelRatio } = this.context.global.systemInfo;
-    let point: [number, number] = [screenWidth / 2, screenHeight / 2];
-    if (location) point = location;
-    let [mapX, mapY] = Util.GetCenterPoint(mapWidth, mapHeight, screenHeight, screenWidth, point[0], point[1], pixelRatio);
-    this.setState({ mapX, mapY });
-  };
+  // private fixMapMove = () => {
+  //   console.log('fixMapMove');
+  //   const { mapWidth, mapHeight, location } = this.state;
+  //   const { screenHeight, screenWidth, pixelRatio } = this.context.global.systemInfo;
+  //   let point: [number, number] = [screenWidth / 2, screenHeight / 2];
+  //   if (location) point = location;
+  //   let [mapX, mapY] = Util.GetCenterPoint(mapWidth, mapHeight, screenHeight, screenWidth, point[0], point[1], pixelRatio);
+  //   this.setState({ mapX, mapY });
+  // };
 
   private onFavoriteClick = () => {
     vibrateShort();
@@ -304,11 +305,11 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     navigateTo({ url: `../search/index?current=${JSON.stringify({ floorId: this.state.floorId })}` });
   };
 
-  private fixMovableXY = (event: any) => {
-    const { x, y } = event.detail;
-    console.log(x, y);
-    // this.setState({ mapX: x, mapY: y });
-  };
+  // private fixMovableXY = (event: any) => {
+  //   const { x, y } = event.detail;
+  //   console.log(x, y);
+  //   this.setState({ mapX: x, mapY: y });
+  // };
 
   /**
    * 分享数据
@@ -324,7 +325,12 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   };
 
   private renderView = () => {
-    const { mapWidth, mapHeight, drawings, mapX, mapY } = this.state;
+    const {
+      mapWidth,
+      mapHeight,
+      drawings
+      // mapX, mapY
+    } = this.state;
     if (this.context.global.hadFail) {
       return (
         <View className={styles.loading}>
