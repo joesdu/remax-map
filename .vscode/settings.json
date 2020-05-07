@@ -36,6 +36,7 @@
     "weapp",
     "wechat",
     "wxml",
-    "wxuser"
+    "wxuser",
+    "yarnpkg"
   ]
 }
