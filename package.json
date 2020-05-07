@@ -11,7 +11,7 @@
     "@remax/plugin-less": "^1.0.0",
     "@vant/weapp": "^1.2.2",
     "react": "^16.13.1",
-    "remax": "^2.0.0"
+    "remax": "^2.0.1"
   },
   "devDependencies": {
     "@types/react": "^16.9.34",

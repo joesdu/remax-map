@@ -6,11 +6,11 @@ export default class Config {
   /**
    * 版权信息
    */
-  public static Copyright: string = 'Copyright © 2020';
+  public static Copyright: string = 'Copyright © 2020 WinSide. All Rights Reserved.';
   /**
    * 版本号
    */
-  public static Version: string = 'Insider Preview 20200506-1340';
+  public static Version: string = 'Insider Preview 20200507-1300';
   /**
    * 分享后显示的标题
    */
