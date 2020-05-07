@@ -40,6 +40,7 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
   };
 
   onShow = () => {
+    console.log('welcome on show');
     let query = this.props.location.query;
     if (query.from === 'share') this.setState({ fromData: JSON.stringify(query), fromShare: 'share' });
   };
