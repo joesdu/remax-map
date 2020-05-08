@@ -24,7 +24,7 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
     this.state = { fromData: '', fromShare: 'mini' };
   }
 
-  onInto = () => {
+  private onInto = () => {
     vibrateShort();
     login()
       .then((loginRes: WechatMiniprogram.LoginSuccessCallbackResult) => Login(loginRes.code))
@@ -39,8 +39,9 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
       });
   };
 
+  private onIntoTest = () => redirectTo({ url: `../test/index?from=welcome` });
+
   onShow = () => {
-    console.log('welcome on show');
     let query = this.props.location.query;
     if (query.from === 'share') this.setState({ fromData: JSON.stringify(query), fromShare: 'share' });
   };
@@ -55,6 +56,11 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
         <View className={styles.into}>
           <VantButton custom-style={'width:250px'} color="#1B73FA" round open-type="getUserInfo" bindclick={this.onInto}>
             进入小程序
+          </VantButton>
+        </View>
+        <View className={styles.into}>
+          <VantButton custom-style={'width:250px'} color="#1B73FA" round bindclick={this.onIntoTest}>
+            进入测试页
           </VantButton>
         </View>
         <View className={styles.viewFooter}>

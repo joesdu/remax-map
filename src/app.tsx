@@ -151,15 +151,15 @@ class App extends React.Component<AppProps, AppState> {
 
   onHide = (): void => CloseMap();
 
+  private isTest: boolean = true;
   onShow = (): void => {
-    console.log('AppOnShow');
     getSystemInfo()
       .then((res: WechatMiniprogram.GetSystemInfoSuccessCallbackResult) => {
         this.setGlobal({ systemInfo: res });
         const { locationAuthorized, bluetoothEnabled, locationEnabled } = res;
         if (!locationAuthorized || !bluetoothEnabled || !locationEnabled) {
           this.setGlobal({ hadFail: true });
-        } else this.SearchIBeacon();
+        } else if (!this.isTest) this.SearchIBeacon();
       })
       .catch((error: any) => console.error(error));
     setKeepScreenOn({ keepScreenOn: true });
