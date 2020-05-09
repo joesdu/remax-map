@@ -7,11 +7,10 @@ import { AppContext } from '@/app';
 import Config from '@/utils/config';
 import FacilityItem from './components/facilityitem';
 import React from 'react';
+import Util from '@/utils/util';
 import VantPicker from '@vant/weapp/dist/picker';
 import VantPopup from '@vant/weapp/dist/popup';
 import styles from './index.less';
-
-// import Util from '@/utils/util';
 
 export interface MainPageProps {
   location: any;
@@ -35,10 +34,10 @@ interface MainPageState {
   facilityGroup: Array<any>;
   projectId: string;
   floorId: string;
-  // mapX: number;
-  // mapY: number;
   location?: [number, number];
   centerPoint?: [number, number];
+  transX: number;
+  transY: number;
 }
 class MainPage extends React.Component<MainPageProps, MainPageState> {
   static contextType = AppContext;
@@ -64,9 +63,9 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
       floorNameList: [],
       floorIndex: 0,
       projectId: '',
-      floorId: ''
-      // mapX: 0,
-      // mapY: 0
+      floorId: '',
+      transX: 0,
+      transY: 0
     };
   }
 
@@ -100,7 +99,8 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     const { floorId } = this.state;
     if (floorId === this.context.global?.currentFloor) {
       console.log('move');
-      // this.fixMapMove();
+      // todo
+      this.fixMapSize();
     } else if (this.context.global?.getLocationInterval === -1) {
       console.log('location');
       this.getLocation();
@@ -132,13 +132,11 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
    * @param res 服务端返回定位数据结果
    */
   private fixLocationData = (res: any) => {
-    // console.log('定位数据:', res);
     let location: any;
     const { floorMapUrl, facilityList, floorName, projectId, floorId } = res.result;
     location = res.result.location;
     if (location === null) location = this.state.location;
     if (floorId !== this.state.floorId) {
-      // console.log('不相等');
       let facilityGroup: Array<any> = [];
       if (facilityList.length > 0) {
         for (let index: number = 0, item: any; (item = facilityList[index++]); ) {
@@ -148,10 +146,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
       }
       this.context.setGlobal!({ currentFloor: floorId });
       this.setState({ facilityGroup, drawings: floorMapUrl, floorName: floorName, projectId, floorId, location });
-    } else {
-      // console.log('相等');
-      this.setState({ location });
-    }
+    } else this.setState({ location });
   };
 
   /**
@@ -164,6 +159,8 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     this.context.setGlobal!({ getLocationInterval: -1 });
     const { floorMapUrl, floorName, projectId, floorId } = res.result;
     this.setState({ facilityGroup: [fixData], drawings: floorMapUrl, floorName: floorName, projectId, floorId });
+    // todo
+    this.fixMapSize();
   };
 
   /**
@@ -181,22 +178,6 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     }
     this.setState({ facilityGroup, drawings: floorMapUrl, floorName: floorName, projectId, floorId });
   };
-
-  private onDrawingsLoad = (event: any) => {
-    const { width: mapWidth, height: mapHeight } = event.detail;
-    this.setState({ mapWidth, mapHeight });
-    // this.fixMapMove();
-  };
-
-  // private fixMapMove = () => {
-  //   console.log('fixMapMove');
-  //   const { mapWidth, mapHeight, location } = this.state;
-  //   const { screenHeight, screenWidth, pixelRatio } = this.context.global.systemInfo;
-  //   let point: [number, number] = [screenWidth / 2, screenHeight / 2];
-  //   if (location) point = location;
-  //   let [mapX, mapY] = Util.GetCenterPoint(mapWidth, mapHeight, screenHeight, screenWidth, point[0], point[1], pixelRatio);
-  //   this.setState({ mapX, mapY });
-  // };
 
   private onFavoriteClick = () => {
     vibrateShort();
@@ -306,12 +287,6 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     navigateTo({ url: `../search/index?current=${JSON.stringify({ floorId: this.state.floorId })}` });
   };
 
-  // private fixMovableXY = (event: any) => {
-  //   const { x, y } = event.detail;
-  //   console.log(x, y);
-  //   this.setState({ mapX: x, mapY: y });
-  // };
-
   /**
    * 分享数据
    * @param res
@@ -325,13 +300,28 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     };
   };
 
+  private onDrawingsLoad = (event: any) => {
+    const { width: mapWidth, height: mapHeight } = event.detail;
+    this.setState({ mapWidth, mapHeight });
+    this.fixMapSize();
+  };
+
+  private fixMapSize = () => {
+    const { mapWidth, mapHeight, location } = this.state;
+    const { screenHeight, screenWidth, pixelRatio } = this.context.global?.systemInfo!;
+    let point: [number, number] = [screenWidth / 2, screenHeight / 2];
+    if (location) point = location;
+    let [transX, transY] = Util.GetCenterPoint(mapWidth, mapHeight, screenHeight, screenWidth, point[0], point[1], pixelRatio);
+    this.setState({ transX, transY });
+  };
+
+  private onMoveableChange = (event: any) => {
+    const { source, x, y } = event.detail;
+    if (source !== '') this.setState({ transX: x, transY: y });
+  };
+
   private renderView = () => {
-    const {
-      mapWidth,
-      mapHeight,
-      drawings
-      // mapX, mapY
-    } = this.state;
+    const { mapWidth, mapHeight, drawings, transX, transY } = this.state;
     if (this.context.global?.hadFail) {
       return (
         <View className={styles.loading}>
@@ -344,18 +334,23 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     } else {
       if (drawings) {
         return (
-          <MovableArea scaleArea className={styles['floor-container']} style={{ height: '100vh', width: '100vw' }}>
+          <MovableArea scaleArea style={{ height: '100vh', width: '100vw' }}>
             <MovableView
               outOfBounds
-              // onChange={this.fixMovableXY} onScale={this.fixMovableXY}
-              // x={mapX}
-              // y={mapY}
               scale
               scaleMin={1}
-              scaleMax={3}
+              scaleMax={2}
               direction="all"
+              animation={undefined}
               className={styles['floor-map']}
-              style={{ height: `${mapHeight}px`, width: `${mapWidth}px` }}
+              style={{
+                height: mapHeight,
+                width: mapWidth,
+                top: transY,
+                left: transX
+              }}
+              onChange={this.onMoveableChange}
+              onTouchEnd={(event) => console.log('touch:', event)}
             >
               <Image className={styles['floor-map-drawings']} src={drawings} onLoad={this.onDrawingsLoad} />
               {this.renderFacilities()}
@@ -374,13 +369,15 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
 
     return (
       <View>
-        <View className={styles['floor-wrap']}>
-          <View style={{ fontSize: 14, color: '#696969', float: 'left', position: 'fixed', left: 42 }}>{Config.Version}</View>
-          {this.renderView()}
-          <CircleButton icon={SearchIcon} imageStyle={{ width: 42 }} onClick={this.onSearch} style={{ float: 'right', position: 'fixed', top: 100, right: 32 }} />
-          <CircleButton icon={LocationIcon} onClick={this.onLocationClick} style={{ float: 'left', position: 'fixed', bottom: 108, left: 32 }} />
-          <FloorSelector text={floorName} onClick={this.onSelector} style={{ position: 'absolute', bottom: 104, left: 250 }} />
-          <CircleButton icon={NotFavoriteIcon} onClick={this.onFavoriteClick} style={{ float: 'right', position: 'fixed', bottom: 108, right: 32 }} />
+        <View className={styles.floor}>
+          <View className={styles['floor-wrap']}>
+            <View style={{ fontSize: 14, color: '#696969', float: 'left', position: 'fixed', left: 42 }}>{Config.Version}</View>
+            {this.renderView()}
+            <CircleButton icon={SearchIcon} imageStyle={{ width: 42 }} onClick={this.onSearch} style={{ float: 'right', position: 'fixed', top: 100, right: 32 }} />
+            <CircleButton icon={LocationIcon} onClick={this.onLocationClick} style={{ float: 'left', position: 'fixed', bottom: 108, left: 32 }} />
+            <FloorSelector text={floorName} onClick={this.onSelector} style={{ position: 'fixed', bottom: 104, left: 250 }} />
+            <CircleButton icon={NotFavoriteIcon} onClick={this.onFavoriteClick} style={{ float: 'right', position: 'fixed', bottom: 108, right: 32 }} />
+          </View>
         </View>
         <VantPopup round show={popShow} close-on-click-overlay closeable close-icon="close" position="bottom" custom-style={popStyle} bindclose={this.onClose}>
           <View className={styles.popContainer}>

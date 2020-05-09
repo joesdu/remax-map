@@ -85,7 +85,6 @@ class App extends React.Component<AppProps, AppState> {
         const { beacons } = res;
         for (let index: number = 0, item: any; (item = beacons[index++]); ) {
           const { major, minor, rssi } = item;
-          console.log({ deviceId: Util.FixDeviceId(major, minor), rssi });
           let exist: number = -1;
           if (this.ibeacons.length > 0) exist = this.ibeacons.findIndex((x: { deviceId: number }) => x.deviceId === Util.FixDeviceId(major, minor));
           if (exist === -1) this.ibeacons.push({ deviceId: Util.FixDeviceId(major, minor), rssi, time: Date.now(), count: 1 });
@@ -103,18 +102,19 @@ class App extends React.Component<AppProps, AppState> {
   private onStartBeaconDiscovery = (): void => {
     startBeaconDiscovery({ uuids: ['FDA50693-A4E2-4FB1-AFCF-C6EB07647825'] })
       .then((startRes: WechatMiniprogram.IBeaconError) => {
-        console.warn('启动搜索:', startRes);
+        console.warn(startRes.errMsg);
         this.checkIBeaconsTimeout();
         this.onIBeaconUpdate();
       })
       .catch((error: WechatMiniprogram.IBeaconError) => {
-        console.error(error);
+        console.error(error.errMsg);
         this.setGlobal({ allowUpdate: false });
         this.onStopBeaconDiscovery();
       })
       .finally(() => {
         setTimeout(() => {
           if (this.ibeacons.length <= 0) {
+            console.warn('No Device');
             this.setGlobal({ allowUpdate: true, hadFail: true });
             this.onStopBeaconDiscovery();
           }
@@ -129,7 +129,7 @@ class App extends React.Component<AppProps, AppState> {
         clearInterval(this.cleanerInterval);
         closeBluetoothAdapter();
       })
-      .catch((error: WechatMiniprogram.IBeaconError) => console.error(error));
+      .catch((error: WechatMiniprogram.IBeaconError) => console.error(error.errMsg));
   };
 
   private checkUpgrade = () => {
@@ -166,7 +166,7 @@ class App extends React.Component<AppProps, AppState> {
           this.setGlobal({ hadFail: true });
         } else this.SearchIBeacon();
       })
-      .catch((error: any) => console.error(error));
+      .catch((error: any) => console.error(error.errMsg));
     setKeepScreenOn({ keepScreenOn: true });
     this.checkUpgrade();
   };
