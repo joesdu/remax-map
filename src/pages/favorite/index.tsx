@@ -17,6 +17,7 @@ interface FavoriteState {
 }
 class Favorite extends React.Component<FavoriteProps, FavoriteState> {
   static contextType = AppContext;
+  context!: React.ContextType<typeof AppContext>;
 
   constructor(props: Readonly<FavoriteProps>) {
     super(props);
@@ -32,7 +33,7 @@ class Favorite extends React.Component<FavoriteProps, FavoriteState> {
     FavoriteList()
       .then((res: any) => this.setState({ favorites: res.result }))
       .catch((error) => console.warn(error));
-    this.setState({ scrollHight: this.context.global.systemInfo.screenHeight });
+    this.setState({ scrollHight: this.context.global?.systemInfo?.screenHeight! });
   }
 
   private onManage = () => {

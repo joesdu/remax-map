@@ -13,6 +13,7 @@ interface SearchResultState {
 }
 class SearchResult extends React.Component<SearchResultProps, SearchResultState> {
   static contextType = AppContext;
+  context!: React.ContextType<typeof AppContext>;
 
   constructor(props: Readonly<SearchResultProps>) {
     super(props);

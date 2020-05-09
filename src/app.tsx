@@ -6,7 +6,13 @@ import { CloseMap } from './service';
 import React from 'react';
 import Util from './utils/util';
 
-export const AppContext = React.createContext({});
+export type ContextProps = {
+  global: Global;
+  setGlobal(data: Global): void;
+  getIBeacons(): Array<{ deviceId: number; rssi: number }>;
+};
+
+export const AppContext = React.createContext<Partial<ContextProps>>({});
 
 export interface AppProps {
   location: any;
@@ -16,7 +22,7 @@ export interface Global {
   allowUpdate?: boolean;
   currentFloor?: string;
   atFirst?: boolean;
-  getLocationInterval?: number;
+  getLocationInterval?: any;
   hadFail?: boolean;
 }
 interface AppState {
@@ -64,7 +70,7 @@ class App extends React.Component<AppProps, AppState> {
     }, 500);
   };
 
-  SearchIBeacon = (): void => {
+  private SearchIBeacon = (): void => {
     openBluetoothAdapter({
       success: () => {
         this.onStopBeaconDiscovery();
@@ -151,7 +157,6 @@ class App extends React.Component<AppProps, AppState> {
 
   onHide = (): void => CloseMap();
 
-  private isTest: boolean = true;
   onShow = (): void => {
     getSystemInfo()
       .then((res: WechatMiniprogram.GetSystemInfoSuccessCallbackResult) => {
@@ -159,7 +164,7 @@ class App extends React.Component<AppProps, AppState> {
         const { locationAuthorized, bluetoothEnabled, locationEnabled } = res;
         if (!locationAuthorized || !bluetoothEnabled || !locationEnabled) {
           this.setGlobal({ hadFail: true });
-        } else if (!this.isTest) this.SearchIBeacon();
+        } else this.SearchIBeacon();
       })
       .catch((error: any) => console.error(error));
     setKeepScreenOn({ keepScreenOn: true });

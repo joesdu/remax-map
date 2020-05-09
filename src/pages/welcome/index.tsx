@@ -18,10 +18,14 @@ interface WelcomeState {
 
 class Welcome extends React.Component<WelcomeProps, WelcomeState> {
   static contextType = AppContext;
+  context!: React.ContextType<typeof AppContext>;
 
   constructor(props: Readonly<WelcomeProps>) {
     super(props);
-    this.state = { fromData: '', fromShare: 'mini' };
+    this.state = {
+      fromData: '',
+      fromShare: 'mini'
+    };
   }
 
   private onInto = () => {
@@ -39,8 +43,6 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
       });
   };
 
-  private onIntoTest = () => redirectTo({ url: `../test/index?from=welcome` });
-
   onShow = () => {
     let query = this.props.location.query;
     if (query.from === 'share') this.setState({ fromData: JSON.stringify(query), fromShare: 'share' });
@@ -56,11 +58,6 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
         <View className={styles.into}>
           <VantButton custom-style={'width:250px'} color="#1B73FA" round open-type="getUserInfo" bindclick={this.onInto}>
             进入小程序
-          </VantButton>
-        </View>
-        <View className={styles.into}>
-          <VantButton custom-style={'width:250px'} color="#1B73FA" round bindclick={this.onIntoTest}>
-            进入测试页
           </VantButton>
         </View>
         <View className={styles.viewFooter}>

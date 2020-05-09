@@ -42,6 +42,7 @@ interface MainPageState {
 }
 class MainPage extends React.Component<MainPageProps, MainPageState> {
   static contextType = AppContext;
+  context!: React.ContextType<typeof AppContext>;
 
   constructor(props: Readonly<MainPageProps>) {
     super(props);
@@ -88,8 +89,8 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
         .then((res: any) => this.fixOnShowData(res, args))
         .catch((error) => console.warn(error));
     }
-    if (this.context.global.atFirst) {
-      this.context.setGlobal({ atFirst: false });
+    if (this.context.global?.atFirst) {
+      this.context.setGlobal!({ atFirst: false });
       this.getLocation();
     }
   };
@@ -97,10 +98,10 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   private onLocationClick = () => {
     vibrateShort();
     const { floorId } = this.state;
-    if (floorId === this.context.global.currentFloor) {
+    if (floorId === this.context.global?.currentFloor) {
       console.log('move');
       // this.fixMapMove();
-    } else if (this.context.global.getLocationInterval === -1) {
+    } else if (this.context.global?.getLocationInterval === -1) {
       console.log('location');
       this.getLocation();
     }
@@ -111,20 +112,20 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
    */
   private getLocation = () => {
     let getLocationInterval = setInterval(() => {
-      if (this.context.global.allowUpdate) {
-        this.context.setGlobal({ allowUpdate: false });
-        Location({ data: JSON.stringify({ deviceData: this.context.getIBeacons() }) })
+      if (this.context.global?.allowUpdate) {
+        this.context.setGlobal!({ allowUpdate: false });
+        Location({ data: JSON.stringify({ deviceData: this.context.getIBeacons!() }) })
           .then((res: any) => {
-            this.context.setGlobal({ hadFail: false });
+            this.context.setGlobal!({ hadFail: false });
             this.fixLocationData(res);
           })
           .catch((error) => {
             console.warn(error);
-            this.context.setGlobal({ hadFail: true });
+            this.context.setGlobal!({ hadFail: true });
           });
       }
     }, 3000);
-    this.context.setGlobal({ getLocationInterval });
+    this.context.setGlobal!({ getLocationInterval });
   };
   /**
    * 处理定位数据
@@ -145,7 +146,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
           facilityGroup.push({ facilityId, avatar: facilityTypeUrl, point, name: facilityName, address: `${projectName}-${buildName}-${floorName}`, isFavorite: isFavor });
         }
       }
-      this.context.setGlobal({ currentFloor: floorId });
+      this.context.setGlobal!({ currentFloor: floorId });
       this.setState({ facilityGroup, drawings: floorMapUrl, floorName: floorName, projectId, floorId, location });
     } else {
       // console.log('相等');
@@ -159,8 +160,8 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
    * @param fixData 页面跳转所带数据
    */
   private fixOnShowData = (res: any, fixData: any) => {
-    clearInterval(this.context.global.getLocationInterval);
-    this.context.setGlobal({ getLocationInterval: -1 });
+    clearInterval(this.context.global?.getLocationInterval);
+    this.context.setGlobal!({ getLocationInterval: -1 });
     const { floorMapUrl, floorName, projectId, floorId } = res.result;
     this.setState({ facilityGroup: [fixData], drawings: floorMapUrl, floorName: floorName, projectId, floorId });
   };
@@ -223,8 +224,8 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
 
   private onSelector = () => {
     vibrateShort();
-    clearInterval(this.context.global.getLocationInterval);
-    this.context.setGlobal({ getLocationInterval: -1 });
+    clearInterval(this.context.global?.getLocationInterval);
+    this.context.setGlobal!({ getLocationInterval: -1 });
     const { projectId } = this.state;
     BuildList({ projectId })
       .then((res: any) => {
@@ -294,7 +295,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
    */
   private renderLocation = () => {
     const { location, floorId } = this.state;
-    if (location && floorId === this.context.global.currentFloor) {
+    if (location && floorId === this.context.global?.currentFloor) {
       let locationData = { facilityId: '', avatar: MyLocation, point: location, name: '我的位置', address: '', isFavorite: false };
       return <FacilityItem data={locationData} onItemClick={this.onItemClick.bind(this, locationData, -1)} />;
     }
@@ -331,7 +332,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
       drawings
       // mapX, mapY
     } = this.state;
-    if (this.context.global.hadFail) {
+    if (this.context.global?.hadFail) {
       return (
         <View className={styles.loading}>
           <View className={styles['loading-text']}>
