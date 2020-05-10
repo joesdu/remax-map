@@ -69,116 +69,6 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     };
   }
 
-  onShow = () => {
-    let query = this.props.location.query;
-    if (query.from === 'welcome' && query.fromshare === 'share') {
-      let sharedata = JSON.parse(query.sharedata);
-      let current = JSON.parse(sharedata.current);
-      const { facilityId, avatar, point, name, address } = current;
-      let args = { facilityId, avatar, point, name, address, isFavorite: false };
-      FloorData({ floorId: sharedata.floorId })
-        .then((res: any) => this.fixOnShowData(res, args))
-        .catch((error) => console.warn(error));
-    } else if (query.from === 'favorite' || query.from === 'searchresult') {
-      let current = JSON.parse(query.current);
-      const { facilityId, facilityTypeUrl, facilityName, projectName, buildName, floorName } = current;
-      let point = query.from === 'favorite' ? current.facilityPosition : current.point;
-      let args = { facilityId: facilityId, avatar: facilityTypeUrl, point, name: facilityName, address: `${projectName}-${buildName}-${floorName}`, isFavorite: query.from === 'favorite' };
-      FloorData({ floorId: current.floorId })
-        .then((res: any) => this.fixOnShowData(res, args))
-        .catch((error) => console.warn(error));
-    }
-    if (this.context.global?.atFirst) {
-      this.context.setGlobal!({ atFirst: false });
-      this.getLocation();
-    }
-  };
-
-  private onLocationClick = () => {
-    vibrateShort();
-    const { floorId } = this.state;
-    if (floorId === this.context.global?.currentFloor) {
-      console.log('move');
-      // todo
-      this.fixMapSize();
-    } else if (this.context.global?.getLocationInterval === -1) {
-      console.log('location');
-      this.getLocation();
-    }
-  };
-
-  /**
-   * 获取定位数据
-   */
-  private getLocation = () => {
-    let getLocationInterval = setInterval(() => {
-      if (this.context.global?.allowUpdate) {
-        this.context.setGlobal!({ allowUpdate: false });
-        Location({ data: JSON.stringify({ deviceData: this.context.getIBeacons!() }) })
-          .then((res: any) => {
-            this.context.setGlobal!({ hadFail: false });
-            this.fixLocationData(res);
-          })
-          .catch((error) => {
-            console.warn(error);
-            this.context.setGlobal!({ hadFail: true });
-          });
-      }
-    }, 3000);
-    this.context.setGlobal!({ getLocationInterval });
-  };
-  /**
-   * 处理定位数据
-   * @param res 服务端返回定位数据结果
-   */
-  private fixLocationData = (res: any) => {
-    let location: any;
-    const { floorMapUrl, facilityList, floorName, projectId, floorId } = res.result;
-    location = res.result.location;
-    if (location === null) location = this.state.location;
-    if (floorId !== this.state.floorId) {
-      let facilityGroup: Array<any> = [];
-      if (facilityList.length > 0) {
-        for (let index: number = 0, item: any; (item = facilityList[index++]); ) {
-          const { facilityId, facilityTypeUrl, point, facilityName, projectName, buildName, isFavor } = item;
-          facilityGroup.push({ facilityId, avatar: facilityTypeUrl, point, name: facilityName, address: `${projectName}-${buildName}-${floorName}`, isFavorite: isFavor });
-        }
-      }
-      this.context.setGlobal!({ currentFloor: floorId });
-      this.setState({ facilityGroup, drawings: floorMapUrl, floorName: floorName, projectId, floorId, location });
-    } else this.setState({ location });
-  };
-
-  /**
-   * 处理其他页面跳转数据
-   * @param res 楼层数据
-   * @param fixData 页面跳转所带数据
-   */
-  private fixOnShowData = (res: any, fixData: any) => {
-    clearInterval(this.context.global?.getLocationInterval);
-    this.context.setGlobal!({ getLocationInterval: -1 });
-    const { floorMapUrl, floorName, projectId, floorId } = res.result;
-    this.setState({ facilityGroup: [fixData], drawings: floorMapUrl, floorName: floorName, projectId, floorId });
-    // todo
-    this.fixMapSize();
-  };
-
-  /**
-   * 处理楼层数据
-   * @param res 楼层数据
-   */
-  private fixFloorData = (res: any) => {
-    const { floorMapUrl, facilityList, floorName, projectId, floorId } = res.result;
-    let facilityGroup: Array<any> = [];
-    if (facilityList.length > 0) {
-      for (let index: number = 0, item: any; (item = facilityList[index++]); ) {
-        const { facilityId, facilityTypeUrl, point, facilityName, projectName, buildName, isFavor } = item;
-        facilityGroup.push({ facilityId, avatar: facilityTypeUrl, point, name: facilityName, address: `${projectName}-${buildName}-${floorName}`, isFavorite: isFavor });
-      }
-    }
-    this.setState({ facilityGroup, drawings: floorMapUrl, floorName: floorName, projectId, floorId });
-  };
-
   private onFavoriteClick = () => {
     vibrateShort();
     navigateTo({ url: '../favorite/index' });
@@ -300,13 +190,122 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     };
   };
 
+  onShow = () => {
+    let query = this.props.location.query;
+    if (query.from === 'welcome' && query.fromshare === 'share') {
+      let sharedata = JSON.parse(query.sharedata);
+      let current = JSON.parse(sharedata.current);
+      const { facilityId, avatar, point, name, address } = current;
+      let args = { facilityId, avatar, point, name, address, isFavorite: false };
+      FloorData({ floorId: sharedata.floorId })
+        .then((res: any) => this.fixOnShowData(res, args))
+        .catch((error) => console.warn(error));
+    } else if (query.from === 'favorite' || query.from === 'searchresult') {
+      let current = JSON.parse(query.current);
+      const { facilityId, facilityTypeUrl, facilityName, projectName, buildName, floorName } = current;
+      let point = query.from === 'favorite' ? current.facilityPosition : current.point;
+      let args = { facilityId: facilityId, avatar: facilityTypeUrl, point, name: facilityName, address: `${projectName}-${buildName}-${floorName}`, isFavorite: query.from === 'favorite' };
+      FloorData({ floorId: current.floorId })
+        .then((res: any) => this.fixOnShowData(res, args))
+        .catch((error) => console.warn(error));
+    }
+    if (this.context.global?.atFirst) {
+      this.context.setGlobal!({ atFirst: false });
+      this.getLocation();
+    }
+  };
+
+  private onLocationClick = () => {
+    vibrateShort();
+    const { floorId } = this.state;
+    if (floorId === this.context.global?.currentFloor) {
+      console.log('move');
+      // todo
+      this.fixMapMove();
+    } else if (this.context.global?.getLocationInterval === -1) {
+      console.log('location');
+      this.getLocation();
+    }
+  };
+
+  /**
+   * 获取定位数据
+   */
+  private getLocation = () => {
+    let getLocationInterval = setInterval(() => {
+      if (this.context.global?.allowUpdate) {
+        this.context.setGlobal!({ allowUpdate: false });
+        Location({ data: JSON.stringify({ deviceData: this.context.getIBeacons!() }) })
+          .then((res: any) => {
+            this.context.setGlobal!({ hadFail: false });
+            this.fixLocationData(res);
+          })
+          .catch((error) => {
+            console.warn(error);
+            this.context.setGlobal!({ hadFail: true });
+          });
+      }
+    }, 3000);
+    this.context.setGlobal!({ getLocationInterval });
+  };
+  /**
+   * 处理定位数据
+   * @param res 服务端返回定位数据结果
+   */
+  private fixLocationData = (res: any) => {
+    let location: any;
+    const { floorMapUrl, facilityList, floorName, projectId, floorId } = res.result;
+    location = res.result.location;
+    if (location === null) location = this.state.location;
+    if (floorId !== this.state.floorId) {
+      let facilityGroup: Array<any> = [];
+      if (facilityList.length > 0) {
+        for (let index: number = 0, item: any; (item = facilityList[index++]); ) {
+          const { facilityId, facilityTypeUrl, point, facilityName, projectName, buildName, isFavor } = item;
+          facilityGroup.push({ facilityId, avatar: facilityTypeUrl, point, name: facilityName, address: `${projectName}-${buildName}-${floorName}`, isFavorite: isFavor });
+        }
+      }
+      this.context.setGlobal!({ currentFloor: floorId });
+      this.setState({ facilityGroup, drawings: floorMapUrl, floorName: floorName, projectId, floorId, location });
+    } else this.setState({ location });
+  };
+
+  /**
+   * 处理其他页面跳转数据
+   * @param res 楼层数据
+   * @param fixData 页面跳转所带数据
+   */
+  private fixOnShowData = (res: any, fixData: any) => {
+    clearInterval(this.context.global?.getLocationInterval);
+    this.context.setGlobal!({ getLocationInterval: -1 });
+    const { floorMapUrl, floorName, projectId, floorId } = res.result;
+    this.setState({ facilityGroup: [fixData], drawings: floorMapUrl, floorName: floorName, projectId, floorId });
+    // todo
+    this.fixMapMove();
+  };
+
+  /**
+   * 处理楼层数据
+   * @param res 楼层数据
+   */
+  private fixFloorData = (res: any) => {
+    const { floorMapUrl, facilityList, floorName, projectId, floorId } = res.result;
+    let facilityGroup: Array<any> = [];
+    if (facilityList.length > 0) {
+      for (let index: number = 0, item: any; (item = facilityList[index++]); ) {
+        const { facilityId, facilityTypeUrl, point, facilityName, projectName, buildName, isFavor } = item;
+        facilityGroup.push({ facilityId, avatar: facilityTypeUrl, point, name: facilityName, address: `${projectName}-${buildName}-${floorName}`, isFavorite: isFavor });
+      }
+    }
+    this.setState({ facilityGroup, drawings: floorMapUrl, floorName: floorName, projectId, floorId });
+  };
+
   private onDrawingsLoad = (event: any) => {
     const { width: mapWidth, height: mapHeight } = event.detail;
     this.setState({ mapWidth, mapHeight });
-    this.fixMapSize();
   };
 
-  private fixMapSize = () => {
+  private fixMapMove = () => {
     const { mapWidth, mapHeight, location } = this.state;
     const { screenHeight, screenWidth, pixelRatio } = this.context.global?.systemInfo!;
     let point: [number, number] = [screenWidth / 2, screenHeight / 2];
