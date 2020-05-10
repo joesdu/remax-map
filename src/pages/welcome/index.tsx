@@ -1,11 +1,10 @@
-import { Image, View, getUserInfo, login, redirectTo, vibrateShort } from 'remax/wechat';
+import { Button, Image, View, getUserInfo, login, redirectTo, vibrateShort } from 'remax/wechat';
 import { Login, UpdatePhone, UpdateUserInfo } from '@/service';
 
 import { AppContext } from '@/app';
 import Config from '@/utils/config';
 import { LogoIcon } from '@/assets/icons';
 import React from 'react';
-import VantButton from '@vant/weapp/dist/button';
 import styles from './index.less';
 
 export interface WelcomeProps {
@@ -56,9 +55,9 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
           <View className={styles.text}>欢迎使用</View>
         </View>
         <View className={styles.into}>
-          <VantButton custom-style={'width:250px'} color="#1B73FA" round open-type="getUserInfo" bindclick={this.onInto}>
+          <Button className={styles.intoBtn} openType="getUserInfo" onClick={this.onInto}>
             进入小程序
-          </VantButton>
+          </Button>
         </View>
         <View className={styles.viewFooter}>
           <View className={styles.footerLink}>{Config.Version}</View>
