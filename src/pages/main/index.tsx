@@ -277,7 +277,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
    */
   private fixOnShowData = (res: any, fixData: any) => {
     clearInterval(this.context.global?.getLocationInterval);
-    this.context.setGlobal!({ getLocationInterval: -1 });
+    this.context.setGlobal!({ getLocationInterval: -1, hadFail: false });
     const { floorMapUrl, floorName, projectId, floorId } = res.result;
     this.setState({ facilityGroup: [fixData], drawings: floorMapUrl, floorName: floorName, projectId, floorId });
     // todo
