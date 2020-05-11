@@ -86,7 +86,6 @@ class App extends React.Component<AppProps, AppState> {
         for (let index: number = 0, item: any; (item = beacons[index++]); ) {
           const { major, minor, rssi } = item;
           let exist: number = -1;
-          console.log({ deviceId: Util.FixDeviceId(major, minor), rssi });
           if (this.ibeacons.length > 0) exist = this.ibeacons.findIndex((x: { deviceId: number }) => x.deviceId === Util.FixDeviceId(major, minor));
           if (exist === -1) this.ibeacons.push({ deviceId: Util.FixDeviceId(major, minor), rssi, time: Date.now(), count: 1 });
           else {
@@ -115,10 +114,10 @@ class App extends React.Component<AppProps, AppState> {
       .finally(() => {
         setTimeout(() => {
           if (this.ibeacons.length <= 0) {
-            console.warn('No Device');
+            console.warn('No IBeacons device data available');
             this.setGlobal({ allowUpdate: true, hadFail: true });
             this.onStopBeaconDiscovery();
-          }
+          } else console.info('IBeacons device data available.');
         }, 10000);
       });
   };

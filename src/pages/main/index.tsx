@@ -7,7 +7,6 @@ import { FavoriteIcon, LocationIcon, MyLocation, NotFavoriteIcon, SearchIcon, Sh
 import Config from '@/utils/config';
 import FacilityItem from './components/facilityitem';
 import React from 'react';
-import Util from '@/utils/util';
 import VantPicker from '@vant/weapp/dist/picker';
 import VantPopup from '@vant/weapp/dist/popup';
 import styles from './index.less';
@@ -36,8 +35,9 @@ interface MainPageState {
   floorId: string;
   location?: [number, number];
   centerPoint?: [number, number];
-  transX: number;
-  transY: number;
+  transX: any;
+  transY: any;
+  scaleValue: number;
 }
 class MainPage extends React.Component<MainPageProps, MainPageState> {
   static contextType: React.Context<Partial<ContextProps>> = AppContext;
@@ -65,7 +65,8 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
       projectId: '',
       floorId: '',
       transX: 0,
-      transY: 0
+      transY: 0,
+      scaleValue: 1
     };
   }
 
@@ -116,7 +117,6 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     let item: any = buildList[index];
     FloorList({ buildId: item.buildId })
       .then((res: any) => {
-        console.log(res);
         const { result } = res;
         let temp: Array<string> = [];
         for (let index: number = 0, item: any; (item = result[index++]); ) temp.push(item.floorName);
@@ -217,12 +217,10 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
 
   private onLocationClick = (): void => {
     vibrateShort();
-    const { floorId } = this.state;
-    if (floorId === this.context.global?.currentFloor) {
+    if (this.context.global?.getLocationInterval !== -1) {
       console.log('move');
-      // todo
       this.fixMapMove();
-    } else if (this.context.global?.getLocationInterval === -1) {
+    } else {
       console.log('location');
       this.getLocation();
     }
@@ -280,8 +278,6 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     this.context.setGlobal!({ getLocationInterval: -1, hadFail: false });
     const { floorMapUrl, floorName, projectId, floorId } = res.result;
     this.setState({ facilityGroup: [fixData], drawings: floorMapUrl, floorName: floorName, projectId, floorId });
-    // todo
-    this.fixMapMove();
   };
 
   /**
@@ -303,15 +299,18 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   private onDrawingsLoad = (event: any): void => {
     const { width: mapWidth, height: mapHeight } = event.detail;
     this.setState({ mapWidth, mapHeight });
+    this.fixMapMove();
   };
 
   private fixMapMove = (): void => {
-    const { mapWidth, mapHeight, location } = this.state;
-    const { screenHeight, screenWidth, pixelRatio } = this.context.global?.systemInfo!;
-    let point: [number, number] = [screenWidth / 2, screenHeight / 2];
+    this.setState({ transX: 0, transY: 0, scaleValue: 1 });
+    const { location, mapWidth, mapHeight } = this.state;
+    const { windowHeight, windowWidth, pixelRatio } = this.context.global?.systemInfo!;
+    let point: [number, number] = [mapWidth / 2, mapHeight / 2];
     if (location) point = location;
-    let [transX, transY] = Util.GetCenterPoint(mapWidth, mapHeight, screenHeight, screenWidth, point[0], point[1], pixelRatio);
-    this.setState({ transX, transY });
+    let resultX = (windowWidth / 2 - point[0]) / pixelRatio;
+    let resultY = (windowHeight / 2 - point[1]) / pixelRatio;
+    this.setState({ transX: resultX, transY: resultY });
   };
 
   private onMoveableChange = (event: any): void => {
@@ -319,8 +318,13 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     if (source !== '') this.setState({ transX: x, transY: y });
   };
 
+  private onMoveableScale = (event: any): void => {
+    const { x, y, scale } = event.detail;
+    this.setState({ transX: x, transY: y, scaleValue: scale });
+  };
+
   private renderView = (): JSX.Element | undefined => {
-    const { mapWidth, mapHeight, drawings, transX, transY } = this.state;
+    const { mapWidth, mapHeight, drawings, transX, transY, scaleValue } = this.state;
     if (this.context.global?.hadFail) {
       return (
         <View className={styles.loading}>
@@ -338,9 +342,9 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
               outOfBounds
               scale
               scaleMin={1}
-              scaleMax={2}
+              scaleMax={3}
               direction="all"
-              animation={undefined}
+              scaleValue={scaleValue}
               className={styles['floor-map']}
               style={{
                 height: mapHeight,
@@ -349,7 +353,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
                 left: transX
               }}
               onChange={this.onMoveableChange}
-              onTouchEnd={(event) => console.log('touch:', event)}
+              onScale={this.onMoveableScale}
             >
               <Image className={styles['floor-map-drawings']} src={drawings} onLoad={this.onDrawingsLoad} />
               {this.renderFacilities()}
