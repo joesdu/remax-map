@@ -11,7 +11,7 @@ export interface ResultItemProps {
   isDel?: boolean;
 }
 const ResultItem: React.FC<ResultItemProps> = ({ title = '测试标题', subTitle = '测试子标题', onClick, isDel = false }) => {
-  const renderItem = () => {
+  const renderItem = (): JSX.Element => {
     if (isDel) {
       return <View className={styles['item-right-del']}>删除</View>;
     } else {

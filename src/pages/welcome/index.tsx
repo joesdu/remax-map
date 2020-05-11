@@ -1,7 +1,7 @@
+import { AppContext, ContextProps } from '@/app';
 import { Button, Image, View, getUserInfo, login, redirectTo, vibrateShort } from 'remax/wechat';
 import { Login, UpdatePhone, UpdateUserInfo } from '@/service';
 
-import { AppContext } from '@/app';
 import Config from '@/utils/config';
 import { LogoIcon } from '@/assets/icons';
 import React from 'react';
@@ -16,7 +16,7 @@ interface WelcomeState {
 }
 
 class Welcome extends React.Component<WelcomeProps, WelcomeState> {
-  static contextType = AppContext;
+  static contextType: React.Context<Partial<ContextProps>> = AppContext;
   context!: React.ContextType<typeof AppContext>;
 
   constructor(props: Readonly<WelcomeProps>) {
@@ -27,7 +27,7 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
     };
   }
 
-  private onInto = () => {
+  private onInto = (): void => {
     vibrateShort();
     login()
       .then((loginRes: WechatMiniprogram.LoginSuccessCallbackResult) => Login(loginRes.code))
@@ -42,12 +42,13 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
       });
   };
 
-  onShow = () => {
-    let query = this.props.location.query;
+  componentDidMount = (): void => {
+    console.log('WelcomeComponentDidMount');
+    let query: any = this.props.location.query;
     if (query.from === 'share') this.setState({ fromData: JSON.stringify(query), fromShare: 'share' });
   };
 
-  render() {
+  render(): JSX.Element {
     return (
       <View className={styles.app}>
         <View className={styles.header}>

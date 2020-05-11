@@ -1,7 +1,7 @@
+import { AppContext, ContextProps } from '@/app';
 import { DelFavor, FavoriteList } from '@/service';
 import { ScrollView, View, redirectTo, vibrateShort } from 'remax/wechat';
 
-import { AppContext } from '@/app';
 import React from 'react';
 import ResultItem from '@/components/resultItem';
 import styles from './index.less';
@@ -16,7 +16,7 @@ interface FavoriteState {
   favorites: Array<any>;
 }
 class Favorite extends React.Component<FavoriteProps, FavoriteState> {
-  static contextType = AppContext;
+  static contextType: React.Context<Partial<ContextProps>> = AppContext;
   context!: React.ContextType<typeof AppContext>;
 
   constructor(props: Readonly<FavoriteProps>) {
@@ -29,21 +29,21 @@ class Favorite extends React.Component<FavoriteProps, FavoriteState> {
     };
   }
 
-  onShow() {
+  componentDidMount = (): void => {
     FavoriteList()
       .then((res: any) => this.setState({ favorites: res.result }))
       .catch((error) => console.warn(error));
     this.setState({ scrollHight: this.context.global?.systemInfo?.screenHeight! });
-  }
+  };
 
-  private onManage = () => {
+  private onManage = (): void => {
     vibrateShort();
     const { isManage } = this.state;
     if (isManage) this.setState({ isManage: false, manageTxt: '管理' });
     else this.setState({ isManage: true, manageTxt: '完成' });
   };
 
-  private onFavorItemClick = (record: any) => {
+  private onFavorItemClick = (record: any): void => {
     vibrateShort();
     const { isManage } = this.state;
     if (isManage)
@@ -53,7 +53,7 @@ class Favorite extends React.Component<FavoriteProps, FavoriteState> {
     else redirectTo({ url: `../main/index?current=${JSON.stringify(record)}&from=favorite` });
   };
 
-  renderFavorItem = () => {
+  renderFavorItem = (): Array<any> => {
     const { favorites, isManage } = this.state;
     let tp: Array<any> = [];
     for (let index: number = 0, item: any; (item = favorites[index++]); ) {
@@ -62,7 +62,7 @@ class Favorite extends React.Component<FavoriteProps, FavoriteState> {
     return tp;
   };
 
-  render() {
+  render(): JSX.Element {
     const { manageTxt, favorites, scrollHight } = this.state;
 
     return (

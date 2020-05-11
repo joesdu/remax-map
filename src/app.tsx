@@ -12,7 +12,7 @@ export type ContextProps = {
   getIBeacons(): Array<{ deviceId: number; rssi: number }>;
 };
 
-export const AppContext = React.createContext<Partial<ContextProps>>({});
+export const AppContext: React.Context<Partial<ContextProps>> = React.createContext<Partial<ContextProps>>({});
 
 export interface AppProps {
   location: any;
@@ -86,6 +86,7 @@ class App extends React.Component<AppProps, AppState> {
         for (let index: number = 0, item: any; (item = beacons[index++]); ) {
           const { major, minor, rssi } = item;
           let exist: number = -1;
+          console.log({ deviceId: Util.FixDeviceId(major, minor), rssi });
           if (this.ibeacons.length > 0) exist = this.ibeacons.findIndex((x: { deviceId: number }) => x.deviceId === Util.FixDeviceId(major, minor));
           if (exist === -1) this.ibeacons.push({ deviceId: Util.FixDeviceId(major, minor), rssi, time: Date.now(), count: 1 });
           else {
@@ -132,7 +133,7 @@ class App extends React.Component<AppProps, AppState> {
       .catch((error: WechatMiniprogram.IBeaconError) => console.error(error.errMsg));
   };
 
-  private checkUpgrade = () => {
+  private checkUpgrade = (): void => {
     let updateManager: WechatMiniprogram.UpdateManager = getUpdateManager();
     updateManager.onCheckForUpdate((res: WechatMiniprogram.OnCheckForUpdateCallbackResult) => {
       if (res.hasUpdate) {
@@ -157,7 +158,8 @@ class App extends React.Component<AppProps, AppState> {
 
   onHide = (): void => CloseMap();
 
-  onShow = (): void => {
+  componentDidMount = (): void => {
+    console.log('AppComponentDidMount');
     getSystemInfo()
       .then((res: WechatMiniprogram.GetSystemInfoSuccessCallbackResult) => {
         this.setGlobal({ systemInfo: res });
@@ -171,7 +173,7 @@ class App extends React.Component<AppProps, AppState> {
     this.checkUpgrade();
   };
 
-  render() {
+  render(): JSX.Element {
     const { global } = this.state;
     const { setGlobal, getIBeacons } = this;
     return <AppContext.Provider value={{ global, setGlobal, getIBeacons }}>{this.props.children}</AppContext.Provider>;

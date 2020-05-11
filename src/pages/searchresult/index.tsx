@@ -1,6 +1,6 @@
+import { AppContext, ContextProps } from '@/app';
 import { ScrollView, redirectTo, vibrateShort } from 'remax/wechat';
 
-import { AppContext } from '@/app';
 import React from 'react';
 import ResultItem from '@/components/resultItem';
 
@@ -12,7 +12,7 @@ interface SearchResultState {
   results: Array<any>;
 }
 class SearchResult extends React.Component<SearchResultProps, SearchResultState> {
-  static contextType = AppContext;
+  static contextType: React.Context<Partial<ContextProps>> = AppContext;
   context!: React.ContextType<typeof AppContext>;
 
   constructor(props: Readonly<SearchResultProps>) {
@@ -22,17 +22,17 @@ class SearchResult extends React.Component<SearchResultProps, SearchResultState>
     };
   }
 
-  componentDidMount() {
-    let data = JSON.parse(this.props.location.query.current);
+  componentDidMount = (): void => {
+    let data: any = JSON.parse(this.props.location.query.current);
     this.setState({ results: data.result });
-  }
+  };
 
-  onGotoClick = (record: any) => {
+  onGotoClick = (record: any): void => {
     vibrateShort();
     redirectTo({ url: `../main/index?current=${JSON.stringify(record)}&from=searchresult` });
   };
 
-  renderResultItem = () => {
+  renderResultItem = (): Array<any> => {
     const { results } = this.state;
     let tp: Array<any> = [];
     for (let index: number = 0, item: any; (item = results[index++]); ) {
@@ -41,7 +41,7 @@ class SearchResult extends React.Component<SearchResultProps, SearchResultState>
     return tp;
   };
 
-  render() {
+  render(): JSX.Element {
     return (
       <ScrollView scrollY style={{ height: '100vh', width: '100vw' }}>
         {this.renderResultItem()}

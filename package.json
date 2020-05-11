@@ -14,7 +14,7 @@
     "remax": "^2.0.4"
   },
   "devDependencies": {
-    "@types/react": "^16.9.34",
+    "@types/react": "^16.9.35",
     "@umijs/fabric": "^2.0.8",
     "cross-env": "^7.0.2"
   }

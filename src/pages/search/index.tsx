@@ -1,7 +1,7 @@
+import { AppContext, ContextProps } from '@/app';
 import { DeleteIcon, ElevatorIcon, EscalatorIcon, ExitIcon, NoResultIcon, RestroomIcon } from '@/assets/icons';
 import { Image, View, navigateTo, vibrateShort } from 'remax/wechat';
 
-import { AppContext } from '@/app';
 import React from 'react';
 import { SearchLocation } from '@/service';
 import VantDropdownItem from '@vant/weapp/dist/dropdown-item';
@@ -17,7 +17,7 @@ interface SearchState {
   floorId: string;
 }
 class Search extends React.Component<SearchProps, SearchState> {
-  static contextType = AppContext;
+  static contextType: React.Context<Partial<ContextProps>> = AppContext;
   context!: React.ContextType<typeof AppContext>;
 
   constructor(props: Readonly<SearchProps>) {
@@ -28,37 +28,37 @@ class Search extends React.Component<SearchProps, SearchState> {
     };
   }
 
-  componentDidMount() {
-    let data = JSON.parse(this.props.location.query.current);
+  componentDidMount = (): void => {
+    let data: any = JSON.parse(this.props.location.query.current);
     const { floorId } = data;
     this.setState({ floorId });
-  }
+  };
 
-  private onRangeChange = (dropdown: any) => {
+  private onRangeChange = (dropdown: any): void => {
     vibrateShort();
     this.setState({ range: dropdown.detail });
   };
 
-  private onSearch = (event: any) => {
+  private onSearch = (event: any): void => {
     vibrateShort();
     const { range, floorId } = this.state;
-    let args = range === '0' ? { floorId, keywords: event.detail } : { keywords: event.detail };
+    let args: { floorId?: string; keywords: any } = range === '0' ? { floorId, keywords: event.detail } : { keywords: event.detail };
     this.LocationSearch(args);
   };
 
-  private Search = (keywords: string) => {
+  private Search = (keywords: string): void => {
     vibrateShort();
     this.LocationSearch({ floorId: this.state.floorId, keywords });
   };
 
-  private LocationSearch = (args: any) =>
+  private LocationSearch = (args: any): Promise<void | WechatMiniprogram.NavigateToSuccessCallbackResult> =>
     SearchLocation(args)
       .then((res: any) => navigateTo({ url: `../searchresult/index?current=${JSON.stringify(res)}` }))
       .catch((error) => console.warn(error));
 
-  render() {
+  render(): JSX.Element {
     const { range } = this.state;
-    const option = [
+    const option: Array<{ text: string; value: string }> = [
       { text: '附近', value: '0' },
       { text: '全部', value: '1' }
     ];
