@@ -11,7 +11,7 @@
     "@remax/plugin-less": "^1.0.0",
     "@vant/weapp": "^1.3.0",
     "react": "^16.13.1",
-    "remax": "^2.0.4"
+    "remax": "https://pkg.csb.dev/remaxjs/remax/commit/e04a21fa/remax"
   },
   "devDependencies": {
     "@types/react": "^16.9.35",

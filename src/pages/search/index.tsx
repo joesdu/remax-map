@@ -28,7 +28,8 @@ class Search extends React.Component<SearchProps, SearchState> {
     };
   }
 
-  componentDidMount = (): void => {
+  onShow = (): void => {
+    console.info('Search On Show');
     let data: any = JSON.parse(this.props.location.query.current);
     const { floorId } = data;
     this.setState({ floorId });

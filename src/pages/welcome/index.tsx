@@ -31,19 +31,20 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
     vibrateShort();
     login()
       .then((loginRes: WechatMiniprogram.LoginSuccessCallbackResult) => Login(loginRes.code))
-      .then(() => redirectTo({ url: `../main/index?from=welcome&sharedata=${this.state.fromData}&fromshare=${this.state.fromShare}` }))
       .finally(() => {
-        getUserInfo({ withCredentials: true }).then((res: WechatMiniprogram.GetUserInfoSuccessCallbackResult) => {
-          const { encryptedData, iv } = res;
-          const { nickName, avatarUrl, gender, country, province, city, language } = res.userInfo;
-          UpdateUserInfo({ nickName, avatarUrl, gender, country, province, city, language }).catch((error: any) => console.warn(error));
-          UpdatePhone({ encryptedData, iv }).catch((error) => console.warn(error));
-        });
+        getUserInfo({ withCredentials: true })
+          .then((res: WechatMiniprogram.GetUserInfoSuccessCallbackResult) => {
+            const { encryptedData, iv } = res;
+            const { nickName, avatarUrl, gender, country, province, city, language } = res.userInfo;
+            UpdateUserInfo({ nickName, avatarUrl, gender, country, province, city, language }).catch((error: any) => console.warn(error));
+            UpdatePhone({ encryptedData, iv }).catch((error) => console.warn(error));
+          })
+          .then(() => redirectTo({ url: `../main/index?from=welcome&sharedata=${this.state.fromData}&fromshare=${this.state.fromShare}` }));
       });
   };
 
-  componentDidMount = (): void => {
-    console.log('WelcomeComponentDidMount');
+  onShow = (): void => {
+    console.info('Welcome On Show');
     let query: any = this.props.location.query;
     if (query.from === 'share') this.setState({ fromData: JSON.stringify(query), fromShare: 'share' });
   };

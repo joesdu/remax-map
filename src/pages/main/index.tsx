@@ -37,7 +37,6 @@ interface MainPageState {
   centerPoint?: [number, number];
   transX: any;
   transY: any;
-  scaleValue: number;
 }
 class MainPage extends React.Component<MainPageProps, MainPageState> {
   static contextType: React.Context<Partial<ContextProps>> = AppContext;
@@ -65,8 +64,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
       projectId: '',
       floorId: '',
       transX: 0,
-      transY: 0,
-      scaleValue: 1
+      transY: 0
     };
   }
 
@@ -190,7 +188,8 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     };
   };
 
-  componentDidMount = (): void => {
+  onShow = (): void => {
+    console.info('Main On Show');
     let query: any = this.props.location.query;
     if (query.from === 'welcome' && query.fromshare === 'share') {
       let sharedata: any = JSON.parse(query.sharedata);
@@ -217,13 +216,8 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
 
   private onLocationClick = (): void => {
     vibrateShort();
-    if (this.context.global?.getLocationInterval !== -1) {
-      console.log('move');
-      this.fixMapMove();
-    } else {
-      console.log('location');
-      this.getLocation();
-    }
+    if (this.context.global?.getLocationInterval !== -1) this.fixMapMove();
+    else this.getLocation();
   };
 
   /**
@@ -278,6 +272,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     this.context.setGlobal!({ getLocationInterval: -1, hadFail: false });
     const { floorMapUrl, floorName, projectId, floorId } = res.result;
     this.setState({ facilityGroup: [fixData], drawings: floorMapUrl, floorName: floorName, projectId, floorId });
+    this.fixMapMove();
   };
 
   /**
@@ -299,17 +294,16 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   private onDrawingsLoad = (event: any): void => {
     const { width: mapWidth, height: mapHeight } = event.detail;
     this.setState({ mapWidth, mapHeight });
-    this.fixMapMove();
   };
 
   private fixMapMove = (): void => {
-    this.setState({ transX: 0, transY: 0, scaleValue: 1 });
+    this.setState({ transX: 0, transY: 0 });
     const { location, mapWidth, mapHeight } = this.state;
-    const { windowHeight, windowWidth, pixelRatio } = this.context.global?.systemInfo!;
+    const { windowHeight, windowWidth } = this.context.global?.systemInfo!;
     let point: [number, number] = [mapWidth / 2, mapHeight / 2];
     if (location) point = location;
-    let resultX = (windowWidth / 2 - point[0]) / pixelRatio;
-    let resultY = (windowHeight / 2 - point[1]) / pixelRatio;
+    let resultX = parseInt((windowWidth / 2 - point[0]).toString());
+    let resultY = parseInt((windowHeight / 2 - point[1]).toString());
     this.setState({ transX: resultX, transY: resultY });
   };
 
@@ -319,12 +313,12 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   };
 
   private onMoveableScale = (event: any): void => {
-    const { x, y, scale } = event.detail;
-    this.setState({ transX: x, transY: y, scaleValue: scale });
+    const { x, y } = event.detail;
+    this.setState({ transX: x, transY: y });
   };
 
   private renderView = (): JSX.Element | undefined => {
-    const { mapWidth, mapHeight, drawings, transX, transY, scaleValue } = this.state;
+    const { mapWidth, mapHeight, drawings, transX, transY } = this.state;
     if (this.context.global?.hadFail) {
       return (
         <View className={styles.loading}>
@@ -341,11 +335,11 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
             <MovableView
               outOfBounds
               scale
-              scaleMin={1}
-              scaleMax={3}
+              scaleMin={0.5}
+              scaleMax={2}
               direction="all"
-              scaleValue={scaleValue}
-              className={styles['floor-map']}
+              animation={undefined}
+              className={styles['floor-container']}
               style={{
                 height: mapHeight,
                 width: mapWidth,
@@ -355,7 +349,9 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
               onChange={this.onMoveableChange}
               onScale={this.onMoveableScale}
             >
-              <Image className={styles['floor-map-drawings']} src={drawings} onLoad={this.onDrawingsLoad} />
+              <View className={styles['floor-map']}>
+                <Image className={styles['floor-map-drawings']} src={drawings} onLoad={this.onDrawingsLoad} />
+              </View>
               {this.renderFacilities()}
               {this.renderLocation()}
             </MovableView>
@@ -372,16 +368,11 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
 
     return (
       <View>
-        <View className={styles.floor}>
-          <View className={styles['floor-wrap']}>
-            <View style={{ fontSize: 14, color: '#696969', float: 'left', position: 'fixed', left: 42 }}>{Config.Version}</View>
-            {this.renderView()}
-            <CircleButton icon={SearchIcon} imageStyle={{ width: 42 }} onClick={this.onSearch} style={{ float: 'right', position: 'fixed', top: 100, right: 32 }} />
-            <CircleButton icon={LocationIcon} onClick={this.onLocationClick} style={{ float: 'left', position: 'fixed', bottom: 108, left: 32 }} />
-            <FloorSelector text={floorName} onClick={this.onSelector} style={{ position: 'fixed', bottom: 104, left: 250 }} />
-            <CircleButton icon={NotFavoriteIcon} onClick={this.onFavoriteClick} style={{ float: 'right', position: 'fixed', bottom: 108, right: 32 }} />
-          </View>
-        </View>
+        {this.renderView()}
+        <CircleButton icon={SearchIcon} imageStyle={{ width: 42 }} onClick={this.onSearch} style={{ float: 'right', position: 'fixed', top: 100, right: 32 }} />
+        <CircleButton icon={LocationIcon} onClick={this.onLocationClick} style={{ float: 'left', position: 'fixed', bottom: 108, left: 32 }} />
+        <FloorSelector text={floorName} onClick={this.onSelector} style={{ position: 'fixed', bottom: 104, left: 250 }} />
+        <CircleButton icon={NotFavoriteIcon} onClick={this.onFavoriteClick} style={{ float: 'right', position: 'fixed', bottom: 108, right: 32 }} />
         <VantPopup round show={popShow} close-on-click-overlay closeable close-icon="close" position="bottom" custom-style={popStyle} bindclose={this.onClose}>
           <View className={styles.popContainer}>
             <View className={styles.flexTop}>

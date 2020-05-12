@@ -1,7 +1,4 @@
 .floor {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
   &-wrap {
     position: relative;
     width: 100%;
@@ -9,16 +6,22 @@
     overflow: hidden;
     text-align: center;
   }
+  &-container {
+    transition: 0.2s transform linear;
+    transform-origin: center center;
+  }
   &-map {
     position: absolute;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     overflow: hidden;
+    width: 100%;
+    height: 100%;
     &-drawings {
       position: relative;
       display: block;
       width: 100%;
       height: 100%;
-      z-index: 1;
+      z-index: 98;
       background-color: '#BEBEBE';
     }
   }

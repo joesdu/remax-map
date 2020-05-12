@@ -29,7 +29,8 @@ class Favorite extends React.Component<FavoriteProps, FavoriteState> {
     };
   }
 
-  componentDidMount = (): void => {
+  onShow = (): void => {
+    console.info('Favorite On Show');
     FavoriteList()
       .then((res: any) => this.setState({ favorites: res.result }))
       .catch((error) => console.warn(error));

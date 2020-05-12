@@ -10,7 +10,7 @@ export default class Config {
   /**
    * 版本号
    */
-  public static Version: string = 'Insider Preview 20200511-1720';
+  public static Version: string = 'Insider Preview 20200512-1220';
   /**
    * 分享后显示的标题
    */

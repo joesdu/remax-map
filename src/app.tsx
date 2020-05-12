@@ -117,7 +117,7 @@ class App extends React.Component<AppProps, AppState> {
             console.warn('No IBeacons device data available');
             this.setGlobal({ allowUpdate: true, hadFail: true });
             this.onStopBeaconDiscovery();
-          } else console.info('IBeacons device data available.');
+          } else console.info(`IBeacons device data available,device count:${this.ibeacons.length}.`);
         }, 10000);
       });
   };
@@ -155,10 +155,14 @@ class App extends React.Component<AppProps, AppState> {
     });
   };
 
-  onHide = (): void => CloseMap();
+  onHide = (): void => {
+    console.info('App On Hide');
+    this.onStopBeaconDiscovery();
+    CloseMap();
+  };
 
-  componentDidMount = (): void => {
-    console.log('AppComponentDidMount');
+  onShow = (): void => {
+    console.info('App On Show');
     getSystemInfo()
       .then((res: WechatMiniprogram.GetSystemInfoSuccessCallbackResult) => {
         this.setGlobal({ systemInfo: res });
