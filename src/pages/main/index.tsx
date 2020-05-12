@@ -299,11 +299,11 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   private fixMapMove = (): void => {
     this.setState({ transX: 0, transY: 0 });
     const { location, mapWidth, mapHeight } = this.state;
-    const { windowHeight, windowWidth } = this.context.global?.systemInfo!;
+    const { windowHeight, windowWidth, pixelRatio } = this.context.global?.systemInfo!;
     let point: [number, number] = [mapWidth / 2, mapHeight / 2];
     if (location) point = location;
-    let resultX = parseInt((windowWidth / 2 - point[0]).toString());
-    let resultY = parseInt((windowHeight / 2 - point[1]).toString());
+    let resultX = parseInt((windowWidth / 2 - point[0]).toString()) * pixelRatio;
+    let resultY = parseInt((windowHeight / 2 - point[1]).toString()) * pixelRatio;
     this.setState({ transX: resultX, transY: resultY });
   };
 
