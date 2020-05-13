@@ -37,6 +37,7 @@ interface MainPageState {
   centerPoint?: [number, number];
   transX: any;
   transY: any;
+  scalaValue: number;
 }
 class MainPage extends React.Component<MainPageProps, MainPageState> {
   static contextType: React.Context<Partial<ContextProps>> = AppContext;
@@ -64,7 +65,8 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
       projectId: '',
       floorId: '',
       transX: 0,
-      transY: 0
+      transY: 0,
+      scalaValue: 1
     };
   }
 
@@ -272,7 +274,6 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     this.context.setGlobal!({ getLocationInterval: -1, hadFail: false });
     const { floorMapUrl, floorName, projectId, floorId } = res.result;
     this.setState({ facilityGroup: [fixData], drawings: floorMapUrl, floorName: floorName, projectId, floorId });
-    this.fixMapMove();
   };
 
   /**
@@ -294,16 +295,23 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   private onDrawingsLoad = (event: any): void => {
     const { width: mapWidth, height: mapHeight } = event.detail;
     this.setState({ mapWidth, mapHeight });
+    this.fixMapMove();
   };
 
   private fixMapMove = (): void => {
-    this.setState({ transX: 0, transY: 0 });
-    const { location, mapWidth, mapHeight } = this.state;
-    const { windowHeight, windowWidth, pixelRatio } = this.context.global?.systemInfo!;
+    const { location, mapWidth, mapHeight, scalaValue } = this.state;
+    const { windowHeight, windowWidth, pixelRatio, statusBarHeight } = this.context.global?.systemInfo!;
     let point: [number, number] = [mapWidth / 2, mapHeight / 2];
     if (location) point = location;
-    let resultX = parseInt((windowWidth / 2 - point[0]).toString()) * pixelRatio;
-    let resultY = parseInt((windowHeight / 2 - point[1]).toString()) * pixelRatio;
+    let SH: number = ((windowHeight - statusBarHeight) * pixelRatio) / 3;
+    let SW: number = (windowWidth * pixelRatio) / 3;
+    let PX: number = (point[0] * pixelRatio) / (3 * scalaValue);
+    let PY: number = (point[1] * pixelRatio) / (3 * scalaValue);
+    let flagX: boolean = PX >= SW / 2;
+    let flagY: boolean = PY <= SH / 2;
+    let resultX: number = flagX ? (SW - PX) / scalaValue : (PX - SW) / scalaValue;
+    let resultY: number = flagY ? (SH - PY) / scalaValue : (PY - SH) / scalaValue;
+    console.log(`X: ${resultX}, Y: ${resultY}`);
     this.setState({ transX: resultX, transY: resultY });
   };
 
@@ -313,8 +321,8 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   };
 
   private onMoveableScale = (event: any): void => {
-    const { x, y } = event.detail;
-    this.setState({ transX: x, transY: y });
+    const { x, y, scale } = event.detail;
+    this.setState({ transX: x, transY: y, scalaValue: scale });
   };
 
   private renderView = (): JSX.Element | undefined => {
@@ -331,16 +339,17 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     } else {
       if (drawings) {
         return (
-          <MovableArea scaleArea style={{ height: '100vh', width: '100vw' }}>
+          <MovableArea className={styles.floor} scaleArea style={{ height: '100vh', width: '100vw' }}>
             <MovableView
               outOfBounds
               scale
               scaleMin={0.5}
               scaleMax={2}
               direction="all"
+              className={styles['floor-map']}
               animation={undefined}
-              className={styles['floor-container']}
               style={{
+                position: 'absolute',
                 height: mapHeight,
                 width: mapWidth,
                 top: transY,
@@ -349,9 +358,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
               onChange={this.onMoveableChange}
               onScale={this.onMoveableScale}
             >
-              <View className={styles['floor-map']}>
-                <Image className={styles['floor-map-drawings']} src={drawings} onLoad={this.onDrawingsLoad} />
-              </View>
+              <Image className={styles['floor-map-drawings']} src={drawings} onLoad={this.onDrawingsLoad} />
               {this.renderFacilities()}
               {this.renderLocation()}
             </MovableView>
