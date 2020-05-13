@@ -311,7 +311,6 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     let flagY: boolean = PY <= SH / 2;
     let resultX: number = (flagX ? (SW - PX) / scalaValue : (PX - SW) / scalaValue) / 2;
     let resultY: number = (flagY ? (SH - PY) / scalaValue : (PY - SH) / scalaValue) / 2;
-    console.log(`X: ${resultX}, Y: ${resultY}`);
     this.setState({ transX: resultX, transY: resultY });
   };
 
