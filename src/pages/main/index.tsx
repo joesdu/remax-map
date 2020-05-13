@@ -309,8 +309,8 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     let PY: number = (point[1] * pixelRatio) / (3 * scalaValue);
     let flagX: boolean = PX >= SW / 2;
     let flagY: boolean = PY <= SH / 2;
-    let resultX: number = flagX ? (SW - PX) / scalaValue : (PX - SW) / scalaValue;
-    let resultY: number = flagY ? (SH - PY) / scalaValue : (PY - SH) / scalaValue;
+    let resultX: number = (flagX ? (SW - PX) / scalaValue : (PX - SW) / scalaValue) / 2;
+    let resultY: number = (flagY ? (SH - PY) / scalaValue : (PY - SH) / scalaValue) / 2;
     console.log(`X: ${resultX}, Y: ${resultY}`);
     this.setState({ transX: resultX, transY: resultY });
   };
@@ -349,12 +349,11 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
               className={styles['floor-map']}
               animation={undefined}
               style={{
-                position: 'absolute',
                 height: mapHeight,
-                width: mapWidth,
-                top: transY,
-                left: transX
+                width: mapWidth
               }}
+              x={transX}
+              y={transY}
               onChange={this.onMoveableChange}
               onScale={this.onMoveableScale}
             >
