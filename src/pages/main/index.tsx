@@ -2,7 +2,7 @@ import { AddFavor, BuildList, DelFavor, FloorData, FloorList, Location, MapUsage
 import { AppContext, ContextProps } from '@/app';
 import { Button, Image, MovableArea, MovableView, Text, View, navigateTo, showModal, vibrateShort } from 'remax/wechat';
 import { CircleButton, FloorSelector } from '@/components';
-import { FavoriteIcon, LocationIcon, MyLocation, NotFavoriteIcon, SearchIcon, ShareIcon } from '@/assets/icons';
+import { FavoriteIcon, LocationIcon, MyLocation, NotFavoriteIcon, SearchIcon, ShareIcon, SpecialIcon } from '@/assets/icons';
 
 import Config from '@/utils/config';
 import FacilityItem from './components/facilityitem';
@@ -196,16 +196,16 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     if (query.from === 'welcome' && query.fromshare === 'share') {
       let sharedata: any = JSON.parse(query.sharedata);
       let current: any = JSON.parse(sharedata.current);
-      const { facilityId, avatar, point, name, address } = current;
-      let args: any = { facilityId, avatar, point, name, address, isFavorite: false };
+      const { facilityId, point, name, address } = current;
+      let args: any = { facilityId, avatar: SpecialIcon, point, name, address, isFavorite: false };
       FloorData({ floorId: sharedata.floorId })
         .then((res: any) => this.fixOnShowData(res, args))
         .catch((error) => console.warn(error));
     } else if (query.from === 'favorite' || query.from === 'searchresult') {
       let current: any = JSON.parse(query.current);
-      const { facilityId, facilityTypeUrl, facilityName, projectName, buildName, floorName } = current;
+      const { facilityId, facilityName, projectName, buildName, floorName } = current;
       let point: any = query.from === 'favorite' ? current.facilityPosition : current.point;
-      let args: any = { facilityId: facilityId, avatar: facilityTypeUrl, point, name: facilityName, address: `${projectName}-${buildName}-${floorName}`, isFavorite: query.from === 'favorite' };
+      let args: any = { facilityId: facilityId, avatar: SpecialIcon, point, name: facilityName, address: `${projectName}-${buildName}-${floorName}`, isFavorite: query.from === 'favorite' };
       FloorData({ floorId: current.floorId })
         .then((res: any) => this.fixOnShowData(res, args))
         .catch((error) => console.warn(error));
@@ -272,8 +272,16 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   private fixOnShowData = (res: any, fixData: any): void => {
     clearInterval(this.context.global?.getLocationInterval);
     this.context.setGlobal!({ getLocationInterval: -1, hadFail: false });
-    const { floorMapUrl, floorName, projectId, floorId } = res.result;
-    this.setState({ facilityGroup: [fixData], drawings: floorMapUrl, floorName: floorName, projectId, floorId });
+    const { floorMapUrl, floorName, projectId, floorId, facilityList } = res.result;
+    let facilityGroup: Array<any> = [];
+    if (facilityList.length > 0) {
+      for (let index: number = 0, item: any; (item = facilityList[index++]); ) {
+        const { facilityId, facilityTypeUrl, point, facilityName, projectName, buildName, isFavor } = item;
+        facilityGroup.push({ facilityId, avatar: facilityTypeUrl, point, name: facilityName, address: `${projectName}-${buildName}-${floorName}`, isFavorite: isFavor });
+      }
+    }
+    facilityGroup.push(fixData);
+    this.setState({ facilityGroup, drawings: floorMapUrl, floorName: floorName, projectId, floorId });
   };
 
   /**

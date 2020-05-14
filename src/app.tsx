@@ -47,16 +47,15 @@ class App extends React.Component<AppProps, AppState> {
     this.setState({ global: { ...global, ...data } });
   };
 
-  private ibeacons: Array<{ deviceId: number; rssi: number; time: number; count: number }> = [];
+  private ibeacons: Array<{ deviceId: number; rssi: number; time: number; }> = [];
   private cleanerInterval: any = -1;
 
   getIBeacons = (): Array<{ deviceId: number; rssi: number }> => {
     this.ibeacons.sort((a: { time: number }, b: { time: number }) => b.time - a.time);
     let iBeaconTemp: Array<{ deviceId: number; rssi: number }> = [];
     for (let index: number = 0, item; (item = this.ibeacons[index++]); ) {
-      const { deviceId, rssi, count } = item;
-      let rssiAverage = rssi / count;
-      if (index < 20) iBeaconTemp.push({ deviceId, rssi: rssiAverage });
+      const { deviceId, rssi } = item;
+      if (index < 20) iBeaconTemp.push({ deviceId, rssi });
     }
     return iBeaconTemp;
   };
@@ -87,11 +86,10 @@ class App extends React.Component<AppProps, AppState> {
           const { major, minor, rssi } = item;
           let exist: number = -1;
           if (this.ibeacons.length > 0) exist = this.ibeacons.findIndex((x: { deviceId: number }) => x.deviceId === Util.FixDeviceId(major, minor));
-          if (exist === -1) this.ibeacons.push({ deviceId: Util.FixDeviceId(major, minor), rssi, time: Date.now(), count: 1 });
+          if (exist === -1) this.ibeacons.push({ deviceId: Util.FixDeviceId(major, minor), rssi, time: Date.now() });
           else {
             this.ibeacons[exist].time = Date.now();
-            this.ibeacons[exist].rssi += rssi;
-            this.ibeacons[exist].count += 1;
+            this.ibeacons[exist].rssi = rssi;
           }
         }
         this.setGlobal({ allowUpdate: true });
