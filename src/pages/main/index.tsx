@@ -277,7 +277,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     if (facilityList.length > 0) {
       for (let index: number = 0, item: any; (item = facilityList[index++]); ) {
         const { facilityId, facilityTypeUrl, point, facilityName, projectName, buildName, isFavor } = item;
-        facilityGroup.push({ facilityId, avatar: facilityTypeUrl, point, name: facilityName, address: `${projectName}-${buildName}-${floorName}`, isFavorite: isFavor });
+        if (facilityId !== fixData.facilityId) facilityGroup.push({ facilityId, avatar: facilityTypeUrl, point, name: facilityName, address: `${projectName}-${buildName}-${floorName}`, isFavorite: isFavor });
       }
     }
     facilityGroup.push(fixData);
