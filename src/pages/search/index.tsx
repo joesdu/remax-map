@@ -9,7 +9,7 @@ import VantDropdownMenu from '@vant/weapp/dist/dropdown-menu';
 import VantSearch from '@vant/weapp/dist/search';
 import styles from './index.less';
 
-export interface SearchProps {
+interface SearchProps {
   location: any;
 }
 interface SearchState {

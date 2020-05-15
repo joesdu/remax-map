@@ -1,6 +1,9 @@
 import { getStorage, request, setStorage } from 'remax/wechat';
 
-import Config from '@/utils/config';
+/**
+ * 网络请求Url前缀
+ */
+const BaseUrl: string = 'http://service-gw.winside.com:8080/smartlight/api/';
 
 /**
  * 登陆API
@@ -8,7 +11,7 @@ import Config from '@/utils/config';
  */
 export const Login = (code: string): void => {
   request({
-    url: `${Config.BaseUrl}wxuser/jscodeLogin`,
+    url: `${BaseUrl}wxuser/jscodeLogin`,
     data: { jsCode: code, appId: 'wxa521c64b9a5faa4c' },
     method: 'POST',
     header: { 'content-type': 'application/x-www-form-urlencoded' }
@@ -21,15 +24,17 @@ export const Login = (code: string): void => {
  */
 export const TokenLogin = (): Promise<any> =>
   new Promise((resolve, reject) => {
-    getStorage({ key: 'token' }).then((token: any) => {
-      request({
-        url: `${Config.BaseUrl}wxuser/tokenLogin`,
-        header: { Authorization: token.data, 'content-type': 'application/x-www-form-urlencoded' },
-        method: 'POST'
+    getStorage({ key: 'token' })
+      .then((token: any) => {
+        request({
+          url: `${BaseUrl}wxuser/tokenLogin`,
+          header: { Authorization: token.data, 'content-type': 'application/x-www-form-urlencoded' },
+          method: 'POST'
+        })
+          .then((res: any) => resolve(res.data))
+          .catch((error: any) => reject(error));
       })
-        .then((res: any) => resolve(res.data))
-        .catch((error: any) => reject(error));
-    });
+      .catch((error: any) => reject(error));
   });
 /**
  * 更新用户信息
@@ -38,7 +43,7 @@ export const UpdateUserInfo = (data: any): Promise<any> =>
   new Promise((resolve, reject) => {
     getStorage({ key: 'token' }).then((token: any) => {
       request({
-        url: `${Config.BaseUrl}wxuser/updateUserInfo`,
+        url: `${BaseUrl}wxuser/updateUserInfo`,
         data: data,
         header: { Authorization: token.data, 'content-type': 'application/x-www-form-urlencoded' },
         method: 'POST'
@@ -54,7 +59,7 @@ export const UpdatePhone = (data: any): Promise<any> =>
   new Promise((resolve, reject) => {
     getStorage({ key: 'token' }).then((token: any) => {
       request({
-        url: `${Config.BaseUrl}wxuser/updatePhoneNumber`,
+        url: `${BaseUrl}wxuser/updatePhoneNumber`,
         data: data,
         header: { Authorization: token.data, 'content-type': 'application/x-www-form-urlencoded' },
         method: 'POST'
@@ -70,7 +75,7 @@ export const MapUsageRecord = (data: { floorId: string; projectId: string }): Pr
   new Promise((resolve, reject) => {
     getStorage({ key: 'token' }).then((token: any) => {
       request({
-        url: `${Config.BaseUrl}location/addMapUsageRecord`,
+        url: `${BaseUrl}location/addMapUsageRecord`,
         data: data,
         header: { Authorization: token.data, 'content-type': 'application/x-www-form-urlencoded' },
         method: 'POST'
@@ -86,7 +91,7 @@ export const AddFavor = (data: { facilityId: string }): Promise<any> =>
   new Promise((resolve, reject) => {
     getStorage({ key: 'token' }).then((token: any) => {
       request({
-        url: `${Config.BaseUrl}location/addFavorLocation`,
+        url: `${BaseUrl}location/addFavorLocation`,
         data,
         header: { Authorization: token.data, 'content-type': 'application/x-www-form-urlencoded' },
         method: 'POST'
@@ -102,7 +107,7 @@ export const DelFavor = (data: { facilityId: string }): Promise<any> =>
   new Promise((resolve, reject) => {
     getStorage({ key: 'token' }).then((token: any) => {
       request({
-        url: `${Config.BaseUrl}location/delFavorLocation`,
+        url: `${BaseUrl}location/delFavorLocation`,
         data,
         header: { Authorization: token.data, 'content-type': 'application/x-www-form-urlencoded' },
         method: 'POST'
@@ -118,7 +123,7 @@ export const SearchLocation = (data: { floorId?: string; keywords: string }): Pr
   new Promise((resolve, reject) => {
     getStorage({ key: 'token' }).then((token: any) => {
       request({
-        url: `${Config.BaseUrl}location/searchLocation`,
+        url: `${BaseUrl}location/searchLocation`,
         data,
         header: { Authorization: token.data, 'content-type': 'application/x-www-form-urlencoded' },
         method: 'POST'
@@ -134,7 +139,7 @@ export const FloorData = (data: { floorId: string }): Promise<any> =>
   new Promise((resolve, reject) => {
     getStorage({ key: 'token' }).then((token: any) => {
       request({
-        url: `${Config.BaseUrl}location/getFloorData`,
+        url: `${BaseUrl}location/getFloorData`,
         data,
         header: { Authorization: token.data, 'content-type': 'application/x-www-form-urlencoded' },
         method: 'POST'
@@ -150,7 +155,7 @@ export const Location = (data: any): Promise<any> =>
   new Promise((resolve, reject) => {
     getStorage({ key: 'token' }).then((token: any) => {
       request({
-        url: `${Config.BaseUrl}location/location`,
+        url: `${BaseUrl}location/location`,
         data,
         header: { Authorization: token.data, 'content-type': 'application/x-www-form-urlencoded' },
         method: 'POST'
@@ -166,7 +171,7 @@ export const BuildList = (data: { projectId: string }): Promise<any> =>
   new Promise((resolve, reject) => {
     getStorage({ key: 'token' }).then((token: any) => {
       request({
-        url: `${Config.BaseUrl}project/getBuildList`,
+        url: `${BaseUrl}project/getBuildList`,
         data,
         header: { Authorization: token.data, 'content-type': 'application/x-www-form-urlencoded' },
         method: 'POST'
@@ -182,7 +187,7 @@ export const FloorList = (data: { buildId: string }): Promise<any> =>
   new Promise((resolve, reject) => {
     getStorage({ key: 'token' }).then((token: any) => {
       request({
-        url: `${Config.BaseUrl}project/getFloorList`,
+        url: `${BaseUrl}project/getFloorList`,
         data,
         header: { Authorization: token.data, 'content-type': 'application/x-www-form-urlencoded' },
         method: 'POST'
@@ -199,7 +204,7 @@ export const FavoriteList = (): Promise<any> =>
   new Promise((resolve, reject) => {
     getStorage({ key: 'token' }).then((token: any) => {
       request({
-        url: `${Config.BaseUrl}location/myFavorLocation`,
+        url: `${BaseUrl}location/myFavorLocation`,
         header: { Authorization: token.data, 'content-type': 'application/x-www-form-urlencoded' },
         method: 'POST'
       })
@@ -214,7 +219,7 @@ export const CloseMap = () => {
   new Promise((resolve, reject) => {
     getStorage({ key: 'token' }).then((token: any) => {
       request({
-        url: `${Config.BaseUrl}wxuser/closeMap`,
+        url: `${BaseUrl}wxuser/closeMap`,
         header: { Authorization: token.data, 'content-type': 'application/x-www-form-urlencoded' },
         method: 'POST'
       })

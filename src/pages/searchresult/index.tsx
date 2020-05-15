@@ -1,10 +1,10 @@
 import { AppContext, ContextProps } from '@/app';
-import { ScrollView, redirectTo, vibrateShort } from 'remax/wechat';
+import { ScrollView, navigateBack } from 'remax/wechat';
 
 import React from 'react';
 import ResultItem from '@/components/resultItem';
 
-export interface SearchResultProps {
+interface SearchResultProps {
   location: any;
 }
 
@@ -29,8 +29,14 @@ class SearchResult extends React.Component<SearchResultProps, SearchResultState>
   };
 
   onGotoClick = (record: any): void => {
-    vibrateShort();
-    redirectTo({ url: `../main/index?current=${JSON.stringify(record)}&from=searchresult` });
+    this.context.setGlobal!({
+      currentData: {
+        from: 'searchresult',
+        current: JSON.stringify(record),
+        isShare: false
+      }
+    });
+    navigateBack({ delta: 2 });
   };
 
   renderResultItem = (): Array<any> => {

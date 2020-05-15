@@ -1,17 +1,16 @@
 import { AddFavor, BuildList, DelFavor, FloorData, FloorList, Location, MapUsageRecord } from '@/service';
 import { AppContext, ContextProps } from '@/app';
-import { Button, Image, MovableArea, MovableView, Text, View, navigateTo, showModal, vibrateShort } from 'remax/wechat';
+import { Button, Image, MovableArea, MovableView, Text, View, hideHomeButton, navigateTo, showModal, vibrateShort } from 'remax/wechat';
 import { CircleButton, FloorSelector } from '@/components';
 import { FavoriteIcon, LocationIcon, MyLocation, NotFavoriteIcon, SearchIcon, ShareIcon, SpecialIcon } from '@/assets/icons';
 
-import Config from '@/utils/config';
 import FacilityItem from './components/facilityitem';
 import React from 'react';
 import VantPicker from '@vant/weapp/dist/picker';
 import VantPopup from '@vant/weapp/dist/popup';
 import styles from './index.less';
 
-export interface MainPageProps {
+interface MainPageProps {
   location: any;
 }
 interface MainPageState {
@@ -70,11 +69,6 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     };
   }
 
-  private onFavoriteClick = (): void => {
-    vibrateShort();
-    navigateTo({ url: '../favorite/index' });
-  };
-
   private onClose = (): void => {
     vibrateShort();
     this.setState({ popShow: false, selectorPopShow: false });
@@ -95,7 +89,6 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   };
 
   private onSelector = (): void => {
-    vibrateShort();
     clearInterval(this.context.global?.getLocationInterval);
     this.context.setGlobal!({ getLocationInterval: -1 });
     const { projectId } = this.state;
@@ -172,40 +165,34 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     }
   };
 
-  private onSearch = (): void => {
-    vibrateShort();
-    navigateTo({ url: `../search/index?current=${JSON.stringify({ floorId: this.state.floorId })}` });
-  };
-
   /**
    * 分享数据
    * @param res
    */
   onShareAppMessage = (res: any): any => {
-    console.log('onShareAppMessage:', res);
     const { itemData, floorId } = this.state;
     return {
-      title: Config.ShareTitle,
+      title: '邀请您使用灯联网定位导航',
       path: `/pages/welcome/index?floorId=${floorId}&current=${JSON.stringify(itemData)}&from=share&shareobj=${JSON.stringify(res)}`
     };
   };
 
   onShow = (): void => {
+    hideHomeButton();
     console.info('Main On Show');
-    let query: any = this.props.location.query;
-    if (query.from === 'welcome' && query.fromshare === 'share') {
-      let sharedata: any = JSON.parse(query.sharedata);
-      let current: any = JSON.parse(sharedata.current);
+    let currentData = this.context.global?.currentData!;
+    if (currentData.isShare) {
+      let current: any = JSON.parse(currentData.current);
       const { facilityId, point, name, address } = current;
       let args: any = { facilityId, avatar: SpecialIcon, point, name, address, isFavorite: false };
-      FloorData({ floorId: sharedata.floorId })
+      FloorData({ floorId: current.floorId })
         .then((res: any) => this.fixOnShowData(res, args))
         .catch((error) => console.warn(error));
-    } else if (query.from === 'favorite' || query.from === 'searchresult') {
-      let current: any = JSON.parse(query.current);
+    } else if (currentData.from === 'favorite' || currentData.from === 'searchresult') {
+      let current: any = JSON.parse(currentData.current);
       const { facilityId, facilityName, projectName, buildName, floorName } = current;
-      let point: any = query.from === 'favorite' ? current.facilityPosition : current.point;
-      let args: any = { facilityId: facilityId, avatar: SpecialIcon, point, name: facilityName, address: `${projectName}-${buildName}-${floorName}`, isFavorite: query.from === 'favorite' };
+      let point: any = currentData.from === 'favorite' ? current.facilityPosition : current.point;
+      let args: any = { facilityId: facilityId, avatar: SpecialIcon, point, name: facilityName, address: `${projectName}-${buildName}-${floorName}`, isFavorite: currentData.from === 'favorite' };
       FloorData({ floorId: current.floorId })
         .then((res: any) => this.fixOnShowData(res, args))
         .catch((error) => console.warn(error));
@@ -214,12 +201,6 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
       this.context.setGlobal!({ atFirst: false });
       this.getLocation();
     }
-  };
-
-  private onLocationClick = (): void => {
-    vibrateShort();
-    if (this.context.global?.getLocationInterval !== -1) this.fixMapMove();
-    else this.getLocation();
   };
 
   /**
@@ -322,16 +303,6 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     this.setState({ transX: resultX, transY: resultY });
   };
 
-  private onMoveableChange = (event: any): void => {
-    const { source, x, y } = event.detail;
-    if (source !== '') this.setState({ transX: x, transY: y });
-  };
-
-  private onMoveableScale = (event: any): void => {
-    const { x, y, scale } = event.detail;
-    this.setState({ transX: x, transY: y, scalaValue: scale });
-  };
-
   private renderView = (): JSX.Element | undefined => {
     const { mapWidth, mapHeight, drawings, transX, transY } = this.state;
     if (this.context.global?.hadFail) {
@@ -350,19 +321,24 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
             <MovableView
               outOfBounds
               scale
-              scaleMin={0.5}
-              scaleMax={2}
+              scaleMin={0.8}
+              scaleMax={2.5}
               direction="all"
               className={styles['floor-map']}
-              animation={undefined}
               style={{
                 height: mapHeight,
                 width: mapWidth
               }}
               x={transX}
               y={transY}
-              onChange={this.onMoveableChange}
-              onScale={this.onMoveableScale}
+              onChange={(event: any): void => {
+                const { source, x, y } = event.detail;
+                if (source !== '') this.setState({ transX: x, transY: y });
+              }}
+              onScale={(event: any): void => {
+                const { x, y, scale } = event.detail;
+                this.setState({ transX: x, transY: y, scalaValue: scale });
+              }}
             >
               <Image className={styles['floor-map-drawings']} src={drawings} onLoad={this.onDrawingsLoad} />
               {this.renderFacilities()}
@@ -382,10 +358,30 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     return (
       <View>
         {this.renderView()}
-        <CircleButton icon={SearchIcon} imageStyle={{ width: 42 }} onClick={this.onSearch} style={{ float: 'right', position: 'fixed', top: 100, right: 32 }} />
-        <CircleButton icon={LocationIcon} onClick={this.onLocationClick} style={{ float: 'left', position: 'fixed', bottom: 108, left: 32 }} />
+        <CircleButton
+          icon={SearchIcon}
+          imageStyle={{ width: 42 }}
+          onClick={() => {
+            navigateTo({ url: `../search/index?current=${JSON.stringify({ floorId: this.state.floorId })}` });
+          }}
+          style={{ float: 'right', position: 'fixed', top: 100, right: 32 }}
+        />
+        <CircleButton
+          icon={LocationIcon}
+          onClick={() => {
+            if (this.context.global?.getLocationInterval !== -1) this.fixMapMove();
+            else this.getLocation();
+          }}
+          style={{ float: 'left', position: 'fixed', bottom: 108, left: 32 }}
+        />
         <FloorSelector text={floorName} onClick={this.onSelector} style={{ position: 'fixed', bottom: 104, left: 250 }} />
-        <CircleButton icon={NotFavoriteIcon} onClick={this.onFavoriteClick} style={{ float: 'right', position: 'fixed', bottom: 108, right: 32 }} />
+        <CircleButton
+          icon={NotFavoriteIcon}
+          onClick={() => {
+            navigateTo({ url: '../favorite/index' });
+          }}
+          style={{ float: 'right', position: 'fixed', bottom: 108, right: 32 }}
+        />
         <VantPopup round show={popShow} close-on-click-overlay closeable close-icon="close" position="bottom" custom-style={popStyle} bindclose={this.onClose}>
           <View className={styles.popContainer}>
             <View className={styles.flexTop}>

@@ -1,5 +1,5 @@
 import { GotoIcon, MarkIcon } from '@/assets/icons';
-import { Image, View } from 'remax/wechat';
+import { Image, View, vibrateShort } from 'remax/wechat';
 
 import React from 'react';
 import styles from './index.less';
@@ -23,6 +23,10 @@ const ResultItem: React.FC<ResultItemProps> = ({ title = '测试标题', subTitl
       );
     }
   };
+  const myClick = () => {
+    vibrateShort();
+    onClick();
+  };
 
   return (
     <View className={styles.item}>
@@ -33,7 +37,7 @@ const ResultItem: React.FC<ResultItemProps> = ({ title = '测试标题', subTitl
           <View className={styles['item-left-right-bottom']}>{subTitle}</View>
         </View>
       </View>
-      <View className={styles['item-right']} onClick={onClick}>
+      <View className={styles['item-right']} onClick={myClick}>
         {renderItem()}
       </View>
     </View>

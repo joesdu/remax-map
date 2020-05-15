@@ -4,7 +4,6 @@ import { closeBluetoothAdapter, getSystemInfo, getUpdateManager, onBeaconUpdate,
 
 import { CloseMap } from './service';
 import React from 'react';
-import Util from './utils/util';
 
 export type ContextProps = {
   global: Global;
@@ -17,6 +16,12 @@ export const AppContext: React.Context<Partial<ContextProps>> = React.createCont
 export interface AppProps {
   location: any;
 }
+
+export type CurrentData = {
+  from: string;
+  current: string;
+  isShare: boolean;
+};
 export interface Global {
   systemInfo?: WechatMiniprogram.GetSystemInfoSuccessCallbackResult;
   allowUpdate?: boolean;
@@ -24,6 +29,7 @@ export interface Global {
   atFirst?: boolean;
   getLocationInterval?: any;
   hadFail?: boolean;
+  currentData?: CurrentData;
 }
 interface AppState {
   global: Global;
@@ -47,7 +53,7 @@ class App extends React.Component<AppProps, AppState> {
     this.setState({ global: { ...global, ...data } });
   };
 
-  private ibeacons: Array<{ deviceId: number; rssi: number; time: number; }> = [];
+  private ibeacons: Array<{ deviceId: number; rssi: number; time: number }> = [];
   private cleanerInterval: any = -1;
 
   getIBeacons = (): Array<{ deviceId: number; rssi: number }> => {
@@ -69,6 +75,17 @@ class App extends React.Component<AppProps, AppState> {
     }, 500);
   };
 
+  /**
+   * 处理设备广播的设备ID
+   * @param major 设备主ID值
+   * @param minor 设备次ID值
+   */
+  private FixDeviceId = (major: string, minor: string): number => {
+    let major_16: string = parseInt(major).toString(16).padStart(4, '0');
+    let minor_16: string = parseInt(minor).toString(16).padStart(4, '0');
+    return parseInt(major_16 + minor_16, 16);
+  };
+
   private SearchIBeacon = (): void => {
     openBluetoothAdapter({
       success: () => {
@@ -85,8 +102,9 @@ class App extends React.Component<AppProps, AppState> {
         for (let index: number = 0, item: any; (item = beacons[index++]); ) {
           const { major, minor, rssi } = item;
           let exist: number = -1;
-          if (this.ibeacons.length > 0) exist = this.ibeacons.findIndex((x: { deviceId: number }) => x.deviceId === Util.FixDeviceId(major, minor));
-          if (exist === -1) this.ibeacons.push({ deviceId: Util.FixDeviceId(major, minor), rssi, time: Date.now() });
+          let deviceId: number = this.FixDeviceId(major, minor);
+          if (this.ibeacons.length > 0) exist = this.ibeacons.findIndex((x: { deviceId: number }) => x.deviceId === deviceId);
+          if (exist === -1) this.ibeacons.push({ deviceId, rssi, time: Date.now() });
           else {
             this.ibeacons[exist].time = Date.now();
             this.ibeacons[exist].rssi = rssi;
@@ -127,7 +145,7 @@ class App extends React.Component<AppProps, AppState> {
         clearInterval(this.cleanerInterval);
         closeBluetoothAdapter();
       })
-      .catch((error: WechatMiniprogram.IBeaconError) => console.error(error.errMsg));
+      .catch((error: WechatMiniprogram.IBeaconError) => console.warn(error.errMsg));
   };
 
   private checkUpgrade = (): void => {

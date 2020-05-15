@@ -1,13 +1,12 @@
 import { AppContext, ContextProps } from '@/app';
 import { Button, Image, View, getUserInfo, login, redirectTo, vibrateShort } from 'remax/wechat';
-import { Login, UpdatePhone, UpdateUserInfo } from '@/service';
+import { Login, TokenLogin, UpdatePhone, UpdateUserInfo } from '@/service';
 
-import Config from '@/utils/config';
 import { LogoIcon } from '@/assets/icons';
 import React from 'react';
 import styles from './index.less';
 
-export interface WelcomeProps {
+interface WelcomeProps {
   location: any;
 }
 interface WelcomeState {
@@ -27,6 +26,18 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
     };
   }
 
+  private gotoMain = (): void => {
+    const { fromData, fromShare } = this.state;
+    this.context.setGlobal!({
+      currentData: {
+        from: 'welcome',
+        current: fromData,
+        isShare: fromShare === 'share'
+      }
+    });
+    redirectTo({ url: '../main/index' });
+  };
+
   private onInto = (): void => {
     vibrateShort();
     login()
@@ -39,14 +50,17 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
             UpdateUserInfo({ nickName, avatarUrl, gender, country, province, city, language }).catch((error: any) => console.warn(error));
             UpdatePhone({ encryptedData, iv }).catch((error) => console.warn(error));
           })
-          .then(() => redirectTo({ url: `../main/index?from=welcome&sharedata=${this.state.fromData}&fromshare=${this.state.fromShare}` }));
+          .then(() => this.gotoMain());
       });
   };
 
   onShow = (): void => {
-    console.info('Welcome On Show');
+    console.info('Welcome Component OnShow');
     let query: any = this.props.location.query;
     if (query.from === 'share') this.setState({ fromData: JSON.stringify(query), fromShare: 'share' });
+    TokenLogin()
+      .then(() => this.gotoMain())
+      .catch((error: any) => console.warn('Token is not available:', error.errMsg));
   };
 
   render(): JSX.Element {
@@ -62,8 +76,8 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
           </Button>
         </View>
         <View className={styles.viewFooter}>
-          <View className={styles.footerLink}>{Config.Version}</View>
-          <View className={styles.txtVersion}>{Config.Copyright}</View>
+          <View className={styles.footerLink}>Insider Preview 20200515-1400</View>
+          <View className={styles.txtVersion}>Copyright © 2020 WinSide. All Rights Reserved.</View>
         </View>
       </View>
     );

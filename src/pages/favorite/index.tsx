@@ -1,12 +1,13 @@
 import { AppContext, ContextProps } from '@/app';
 import { DelFavor, FavoriteList } from '@/service';
-import { ScrollView, View, redirectTo, vibrateShort } from 'remax/wechat';
+import { ScrollView, View, navigateBack, vibrateShort } from 'remax/wechat';
 
 import React from 'react';
 import ResultItem from '@/components/resultItem';
 import styles from './index.less';
+import { usePageInstance } from 'remax';
 
-export interface FavoriteProps {
+interface FavoriteProps {
   location: any;
 }
 interface FavoriteState {
@@ -39,19 +40,30 @@ class Favorite extends React.Component<FavoriteProps, FavoriteState> {
 
   private onManage = (): void => {
     vibrateShort();
+    let test = usePageInstance();
+    let test2 = test.getCurrentPages();
+    console.log(test2);
     const { isManage } = this.state;
     if (isManage) this.setState({ isManage: false, manageTxt: '管理' });
     else this.setState({ isManage: true, manageTxt: '完成' });
   };
 
   private onFavorItemClick = (record: any): void => {
-    vibrateShort();
     const { isManage } = this.state;
     if (isManage)
       DelFavor({ facilityId: record.facilityId })
         .then(() => FavoriteList().then((res: any) => this.setState({ favorites: res })))
         .catch((error) => console.warn(error));
-    else redirectTo({ url: `../main/index?current=${JSON.stringify(record)}&from=favorite` });
+    else {
+      this.context.setGlobal!({
+        currentData: {
+          from: 'favorite',
+          current: JSON.stringify(record),
+          isShare: false
+        }
+      });
+      navigateBack({ delta: 1 });
+    }
   };
 
   renderFavorItem = (): Array<any> => {
