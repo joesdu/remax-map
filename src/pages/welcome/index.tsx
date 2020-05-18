@@ -1,5 +1,5 @@
 import { AppContext, ContextProps } from '@/app';
-import { Button, Image, View, getUserInfo, login, redirectTo, vibrateShort } from 'remax/wechat';
+import { Button, Image, View, getStorage, getUserInfo, login, redirectTo, vibrateShort } from 'remax/wechat';
 import { Login, TokenLogin, UpdatePhone, UpdateUserInfo } from '@/service';
 
 import { LogoIcon } from '@/assets/icons';
@@ -12,6 +12,7 @@ interface WelcomeProps {
 interface WelcomeState {
   fromData: string;
   fromShare: string;
+  btnShow: boolean;
 }
 
 class Welcome extends React.Component<WelcomeProps, WelcomeState> {
@@ -22,7 +23,8 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
     super(props);
     this.state = {
       fromData: '',
-      fromShare: 'mini'
+      fromShare: 'mini',
+      btnShow: false
     };
   }
 
@@ -58,9 +60,30 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
     console.info('Welcome Component OnShow');
     let query: any = this.props.location.query;
     if (query.from === 'share') this.setState({ fromData: JSON.stringify(query), fromShare: 'share' });
-    TokenLogin()
-      .then(() => this.gotoMain())
-      .catch((error: any) => console.warn('Token is not available:', error.errMsg));
+    getStorage({ key: 'token' })
+      .then((token: any) => {
+        this.setState({ btnShow: false });
+        TokenLogin(token.data)
+          .then(() => setTimeout(() => this.gotoMain(), 1500))
+          .catch((error: any) => console.warn('TokenLogin is not available!', error));
+      })
+      .catch((error: any) => {
+        console.warn('Token is not available!', error);
+        this.setState({ btnShow: true });
+      });
+  };
+
+  private renderIntoButton = (): JSX.Element | undefined => {
+    const { btnShow } = this.state;
+    if (btnShow) {
+      return (
+        <View className={styles.into}>
+          <Button className={styles.intoBtn} openType="getUserInfo" onClick={this.onInto}>
+            进入小程序
+          </Button>
+        </View>
+      );
+    }
   };
 
   render(): JSX.Element {
@@ -70,13 +93,9 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
           <Image src={LogoIcon} className={styles.logo} />
           <View className={styles.text}>欢迎使用</View>
         </View>
-        <View className={styles.into}>
-          <Button className={styles.intoBtn} openType="getUserInfo" onClick={this.onInto}>
-            进入小程序
-          </Button>
-        </View>
+        {this.renderIntoButton()}
         <View className={styles.viewFooter}>
-          <View className={styles.footerLink}>Insider Preview 20200515-1400</View>
+          <View className={styles.footerLink}>Insider Preview 20200518-1040</View>
           <View className={styles.txtVersion}>Copyright © 2020 WinSide. All Rights Reserved.</View>
         </View>
       </View>

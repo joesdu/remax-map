@@ -22,18 +22,14 @@ export const Login = (code: string): void => {
 /**
  * Token登陆API
  */
-export const TokenLogin = (): Promise<any> =>
+export const TokenLogin = (token: string): Promise<any> =>
   new Promise((resolve, reject) => {
-    getStorage({ key: 'token' })
-      .then((token: any) => {
-        request({
-          url: `${BaseUrl}wxuser/tokenLogin`,
-          header: { Authorization: token.data, 'content-type': 'application/x-www-form-urlencoded' },
-          method: 'POST'
-        })
-          .then((res: any) => resolve(res.data))
-          .catch((error: any) => reject(error));
-      })
+    request({
+      url: `${BaseUrl}wxuser/tokenLogin`,
+      header: { Authorization: token, 'content-type': 'application/x-www-form-urlencoded' },
+      method: 'POST'
+    })
+      .then((res: any) => resolve(res.data))
       .catch((error: any) => reject(error));
   });
 /**
