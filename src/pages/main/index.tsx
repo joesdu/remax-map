@@ -38,6 +38,7 @@ interface MainPageState {
   transY: any;
   scalaValue: number;
   realScala: number;
+  isOnShowData: boolean;
 }
 class MainPage extends React.Component<MainPageProps, MainPageState> {
   static contextType: React.Context<Partial<ContextProps>> = AppContext;
@@ -67,7 +68,8 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
       transX: 0,
       transY: 0,
       scalaValue: 1,
-      realScala: 1
+      realScala: 1,
+      isOnShowData: false
     };
   }
 
@@ -160,8 +162,8 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
    * 渲染位置
    */
   private renderLocation = (): JSX.Element | undefined => {
-    const { location, floorId } = this.state;
-    if (location && floorId === this.context.global?.currentFloor) {
+    const { location, floorId, isOnShowData } = this.state;
+    if (!isOnShowData && location && floorId === this.context.global?.currentFloor) {
       let locationData = { facilityId: '', avatar: MyLocation, point: location, name: '我的位置', address: '', isFavorite: false };
       return <FacilityItem data={locationData} onItemClick={this.onItemClick.bind(this, locationData, -1)} />;
     }
@@ -243,7 +245,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
         }
       }
       this.context.setGlobal!({ currentFloor: floorId });
-      this.setState({ facilityGroup, drawings: floorMapUrl, floorName: floorName, projectId, floorId, location });
+      this.setState({ facilityGroup, drawings: floorMapUrl, floorName: floorName, projectId, floorId, location, isOnShowData: false });
     } else this.setState({ location });
   };
 
@@ -264,7 +266,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
       }
     }
     facilityGroup.push(fixData);
-    this.setState({ facilityGroup, drawings: floorMapUrl, floorName: floorName, projectId, floorId });
+    this.setState({ facilityGroup, drawings: floorMapUrl, floorName: floorName, projectId, floorId, location: fixData.point, isOnShowData: true });
   };
 
   /**
@@ -290,7 +292,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   };
 
   private fixMapMove = (): void => {
-    this.setState({ realScala: 1, scalaValue: 1 });
+    this.setState({ realScala: 2, scalaValue: 2 });
     setTimeout(() => {
       const { location, mapWidth, mapHeight, scalaValue } = this.state;
       const { windowHeight, windowWidth, pixelRatio, statusBarHeight } = this.context.global?.systemInfo!;
