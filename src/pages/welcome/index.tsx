@@ -1,8 +1,7 @@
 import { AppContext, ContextProps } from '@/app';
-import { Button, Image, View, getStorage, getUserInfo, login, redirectTo, vibrateShort } from 'remax/wechat';
+import { Button, View, getStorage, getUserInfo, login, redirectTo, setNavigationBarColor, vibrateShort } from 'remax/wechat';
 import { Login, TokenLogin, UpdatePhone, UpdateUserInfo } from '@/service';
 
-import { LogoIcon } from '@/assets/icons';
 import React from 'react';
 import styles from './index.less';
 
@@ -57,6 +56,7 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
   };
 
   onShow = (): void => {
+    setNavigationBarColor({ frontColor: '#ffffff', backgroundColor: '#9CB4E5' });
     console.info('Welcome Component OnShow');
     let query: any = this.props.location.query;
     if (query.from === 'share') this.setState({ fromData: JSON.stringify(query), fromShare: 'share' });
@@ -89,13 +89,9 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
   render(): JSX.Element {
     return (
       <View className={styles.app}>
-        <View className={styles.header}>
-          <Image src={LogoIcon} className={styles.logo} />
-          <View className={styles.text}>欢迎使用</View>
-        </View>
         {this.renderIntoButton()}
         <View className={styles.viewFooter}>
-          <View className={styles.footerLink}>Insider Preview 20200518-1040</View>
+          <View className={styles.footerLink}>Insider Preview 20200519-1600</View>
           <View className={styles.txtVersion}>Copyright © 2020 WinSide. All Rights Reserved.</View>
         </View>
       </View>

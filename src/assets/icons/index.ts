@@ -6,7 +6,6 @@ export { default as FavoriteIcon } from '@/assets/icons/favorite.svg';
 export { default as GotoIcon } from '@/assets/icons/goto.svg';
 export { default as LaminatedIcon } from '@/assets/icons/laminated.svg';
 export { default as LocationIcon } from '@/assets/icons/location.svg';
-export { default as LogoIcon } from '@/assets/icons/logo.svg';
 export { default as MarkIcon } from '@/assets/icons/mark.svg';
 export { default as NotFavoriteIcon } from '@/assets/icons/notfavorite.svg';
 export { default as NoResultIcon } from '@/assets/icons/noresult.svg';
