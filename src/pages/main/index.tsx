@@ -37,6 +37,7 @@ interface MainPageState {
   transX: any;
   transY: any;
   scalaValue: number;
+  realScala: number;
 }
 class MainPage extends React.Component<MainPageProps, MainPageState> {
   static contextType: React.Context<Partial<ContextProps>> = AppContext;
@@ -65,7 +66,8 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
       floorId: '',
       transX: 0,
       transY: 0,
-      scalaValue: 1
+      scalaValue: 1,
+      realScala: 1
     };
   }
 
@@ -288,23 +290,26 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   };
 
   private fixMapMove = (): void => {
-    const { location, mapWidth, mapHeight, scalaValue } = this.state;
-    const { windowHeight, windowWidth, pixelRatio, statusBarHeight } = this.context.global?.systemInfo!;
-    let point: [number, number] = [mapWidth / 2, mapHeight / 2];
-    if (location) point = location;
-    let SH: number = ((windowHeight - statusBarHeight) * pixelRatio) / 3;
-    let SW: number = (windowWidth * pixelRatio) / 3;
-    let PX: number = (point[0] * pixelRatio) / (3 * scalaValue);
-    let PY: number = (point[1] * pixelRatio) / (3 * scalaValue);
-    let flagX: boolean = PX >= SW / 2;
-    let flagY: boolean = PY <= SH / 2;
-    let resultX: number = (flagX ? (SW - PX) / scalaValue : (PX - SW) / scalaValue) / 2;
-    let resultY: number = (flagY ? (SH - PY) / scalaValue : (PY - SH) / scalaValue) / 2;
-    this.setState({ transX: resultX, transY: resultY });
+    this.setState({ realScala: 1, scalaValue: 1 });
+    setTimeout(() => {
+      const { location, mapWidth, mapHeight, scalaValue } = this.state;
+      const { windowHeight, windowWidth, pixelRatio, statusBarHeight } = this.context.global?.systemInfo!;
+      let point: [number, number] = [mapWidth / 2, mapHeight / 2];
+      if (location) point = location;
+      let SH: number = ((windowHeight - statusBarHeight) * pixelRatio) / 3;
+      let SW: number = (windowWidth * pixelRatio) / 3;
+      let PX: number = (point[0] * pixelRatio) / (3 * scalaValue);
+      let PY: number = (point[1] * pixelRatio) / (3 * scalaValue);
+      let flagX: boolean = PX >= SW / 2;
+      let flagY: boolean = PY <= SH / 2;
+      let resultX: number = (flagX ? (SW - PX) / scalaValue : (PX - SW) / scalaValue) / 2;
+      let resultY: number = (flagY ? (SH - PY) / scalaValue : (PY - SH) / scalaValue) / 2;
+      this.setState({ transX: resultX, transY: resultY });
+    }, 1000);
   };
 
   private renderView = (): JSX.Element | undefined => {
-    const { mapWidth, mapHeight, drawings, transX, transY } = this.state;
+    const { mapWidth, mapHeight, drawings, transX, transY, realScala } = this.state;
     if (this.context.global?.hadFail) {
       return (
         <View className={styles.loading}>
@@ -322,8 +327,9 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
               outOfBounds
               scale
               scaleMin={0.8}
-              scaleMax={10}
+              scaleMax={5}
               direction="all"
+              scaleValue={realScala}
               className={styles['floor-map']}
               style={{
                 height: mapHeight,
@@ -337,7 +343,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
               }}
               onScale={(event: any): void => {
                 const { x, y, scale } = event.detail;
-                this.setState({ transX: x, transY: y, scalaValue: scale });
+                this.setState({ transX: x, transY: y, scalaValue: scale, realScala: scale });
               }}
             >
               <Image className={styles['floor-map-drawings']} src={drawings} onLoad={this.onDrawingsLoad} />
