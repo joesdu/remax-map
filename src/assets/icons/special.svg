@@ -1,23 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="40px" height="40px" viewBox="0 0 40 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <defs>
-        <filter x="-9.0%" y="-17.9%" width="118.0%" height="135.8%" filterUnits="objectBoundingBox" id="filter-1">
-            <feOffset dx="0" dy="4" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
-            <feGaussianBlur stdDeviation="6" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
-            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.08 0" type="matrix" in="shadowBlurOuter1" result="shadowMatrixOuter1"></feColorMatrix>
-            <feMerge>
-                <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
-                <feMergeNode in="SourceGraphic"></feMergeNode>
-            </feMerge>
-        </filter>
-    </defs>
-    <g id="小程序" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="13" transform="translate(-48.000000, -622.000000)">
-            <g id="矩形-2" filter="url(#filter-1)" transform="translate(16.000000, 586.000000)">
-                <g id="编组-3备份-3" transform="translate(20.000000, 24.000000)">
-                    <g id="wc" transform="translate(12.000000, 12.000000)">
-                        <rect id="矩形" fill="#000000" fill-rule="nonzero" opacity="0" x="4" y="4" width="32" height="32"></rect>
-                        <path d="M14.8,27.8 C13.37,27.8 12.213,28.97 12.213,30.4 C12.213,31.83 13.37,33 14.8,33 C16.23,33 17.4,31.83 17.4,30.4 C17.4,28.97 16.23,27.8 14.8,27.8 L14.8,27.8 Z M7,7 L7,9.6 L9.6,9.6 L14.28,19.467 L12.525,22.652 C12.317,23.016 12.2,23.445 12.2,23.9 C12.2,25.33 13.37,26.5 14.8,26.5 L30.4,26.5 L30.4,23.9 L15.346,23.9 C15.164,23.9 15.021,23.757 15.021,23.575 L15.06,23.419 L16.23,21.3 L25.915,21.3 C26.89,21.3 27.748,20.767 28.19,19.961 L32.844,11.524 C32.948,11.342 33,11.121 33,10.9 C33,10.185 32.415,9.6 31.7,9.6 L12.473,9.6 L11.251,7 L7,7 L7,7 Z M27.8,27.8 C26.37,27.8 25.213,28.97 25.213,30.4 C25.213,31.83 26.37,33 27.8,33 C29.23,33 30.4,31.83 30.4,30.4 C30.4,28.97 29.23,27.8 27.8,27.8 L27.8,27.8 Z" id="Shape" fill="#FFFFFF"></path>
+<svg width="56px" height="88px" viewBox="0 0 56 88" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 59.1 (86144) - https://sketch.com -->
+    <title>区域-弹出-收藏</title>
+    <desc>Created with Sketch.</desc>
+    <g id="地图" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="重庆与展" transform="translate(-1118.000000, -340.000000)">
+            <g id="重庆与展8F地图" transform="translate(293.738281, 80.449219)">
+                <g id="位置标志-icon" transform="translate(172.261719, 71.550781)">
+                    <g id="展厅" transform="translate(656.000000, 191.000000)">
+                        <g id="编组-2">
+                            <g id="区域-弹出-收藏">
+                                <path d="M24.0140485,72.9742615 C26.7825797,72.9742615 29.0269177,75.2185995 29.0269177,77.9871307 C29.0269177,80.755662 26.7825797,83 24.0140485,83 L23.9859461,83 C21.2174148,83 18.9730768,80.755662 18.9730768,77.9871307 C18.9730768,75.2185995 21.2174148,72.9742615 23.9859461,72.9742615 L24.0140485,72.9742615 Z M41.5995024,5.78542401 C51.5354261,14.7983829 52.8150973,29.9582434 44.5306008,40.5092209 L35.484534,52.0301198 C31.4886999,57.1191383 28.8225928,63.1228416 27.7267104,69.4996622 L27.7151291,69.5670527 C27.3933293,71.4395704 25.6144836,72.6966757 23.7419659,72.3748759 C22.2277532,72.1146524 21.0696584,70.8819144 20.9043987,69.3544179 C20.2237114,63.0628204 17.7218474,57.1065932 13.7055808,52.2160783 L3.87226049,40.2422715 C-4.60544644,29.9191638 -3.49298013,14.76029 6.40094977,5.78542401 C16.3858111,-3.27192661 31.614641,-3.27192661 41.5995024,5.78542401 Z" id="形状结合" stroke="#FFFFFF" stroke-width="4" fill="#CE0000"></path>
+                                <g id="编组" transform="translate(11.000000, 11.000000)" fill="#FFFFFF" fill-rule="nonzero">
+                                    <path d="M13,0 C20.1797017,0 26,5.82029825 26,13 C26,20.1797017 20.1797017,26 13,26 C5.82029825,26 0,20.1797017 0,13 C0,5.82029825 5.82029825,0 13,0 Z M13,8.66666666 C10.6067661,8.66666666 8.66666666,10.6067661 8.66666666,13 C8.66666666,15.3932339 10.6067661,17.3333333 13,17.3333333 C15.3932339,17.3333333 17.3333333,15.3932339 17.3333333,13 C17.3333333,10.6067661 15.3932339,8.66666666 13,8.66666666 Z" id="形状"></path>
+                                </g>
+                            </g>
+                        </g>
                     </g>
                 </g>
             </g>

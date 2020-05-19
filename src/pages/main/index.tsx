@@ -322,7 +322,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
               outOfBounds
               scale
               scaleMin={0.8}
-              scaleMax={2}
+              scaleMax={10}
               direction="all"
               className={styles['floor-map']}
               style={{

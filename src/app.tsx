@@ -184,10 +184,7 @@ class App extends React.Component<AppProps, AppState> {
         this.setGlobal({ systemInfo: res });
         const { locationAuthorized, bluetoothEnabled, locationEnabled } = res;
         if (!locationAuthorized || !bluetoothEnabled || !locationEnabled) {
-          showModal({
-            title: '状态异常',
-            content: '手机蓝牙或者定位功能未打开,请打开后重新进入小程序'
-          });
+          showModal({ content: '手机蓝牙或者定位功能未打开,请打开后重新进入小程序', showCancel: false });
           this.setGlobal({ hadFail: true });
         } else this.SearchIBeacon();
       })
