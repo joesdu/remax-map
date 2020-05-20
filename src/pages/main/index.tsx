@@ -16,12 +16,12 @@ interface MainPageProps {
 interface MainPageState {
   mapWidth: number;
   mapHeight: number;
-  currentDrawings?: string;
+  currentDrawings: string;
   drawings: string;
   itemData?: any;
   current: number;
-  popShow?: boolean;
-  selectorPopShow?: boolean;
+  popShow: boolean;
+  selectorPopShow: boolean;
   keep: boolean;
   floorName: string;
   buildList: Array<any>;
@@ -34,10 +34,11 @@ interface MainPageState {
   projectId: string;
   floorId: string;
   location?: [number, number];
-  centerPoint?: [number, number];
+  specialPoint?: [number, number];
   transX: any;
   transY: any;
   scalaValue: number;
+  realScala: number;
   isOnShowData: boolean;
 }
 class MainPage extends React.Component<MainPageProps, MainPageState> {
@@ -69,6 +70,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
       transX: 0,
       transY: 0,
       scalaValue: 1,
+      realScala: 1,
       isOnShowData: false
     };
   }
@@ -162,8 +164,8 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
    * 渲染位置
    */
   private renderLocation = (): JSX.Element | undefined => {
-    const { location, floorId, isOnShowData } = this.state;
-    if (!isOnShowData && location && floorId === this.context.global?.currentFloor) {
+    const { location, floorId } = this.state;
+    if (location && floorId === this.context.global?.currentFloor) {
       let locationData = { facilityId: '', avatar: MyLocation, point: location, name: '我的位置', address: '', isFavorite: false };
       return <FacilityItem data={locationData} onItemClick={this.onItemClick.bind(this, locationData, -1)} />;
     }
@@ -246,7 +248,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
       }
       this.context.setGlobal!({ currentFloor: floorId });
       this.setState({ facilityGroup, drawings: floorMapUrl, floorName: floorName, projectId, floorId, location, isOnShowData: false });
-    } else this.setState({ location });
+    } else this.setState({ location, isOnShowData: false });
   };
 
   /**
@@ -266,7 +268,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
       }
     }
     facilityGroup.push(fixData);
-    this.setState({ facilityGroup, drawings: floorMapUrl, floorName: floorName, projectId, floorId, location: fixData.point, isOnShowData: true });
+    this.setState({ facilityGroup, drawings: floorMapUrl, floorName: floorName, projectId, floorId, specialPoint: fixData.point, isOnShowData: true });
     this.fixMapMove();
   };
 
@@ -296,11 +298,14 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   private fixMapMove = (): void => {
     const { drawings, currentDrawings } = this.state;
     if (drawings !== '' && drawings === currentDrawings) {
+      let scalaValue: number = 2;
+      this.setState({ scalaValue, realScala: 2 });
       setTimeout(() => {
-        const { location, mapWidth, mapHeight, scalaValue } = this.state;
+        const { location, mapWidth, mapHeight, isOnShowData, specialPoint } = this.state;
         const { windowHeight, windowWidth, pixelRatio, statusBarHeight } = this.context.global?.systemInfo!;
         let point: [number, number] = [mapWidth / 2, mapHeight / 2];
-        if (location) point = location;
+        if (isOnShowData) point = specialPoint!;
+        else point = location!;
         let SH: number = ((windowHeight - statusBarHeight) * pixelRatio) / 3;
         let SW: number = (windowWidth * pixelRatio) / 3;
         let PX: number = (point[0] * pixelRatio) / (3 * scalaValue);
@@ -310,12 +315,12 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
         let resultX: number = (flagX ? (SW - PX) / scalaValue : (PX - SW) / scalaValue) / 2;
         let resultY: number = (flagY ? (SH - PY) / scalaValue : (PY - SH) / scalaValue) / 2;
         this.setState({ transX: resultX, transY: resultY });
-      }, 1000);
+      }, 500);
     }
   };
 
   private renderView = (): JSX.Element | undefined => {
-    const { mapWidth, mapHeight, drawings, transX, transY } = this.state;
+    const { mapWidth, mapHeight, drawings, transX, transY, realScala } = this.state;
     if (this.context.global?.hadFail) {
       return (
         <View className={styles.loading}>
@@ -335,6 +340,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
               scaleMin={0.6}
               scaleMax={2}
               direction="all"
+              scaleValue={realScala}
               className={styles['floor-map']}
               style={{
                 height: mapHeight,
@@ -348,7 +354,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
               }}
               onScale={(event: any): void => {
                 const { x, y, scale } = event.detail;
-                this.setState({ transX: x, transY: y, scalaValue: scale });
+                this.setState({ transX: x, transY: y, scalaValue: scale, realScala: scale });
               }}
             >
               <Image className={styles['floor-map-drawings']} src={drawings} onLoad={this.onDrawingsLoad} />
