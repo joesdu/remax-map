@@ -189,6 +189,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     let currentData = this.context.global?.currentData!;
     if (currentData.isShare) {
       let current: any = JSON.parse(currentData.current);
+      console.log('OnShow1:', current);
       const { facilityId, point, name, address } = current;
       let args: any = { facilityId, avatar: SpecialIcon, point, name, address, isFavorite: false };
       FloorData({ floorId: current.floorId })
@@ -196,6 +197,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
         .catch((error) => console.warn(error));
     } else if (currentData.from === 'favorite' || currentData.from === 'searchresult') {
       let current: any = JSON.parse(currentData.current);
+      console.log('OnShow2:', current);
       const { facilityId, facilityName, projectName, buildName, floorName } = current;
       let point: any = currentData.from === 'favorite' ? current.facilityPosition : current.point;
       let args: any = { facilityId: facilityId, avatar: SpecialIcon, point, name: facilityName, address: `${projectName}-${buildName}-${floorName}`, isFavorite: currentData.from === 'favorite' };
@@ -306,6 +308,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
         let point: [number, number] = [mapWidth / 2, mapHeight / 2];
         if (isOnShowData) point = specialPoint!;
         else point = location!;
+        console.log(`point:(${isOnShowData ? 'onShow' : 'location'})${point}`);
         let SH: number = ((windowHeight - statusBarHeight) * pixelRatio) / 3;
         let SW: number = (windowWidth * pixelRatio) / 3;
         let PX: number = (point[0] * pixelRatio) / (3 * scalaValue);
