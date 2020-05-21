@@ -148,26 +148,15 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     this.setState({ itemData: record, popShow: true, current, keep: record.isFavorite });
   };
 
-  // 动态渲染设施
-  private renderFacilities = (): Array<any> => {
-    const { facilityGroup } = this.state;
-    let itemTemp: Array<any> = [];
-    if (facilityGroup.length > 0) {
-      for (let index: number = 0, item: any; (item = facilityGroup[index++]); ) {
-        itemTemp.push(<FacilityItem key={index} data={item} onItemClick={this.onItemClick.bind(this, item, index - 1)} />);
-      }
-    }
-    return itemTemp;
-  };
+  private onSearchClick = () => navigateTo({ url: `../search/index?current=${JSON.stringify({ floorId: this.state.floorId })}` });
 
-  /**
-   * 渲染位置
-   */
-  private renderLocation = (): JSX.Element | undefined => {
-    const { location, floorId } = this.state;
-    if (location && floorId === this.context.global?.currentFloor) {
-      let locationData = { facilityId: '', avatar: MyLocation, point: location, name: '我的位置', address: '', isFavorite: false };
-      return <FacilityItem data={locationData} onItemClick={this.onItemClick.bind(this, locationData, -1)} />;
+  private onFavoriteClick = () => navigateTo({ url: '../favorite/index' });
+
+  private onLocationClick = () => {
+    if (this.context.global?.getLocationInterval !== -1) {
+      this.fixMapMove();
+    } else {
+      this.getLocation();
     }
   };
 
@@ -299,7 +288,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
 
   private fixMapMove = (): void => {
     const { drawings, currentDrawings } = this.state;
-    if (drawings !== '' && drawings === currentDrawings) {
+    if (drawings === currentDrawings) {
       let scalaValue: number = 2;
       this.setState({ scalaValue, realScala: 2 });
       setTimeout(() => {
@@ -308,7 +297,6 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
         let point: [number, number] = [mapWidth / 2, mapHeight / 2];
         if (isOnShowData) point = specialPoint!;
         else point = location!;
-        console.log(`point:(${isOnShowData ? 'onShow' : 'location'})${point}`);
         let SH: number = ((windowHeight - statusBarHeight) * pixelRatio) / 3;
         let SW: number = (windowWidth * pixelRatio) / 3;
         let PX: number = (point[0] * pixelRatio) / (3 * scalaValue);
@@ -317,6 +305,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
         let flagY: boolean = PY <= SH / 2;
         let resultX: number = (flagX ? (SW - PX) / scalaValue : (PX - SW) / scalaValue) / 2;
         let resultY: number = (flagY ? (SH - PY) / scalaValue : (PY - SH) / scalaValue) / 2;
+        console.log(`point:(${isOnShowData ? 'onShow' : 'location'})${point},XYPoint:${resultX},${resultY}`);
         this.setState({ transX: resultX, transY: resultY });
       }, 500);
     }
@@ -370,6 +359,29 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     }
   };
 
+  // 动态渲染设施
+  private renderFacilities = (): Array<any> => {
+    const { facilityGroup } = this.state;
+    let itemTemp: Array<any> = [];
+    if (facilityGroup.length > 0) {
+      for (let index: number = 0, item: any; (item = facilityGroup[index++]); ) {
+        itemTemp.push(<FacilityItem key={index} data={item} onItemClick={this.onItemClick.bind(this, item, index - 1)} />);
+      }
+    }
+    return itemTemp;
+  };
+
+  /**
+   * 渲染位置
+   */
+  private renderLocation = (): JSX.Element | undefined => {
+    const { location, floorId } = this.state;
+    if (location && floorId === this.context.global?.currentFloor) {
+      let locationData = { facilityId: '', avatar: MyLocation, point: location, name: '我的位置', address: '', isFavorite: false };
+      return <FacilityItem data={locationData} onItemClick={this.onItemClick.bind(this, locationData, -1)} />;
+    }
+  };
+
   render(): JSX.Element {
     const { popShow, keep, itemData, selectorPopShow, floorName, buildNameList, floorNameList } = this.state;
     const { avatar, name, address } = itemData;
@@ -378,30 +390,10 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     return (
       <View>
         {this.renderView()}
-        <CircleButton
-          icon={SearchIcon}
-          imageStyle={{ width: 42 }}
-          onClick={() => {
-            navigateTo({ url: `../search/index?current=${JSON.stringify({ floorId: this.state.floorId })}` });
-          }}
-          style={{ float: 'right', position: 'fixed', top: 100, right: 32 }}
-        />
-        <CircleButton
-          icon={LocationIcon}
-          onClick={() => {
-            if (this.context.global?.getLocationInterval !== -1) this.fixMapMove();
-            else this.getLocation();
-          }}
-          style={{ float: 'left', position: 'fixed', bottom: 108, left: 32 }}
-        />
+        <CircleButton icon={SearchIcon} imageStyle={{ width: 42 }} onClick={this.onSearchClick} style={{ float: 'right', position: 'fixed', top: 100, right: 32 }} />
+        <CircleButton icon={LocationIcon} onClick={this.onLocationClick} style={{ float: 'left', position: 'fixed', bottom: 108, left: 32 }} />
         <FloorSelector text={floorName} onClick={this.onSelector} style={{ position: 'fixed', bottom: 104, left: 250 }} />
-        <CircleButton
-          icon={NotFavoriteIcon}
-          onClick={() => {
-            navigateTo({ url: '../favorite/index' });
-          }}
-          style={{ float: 'right', position: 'fixed', bottom: 108, right: 32 }}
-        />
+        <CircleButton icon={NotFavoriteIcon} onClick={this.onFavoriteClick} style={{ float: 'right', position: 'fixed', bottom: 108, right: 32 }} />
         <VantPopup round show={popShow} close-on-click-overlay closeable close-icon="close" position="bottom" custom-style={popStyle} bindclose={this.onClose}>
           <View className={styles.popContainer}>
             <View className={styles.flexTop}>
