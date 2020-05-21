@@ -1,6 +1,6 @@
 import { AddFavor, BuildList, DelFavor, FloorData, FloorList, Location, MapUsageRecord } from '@/service';
 import { AppContext, ContextProps } from '@/app';
-import { Button, Image, MovableArea, MovableView, Text, View, hideHomeButton, navigateTo, showModal, vibrateShort } from 'remax/wechat';
+import { Button, Image, MovableArea, MovableView, Text, View, navigateTo, showModal, vibrateShort, hideHomeButton } from 'remax/wechat';
 import { CircleButton, FloorSelector } from '@/components';
 import { FavoriteIcon, LocationIcon, MyLocation, NotFavoriteIcon, SearchIcon, ShareIcon, SpecialIcon } from '@/assets/icons';
 
@@ -173,20 +173,18 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   };
 
   onShow = (): void => {
-    hideHomeButton();
     console.info('Main On Show');
+    hideHomeButton();
     let currentData = this.context.global?.currentData!;
     if (currentData.isShare) {
-      let current: any = JSON.parse(currentData.current);
-      console.log('OnShow1:', current);
-      const { facilityId, point, name, address } = current;
+      let share: any = JSON.parse(currentData.current);
+      const { facilityId, point, name, address } = JSON.parse(share.current);
       let args: any = { facilityId, avatar: SpecialIcon, point, name, address, isFavorite: false };
-      FloorData({ floorId: current.floorId })
+      FloorData({ floorId: share.floorId })
         .then((res: any) => this.fixOnShowData(res, args))
         .catch((error) => console.warn(error));
     } else if (currentData.from === 'favorite' || currentData.from === 'searchresult') {
       let current: any = JSON.parse(currentData.current);
-      console.log('OnShow2:', current);
       const { facilityId, facilityName, projectName, buildName, floorName } = current;
       let point: any = currentData.from === 'favorite' ? current.facilityPosition : current.point;
       let args: any = { facilityId: facilityId, avatar: SpecialIcon, point, name: facilityName, address: `${projectName}-${buildName}-${floorName}`, isFavorite: currentData.from === 'favorite' };
@@ -287,27 +285,35 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   };
 
   private fixMapMove = (): void => {
-    const { drawings, currentDrawings } = this.state;
-    if (drawings === currentDrawings) {
-      let scalaValue: number = 2;
-      this.setState({ scalaValue, realScala: 2 });
-      setTimeout(() => {
-        const { location, mapWidth, mapHeight, isOnShowData, specialPoint } = this.state;
-        const { windowHeight, windowWidth, pixelRatio, statusBarHeight } = this.context.global?.systemInfo!;
-        let point: [number, number] = [mapWidth / 2, mapHeight / 2];
-        if (isOnShowData) point = specialPoint!;
-        else point = location!;
-        let SH: number = ((windowHeight - statusBarHeight) * pixelRatio) / 3;
-        let SW: number = (windowWidth * pixelRatio) / 3;
-        let PX: number = (point[0] * pixelRatio) / (3 * scalaValue);
-        let PY: number = (point[1] * pixelRatio) / (3 * scalaValue);
-        let flagX: boolean = PX >= SW / 2;
-        let flagY: boolean = PY <= SH / 2;
-        let resultX: number = (flagX ? (SW - PX) / scalaValue : (PX - SW) / scalaValue) / 2;
-        let resultY: number = (flagY ? (SH - PY) / scalaValue : (PY - SH) / scalaValue) / 2;
-        console.log(`point:(${isOnShowData ? 'onShow' : 'location'})${point},XYPoint:${resultX},${resultY}`);
-        this.setState({ transX: resultX, transY: resultY });
-      }, 500);
+    const { drawings, currentDrawings, isOnShowData } = this.state;
+    if (isOnShowData) {
+      this.setState({ scalaValue: 0.8, realScala: 0.8 });
+    } else {
+      if (drawings === currentDrawings) {
+        let scalaValue: number = 2;
+        this.setState({ scalaValue, realScala: 2 });
+        setTimeout(() => {
+          try {
+            const { location, mapWidth, mapHeight, isOnShowData, specialPoint } = this.state;
+            const { windowHeight, windowWidth, pixelRatio, statusBarHeight } = this.context.global?.systemInfo!;
+            let point: [number, number] = [mapWidth / 2, mapHeight / 2];
+            if (isOnShowData) point = specialPoint!;
+            else point = location!;
+            let SH: number = ((windowHeight - statusBarHeight) * pixelRatio) / 3;
+            let SW: number = (windowWidth * pixelRatio) / 3;
+            let PX: number = (point[0] * pixelRatio) / (3 * scalaValue);
+            let PY: number = (point[1] * pixelRatio) / (3 * scalaValue);
+            let flagX: boolean = PX >= SW / 2;
+            let flagY: boolean = PY <= SH / 2;
+            let resultX: number = (flagX ? (SW - PX) / scalaValue : (PX - SW) / scalaValue) / 2;
+            let resultY: number = (flagY ? (SH - PY) / scalaValue : (PY - SH) / scalaValue) / 2;
+            // console.log(`point:(${isOnShowData ? 'onShow' : 'location'})${point},XYPoint:${resultX},${resultY}`);
+            this.setState({ transX: resultX, transY: resultY });
+          } catch (error) {
+            console.warn(error);
+          }
+        }, 500);
+      }
     }
   };
 
@@ -394,7 +400,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
         <CircleButton icon={LocationIcon} onClick={this.onLocationClick} style={{ float: 'left', position: 'fixed', bottom: 108, left: 32 }} />
         <FloorSelector text={floorName} onClick={this.onSelector} style={{ position: 'fixed', bottom: 104, left: 250 }} />
         <CircleButton icon={NotFavoriteIcon} onClick={this.onFavoriteClick} style={{ float: 'right', position: 'fixed', bottom: 108, right: 32 }} />
-        <VantPopup round show={popShow} close-on-click-overlay closeable close-icon="close" position="bottom" custom-style={popStyle} bindclose={this.onClose}>
+        <VantPopup round show={popShow} overlay={false} close-on-click-overlay closeable close-icon="close" position="bottom" custom-style={popStyle} bindclose={this.onClose}>
           <View className={styles.popContainer}>
             <View className={styles.flexTop}>
               <View className={styles.topRight}>

@@ -5,7 +5,8 @@ const config: AppConfig = {
   window: {
     navigationBarTitleText: '室内导航',
     navigationBarBackgroundColor: '#FFFFFF',
-    navigationBarTextStyle: 'black'
+    navigationBarTextStyle: 'black',
+    pageOrientation: 'portrait'
   }
 };
 
