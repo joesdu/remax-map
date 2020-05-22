@@ -1,4 +1,4 @@
-import { GotoIcon, MarkIcon } from '@/assets/icons';
+import { GotoIcon, MarkIcon } from '@/assets';
 import { Image, View, vibrateShort } from 'remax/wechat';
 
 import React from 'react';

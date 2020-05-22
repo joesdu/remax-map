@@ -15,3 +15,4 @@ export { default as ShareIcon } from '@/assets/icons/share.svg';
 export { default as UpIcon } from '@/assets/icons/up.svg';
 export { default as MyLocation } from '@/assets/icons/my.svg';
 export { default as SpecialIcon } from '@/assets/icons/special.svg';
+export { default as SharePng } from '@/assets/icons/share.png';

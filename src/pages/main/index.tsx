@@ -1,8 +1,8 @@
 import { AddFavor, BuildList, DelFavor, FloorData, FloorList, Location, MapUsageRecord } from '@/service';
 import { AppContext, ContextProps } from '@/app';
-import { Button, Image, MovableArea, MovableView, Text, View, navigateTo, showModal, vibrateShort, hideHomeButton } from 'remax/wechat';
+import { Button, Image, MovableArea, MovableView, Text, View, hideHomeButton, navigateTo, showModal, vibrateShort } from 'remax/wechat';
 import { CircleButton, FloorSelector } from '@/components';
-import { FavoriteIcon, LocationIcon, MyLocation, NotFavoriteIcon, SearchIcon, ShareIcon, SpecialIcon } from '@/assets/icons';
+import { FavoriteIcon, LocationIcon, MyLocation, NotFavoriteIcon, SearchIcon, ShareIcon, SharePng, SpecialIcon } from '@/assets';
 
 import FacilityItem from './components/facilityitem';
 import React from 'react';
@@ -168,7 +168,8 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     const { itemData, floorId } = this.state;
     return {
       title: '邀请您使用灯联网定位导航',
-      path: `/pages/welcome/index?floorId=${floorId}&current=${JSON.stringify(itemData)}&from=share&shareobj=${JSON.stringify(res)}`
+      path: `/pages/welcome/index?floorId=${floorId}&current=${JSON.stringify(itemData)}&from=share&shareobj=${JSON.stringify(res)}`,
+      imageUrl: SharePng
     };
   };
 
@@ -400,7 +401,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
         <CircleButton icon={LocationIcon} onClick={this.onLocationClick} style={{ float: 'left', position: 'fixed', bottom: 108, left: 32 }} />
         <FloorSelector text={floorName} onClick={this.onSelector} style={{ position: 'fixed', bottom: 104, left: 250 }} />
         <CircleButton icon={NotFavoriteIcon} onClick={this.onFavoriteClick} style={{ float: 'right', position: 'fixed', bottom: 108, right: 32 }} />
-        <VantPopup round show={popShow} overlay={false} close-on-click-overlay closeable close-icon="close" position="bottom" custom-style={popStyle} bindclose={this.onClose}>
+        <VantPopup round show={popShow} close-on-click-overlay closeable close-icon="close" position="bottom" custom-style={popStyle} bindclose={this.onClose}>
           <View className={styles.popContainer}>
             <View className={styles.flexTop}>
               <View className={styles.topRight}>

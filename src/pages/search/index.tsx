@@ -1,5 +1,5 @@
 import { AppContext, ContextProps } from '@/app';
-import { DeleteIcon, ElevatorIcon, EscalatorIcon, ExitIcon, NoResultIcon, RestroomIcon } from '@/assets/icons';
+import { DeleteIcon, ElevatorIcon, EscalatorIcon, ExitIcon, NoResultIcon, RestroomIcon } from '@/assets';
 import { Image, View, navigateTo, vibrateShort } from 'remax/wechat';
 
 import React from 'react';

@@ -1,5 +1,5 @@
 import { Button, Image, Text, vibrateShort } from 'remax/wechat';
-import { LaminatedIcon, UpIcon } from '@/assets/icons';
+import { LaminatedIcon, UpIcon } from '@/assets';
 
 import React from 'react';
 import styles from './index.less';
