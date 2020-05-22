@@ -33,8 +33,8 @@ interface MainPageState {
   facilityGroup: Array<any>;
   projectId: string;
   floorId: string;
-  location?: [number, number];
-  specialPoint?: [number, number];
+  location?: Array<number>;
+  specialPoint?: Array<number>;
   transX: any;
   transY: any;
   scalaValue: number;
@@ -167,7 +167,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   onShareAppMessage = (res: any): any => {
     const { itemData, floorId } = this.state;
     return {
-      title: '邀请您使用灯联网定位导航',
+      title: itemData.address ?? '邀请您使用灯联网定位导航',
       path: `/pages/welcome/index?floorId=${floorId}&current=${JSON.stringify(itemData)}&from=share&shareobj=${JSON.stringify(res)}`,
       imageUrl: SharePng
     };
@@ -288,7 +288,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   private fixMapMove = (): void => {
     const { drawings, currentDrawings, isOnShowData } = this.state;
     if (isOnShowData) {
-      this.setState({ scalaValue: 0.8, realScala: 0.8 });
+      this.setState({ scalaValue: 1, realScala: 1 });
     } else {
       if (drawings === currentDrawings) {
         let scalaValue: number = 2;
@@ -297,7 +297,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
           try {
             const { location, mapWidth, mapHeight, isOnShowData, specialPoint } = this.state;
             const { windowHeight, windowWidth, pixelRatio, statusBarHeight } = this.context.global?.systemInfo!;
-            let point: [number, number] = [mapWidth / 2, mapHeight / 2];
+            let point: Array<number> = [mapWidth / 2, mapHeight / 2];
             if (isOnShowData) point = specialPoint!;
             else point = location!;
             let SH: number = ((windowHeight - statusBarHeight) * pixelRatio) / 3;
@@ -309,7 +309,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
             let resultX: number = (flagX ? (SW - PX) / scalaValue : (PX - SW) / scalaValue) / 2;
             let resultY: number = (flagY ? (SH - PY) / scalaValue : (PY - SH) / scalaValue) / 2;
             // console.log(`point:(${isOnShowData ? 'onShow' : 'location'})${point},XYPoint:${resultX},${resultY}`);
-            this.setState({ transX: resultX, transY: resultY });
+            this.setState({ transX: resultX - mapWidth / 2, transY: resultY - mapHeight / 2 });
           } catch (error) {
             console.warn(error);
           }
@@ -342,8 +342,8 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
               scaleValue={realScala}
               className={styles['floor-map']}
               style={{
-                height: mapHeight,
-                width: mapWidth
+                height: mapHeight * 2,
+                width: mapWidth * 2
               }}
               x={transX}
               y={transY}
@@ -356,9 +356,11 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
                 this.setState({ transX: x, transY: y, scalaValue: scale, realScala: scale });
               }}
             >
-              <Image className={styles['floor-map-drawings']} src={drawings} onLoad={this.onDrawingsLoad} />
-              {this.renderFacilities()}
-              {this.renderLocation()}
+              <View className={styles['floor-map-drawings']} style={{ height: mapHeight, width: mapWidth }}>
+                <Image className={styles['floor-map-drawings-img']} src={drawings} onLoad={this.onDrawingsLoad} />
+                {this.renderFacilities()}
+                {this.renderLocation()}
+              </View>
             </MovableView>
           </MovableArea>
         );
