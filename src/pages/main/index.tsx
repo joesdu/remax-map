@@ -286,36 +286,51 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   };
 
   private fixMapMove = (): void => {
-    const { drawings, currentDrawings, isOnShowData } = this.state;
-    if (isOnShowData) {
-      this.setState({ scalaValue: 1, realScala: 1 });
-    } else {
-      if (drawings === currentDrawings) {
-        let scalaValue: number = 2;
-        this.setState({ scalaValue, realScala: 2 });
-        setTimeout(() => {
-          try {
-            const { location, mapWidth, mapHeight, isOnShowData, specialPoint } = this.state;
-            const { windowHeight, windowWidth, pixelRatio, statusBarHeight } = this.context.global?.systemInfo!;
-            let point: Array<number> = [mapWidth / 2, mapHeight / 2];
-            if (isOnShowData) point = specialPoint!;
-            else point = location!;
-            let SH: number = ((windowHeight - statusBarHeight) * pixelRatio) / 3;
-            let SW: number = (windowWidth * pixelRatio) / 3;
-            let PX: number = (point[0] * pixelRatio) / (3 * scalaValue);
-            let PY: number = (point[1] * pixelRatio) / (3 * scalaValue);
-            let flagX: boolean = PX >= SW / 2;
-            let flagY: boolean = PY <= SH / 2;
-            let resultX: number = (flagX ? (SW - PX) / scalaValue : (PX - SW) / scalaValue) / 2;
-            let resultY: number = (flagY ? (SH - PY) / scalaValue : (PY - SH) / scalaValue) / 2;
-            // console.log(`point:(${isOnShowData ? 'onShow' : 'location'})${point},XYPoint:${resultX},${resultY}`);
-            this.setState({ transX: resultX - mapWidth / 2, transY: resultY - mapHeight / 2 });
-          } catch (error) {
-            console.warn(error);
-          }
-        }, 500);
-      }
+    const {
+      drawings,
+      currentDrawings
+      // isOnShowData
+    } = this.state;
+    // if (isOnShowData) {
+    //   this.setState({ scalaValue: 1, realScala: 1 });
+    // } else {
+    if (drawings === currentDrawings) {
+      let scalaValue: number = 2;
+      this.setState({ scalaValue, realScala: 2 });
+      setTimeout(() => {
+        try {
+          const { location, mapWidth, mapHeight, isOnShowData, specialPoint } = this.state;
+          const {
+            windowHeight,
+            windowWidth,
+            // pixelRatio,
+            statusBarHeight
+          } = this.context.global?.systemInfo!;
+          let point: Array<number> = [mapWidth / 2, mapHeight / 2];
+          if (isOnShowData) point = specialPoint!;
+          else point = location!;
+          // let SH: number = ((windowHeight - statusBarHeight) * pixelRatio) / 3;
+          // let SW: number = (windowWidth * pixelRatio) / 3;
+          // let PX: number = (point[0] * 2 * pixelRatio) / (3 * scalaValue);
+          // let PY: number = (point[1] * 2 * pixelRatio) / (3 * scalaValue);
+          // let flagX: boolean = PX >= SW / 2;
+          // let flagY: boolean = PY <= SH / 2;
+          // let resultX: number = (flagX ? (SW - PX) / scalaValue : (PX - SW) / scalaValue) / 2;
+          // let resultY: number = (flagY ? (SH - PY) / scalaValue : (PY - SH) / scalaValue) / 2;
+          let SH: number = windowHeight - statusBarHeight;
+          let SW: number = windowWidth;
+          let PX: number = point[0] + mapWidth / 2;
+          let PY: number = point[1] + mapHeight / 2;
+          let resultX: number = SW / 2 - PX;
+          let resultY: number = SH / 2 - PY;
+          console.log(`point:(${isOnShowData ? 'onShow' : 'location'})${point},XYPoint:${Math.round(resultX)},${Math.round(resultY)}`);
+          this.setState({ transX: Math.round(resultX * 2), transY: Math.round(resultY / 2) });
+        } catch (error) {
+          console.warn(error);
+        }
+      }, 500);
     }
+    // }
   };
 
   private renderView = (): JSX.Element | undefined => {
