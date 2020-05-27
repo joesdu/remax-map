@@ -15,6 +15,7 @@ interface SearchProps {
 interface SearchState {
   range: string;
   floorId: string;
+  projectId: string;
 }
 class Search extends React.Component<SearchProps, SearchState> {
   static contextType: React.Context<Partial<ContextProps>> = AppContext;
@@ -24,15 +25,15 @@ class Search extends React.Component<SearchProps, SearchState> {
     super(props);
     this.state = {
       range: '0',
-      floorId: ''
+      floorId: '',
+      projectId: ''
     };
   }
 
   onShow = (): void => {
-    console.info('Search On Show');
     let data: any = JSON.parse(this.props.location.query.current);
-    const { floorId } = data;
-    this.setState({ floorId });
+    const { floorId, projectId } = data;
+    this.setState({ floorId, projectId });
   };
 
   private onRangeChange = (dropdown: any): void => {
@@ -42,14 +43,15 @@ class Search extends React.Component<SearchProps, SearchState> {
 
   private onSearch = (event: any): void => {
     vibrateShort();
-    const { range, floorId } = this.state;
-    let args: { floorId?: string; keywords: any } = range === '0' ? { floorId, keywords: event.detail } : { keywords: event.detail };
+    const { range, floorId, projectId } = this.state;
+    let args: { floorId?: string; keywords: any; projectId?: string } = range === '0' ? { floorId, keywords: event.detail, projectId } : { keywords: event.detail, projectId };
     this.LocationSearch(args);
   };
 
   private Search = (keywords: string): void => {
     vibrateShort();
-    this.LocationSearch({ floorId: this.state.floorId, keywords });
+    const { floorId, projectId } = this.state;
+    this.LocationSearch({ floorId, keywords, projectId });
   };
 
   private LocationSearch = (args: any): Promise<void | WechatMiniprogram.NavigateToSuccessCallbackResult> =>

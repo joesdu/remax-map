@@ -148,16 +148,13 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     this.setState({ itemData: record, popShow: true, current, keep: record.isFavorite });
   };
 
-  private onSearchClick = () => navigateTo({ url: `../search/index?current=${JSON.stringify({ floorId: this.state.floorId })}` });
+  private onSearchClick = () => navigateTo({ url: `../search/index?current=${JSON.stringify({ floorId: this.state.floorId, projectId: this.state.projectId })}` });
 
   private onFavoriteClick = () => navigateTo({ url: '../favorite/index' });
 
   private onLocationClick = () => {
-    if (this.context.global?.getLocationInterval !== -1) {
-      this.fixMapMove();
-    } else {
-      this.getLocation();
-    }
+    if (this.context.global?.getLocationInterval !== -1) this.fixMapMove();
+    else this.getLocation();
   };
 
   /**
@@ -174,7 +171,6 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   };
 
   onShow = (): void => {
-    console.info('Main On Show');
     hideHomeButton();
     let currentData = this.context.global?.currentData!;
     if (currentData.isShare) {
@@ -285,46 +281,36 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     this.fixMapMove();
   };
 
+  /**
+   * 小数四舍五入
+   * @param number 数
+   * @param precision 保留位数,默认2位
+   */
+  private MathRound = (number: number, precision = 2): number => Math.round(Number(+number + 'e' + precision)) / Math.pow(10, precision);
+
   private fixMapMove = (): void => {
-    const {
-      drawings,
-      currentDrawings
-      // isOnShowData
-    } = this.state;
-    // if (isOnShowData) {
-    //   this.setState({ scalaValue: 1, realScala: 1 });
-    // } else {
+    const { drawings, currentDrawings } = this.state;
     if (drawings === currentDrawings) {
       let scalaValue: number = 2;
       this.setState({ scalaValue, realScala: 2 });
       setTimeout(() => {
         try {
           const { location, mapWidth, mapHeight, isOnShowData, specialPoint } = this.state;
-          const {
-            windowHeight,
-            windowWidth,
-            // pixelRatio,
-            statusBarHeight
-          } = this.context.global?.systemInfo!;
+          const { windowHeight, windowWidth, pixelRatio, statusBarHeight } = this.context.global?.systemInfo!;
+          let PR: number = this.MathRound(pixelRatio, 3);
+          let MH: number = mapHeight / PR;
+          let MW: number = mapWidth / PR;
           let point: Array<number> = [mapWidth / 2, mapHeight / 2];
           if (isOnShowData) point = specialPoint!;
           else point = location!;
-          // let SH: number = ((windowHeight - statusBarHeight) * pixelRatio) / 3;
-          // let SW: number = (windowWidth * pixelRatio) / 3;
-          // let PX: number = (point[0] * 2 * pixelRatio) / (3 * scalaValue);
-          // let PY: number = (point[1] * 2 * pixelRatio) / (3 * scalaValue);
-          // let flagX: boolean = PX >= SW / 2;
-          // let flagY: boolean = PY <= SH / 2;
-          // let resultX: number = (flagX ? (SW - PX) / scalaValue : (PX - SW) / scalaValue) / 2;
-          // let resultY: number = (flagY ? (SH - PY) / scalaValue : (PY - SH) / scalaValue) / 2;
-          let SH: number = windowHeight - statusBarHeight;
+          let SH: number = windowHeight;
           let SW: number = windowWidth;
-          let PX: number = point[0] + mapWidth / 2;
-          let PY: number = point[1] + mapHeight / 2;
-          let resultX: number = SW / 2 - PX;
-          let resultY: number = SH / 2 - PY;
-          console.log(`point:(${isOnShowData ? 'onShow' : 'location'})${point},XYPoint:${Math.round(resultX)},${Math.round(resultY)}`);
-          this.setState({ transX: Math.round(resultX * 2), transY: Math.round(resultY / 2) });
+          let PX: number = point[0] / PR + MW / 2;
+          let PY: number = point[1] / PR + MH / 2;
+          let resultX: number = SW / 2 - PX * PR;
+          let resultY: number = SH / 2 - PY * PR - statusBarHeight * PR;
+          console.log(`${isOnShowData ? 'OnShow' : 'Location'}:${point},XYPoint:[${this.MathRound(resultX / 2)},${this.MathRound(resultY / 2)}]`);
+          this.setState({ transX: this.MathRound(resultX * 2), transY: this.MathRound(resultY / 2) });
         } catch (error) {
           console.warn(error);
         }

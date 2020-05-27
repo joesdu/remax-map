@@ -24,12 +24,21 @@ const ResultItem: React.FC<ResultItemProps> = ({ title = '测试标题', subTitl
     }
   };
   const myClick = () => {
-    vibrateShort();
-    onClick();
+    if (!isDel) {
+      vibrateShort();
+      onClick();
+    }
+  };
+
+  const deleteClick = () => {
+    if (isDel) {
+      vibrateShort();
+      onClick();
+    }
   };
 
   return (
-    <View className={styles.item}>
+    <View className={styles.item} onClick={myClick}>
       <View className={styles['item-left']}>
         <Image className={styles['item-left-left']} mode="aspectFill" src={MarkIcon} />
         <View className={styles['item-left-right']}>
@@ -37,7 +46,7 @@ const ResultItem: React.FC<ResultItemProps> = ({ title = '测试标题', subTitl
           <View className={styles['item-left-right-bottom']}>{subTitle}</View>
         </View>
       </View>
-      <View className={styles['item-right']} onClick={myClick}>
+      <View className={styles['item-right']} onClick={deleteClick}>
         {renderItem()}
       </View>
     </View>

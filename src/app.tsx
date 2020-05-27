@@ -172,13 +172,11 @@ class App extends React.Component<AppProps, AppState> {
   };
 
   onHide = (): void => {
-    console.info('App On Hide');
     this.onStopBeaconDiscovery();
     CloseMap();
   };
 
   onShow = (): void => {
-    console.info('App On Show');
     getSystemInfo()
       .then((res: WechatMiniprogram.GetSystemInfoSuccessCallbackResult) => {
         this.setGlobal({ systemInfo: res });

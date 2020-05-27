@@ -30,7 +30,6 @@ class Favorite extends React.Component<FavoriteProps, FavoriteState> {
   }
 
   onShow = (): void => {
-    console.info('Favorite On Show');
     FavoriteList()
       .then((res: any) => this.setState({ favorites: res.result }))
       .catch((error) => console.warn(error));
@@ -48,7 +47,7 @@ class Favorite extends React.Component<FavoriteProps, FavoriteState> {
     const { isManage } = this.state;
     if (isManage)
       DelFavor({ facilityId: record.facilityId })
-        .then(() => FavoriteList().then((res: any) => this.setState({ favorites: res })))
+        .then(() => FavoriteList().then((res: any) => this.setState({ favorites: res.result })))
         .catch((error) => console.warn(error));
     else {
       this.context.setGlobal!({

@@ -57,7 +57,6 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
 
   onShow = (): void => {
     setNavigationBarColor({ frontColor: '#ffffff', backgroundColor: '#9CB4E5' });
-    console.info('Welcome Component OnShow');
     let query: any = this.props.location.query;
     if (query.from === 'share') this.setState({ fromData: JSON.stringify(query), fromShare: 'share' });
     getStorage({ key: 'token' })
@@ -91,7 +90,7 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
       <View className={styles.app}>
         {this.renderIntoButton()}
         <View className={styles.viewFooter}>
-          <View className={styles.footerLink}>Insider Preview 20200525.1121</View>
+          <View className={styles.footerLink}>Insider Preview 20200527.1641</View>
           <View className={styles.txtVersion}>Copyright © 2020 WinSide. All Rights Reserved.</View>
         </View>
       </View>
