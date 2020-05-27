@@ -309,8 +309,8 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
           let PY: number = point[1] / PR + MH / 2;
           let resultX: number = SW / 2 - PX * PR;
           let resultY: number = SH / 2 - PY * PR - statusBarHeight * PR;
-          console.log(`${isOnShowData ? 'OnShow' : 'Location'}:${point},XYPoint:[${this.MathRound(resultX / 2)},${this.MathRound(resultY / 2)}]`);
-          this.setState({ transX: this.MathRound(resultX * 2), transY: this.MathRound(resultY / 2) });
+          console.log(`${isOnShowData ? 'OnShow' : 'Location'}:${point},XYPoint:[${this.MathRound(resultX)},${this.MathRound(resultY / 2)}]`);
+          this.setState({ transX: this.MathRound(resultX), transY: this.MathRound(resultY / 2) });
         } catch (error) {
           console.warn(error);
         }
