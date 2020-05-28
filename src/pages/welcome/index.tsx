@@ -101,7 +101,7 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
       <View className={styles.app}>
         {this.renderIntoButton()}
         <View className={styles.viewFooter}>
-          <View className={styles.footerLink}>Insider Preview 20200528.1503</View>
+          <View className={styles.footerLink}>Insider Preview 20200528.1620</View>
           <View className={styles.txtVersion}>Copyright © 2020 WinSide. All Rights Reserved.</View>
         </View>
       </View>

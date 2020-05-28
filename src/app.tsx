@@ -105,6 +105,7 @@ class App extends React.Component<AppProps, AppState> {
           const { major, minor, rssi } = item;
           let exist: number = -1;
           let deviceId: number = this.FixDeviceId(major, minor);
+          console.log('设备:', { deviceId, rssi });
           if (this.ibeacons.length > 0) exist = this.ibeacons.findIndex((x: { deviceId: number }) => x.deviceId === deviceId);
           if (exist === -1) this.ibeacons.push({ deviceId, rssi, time: Date.now() });
           else {
