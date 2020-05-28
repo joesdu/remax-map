@@ -30,6 +30,7 @@ export interface Global {
   getLocationInterval?: any;
   hadFail?: boolean;
   currentData?: CurrentData;
+  needLogin?: boolean;
 }
 interface AppState {
   global: Global;
@@ -43,7 +44,8 @@ class App extends React.Component<AppProps, AppState> {
         currentFloor: '',
         atFirst: true,
         getLocationInterval: -1,
-        hadFail: true
+        hadFail: true,
+        needLogin: true
       }
     };
   }
@@ -161,12 +163,7 @@ class App extends React.Component<AppProps, AppState> {
             }
           });
         });
-        updateManager.onUpdateFailed(() =>
-          showModal({
-            title: '已经有新版本了哟~',
-            content: '新版本已经上线啦~，请您删除当前小程序，重新搜索打开哟~'
-          })
-        );
+        updateManager.onUpdateFailed(() => showModal({ title: '已经有新版本了哟~', content: '新版本已经上线啦~，请您删除当前小程序，重新搜索打开哟~' }));
       }
     });
   };

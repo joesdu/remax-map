@@ -22,14 +22,18 @@ export const Login = (code: string): void => {
 /**
  * Token登陆API
  */
-export const TokenLogin = (token: string): Promise<any> =>
+export const TokenLogin = (token: string, data?: { projectId: string }): Promise<any> =>
   new Promise((resolve, reject) => {
     request({
       url: `${BaseUrl}wxuser/tokenLogin`,
       header: { Authorization: token, 'content-type': 'application/x-www-form-urlencoded' },
-      method: 'POST'
+      method: 'POST',
+      data
     })
-      .then((res: any) => resolve(res.data))
+      .then((res: any) => {
+        setStorage({ key: 'token', data: res.data.result.token });
+        resolve(res.data);
+      })
       .catch((error: any) => reject(error));
   });
 /**
@@ -40,7 +44,7 @@ export const UpdateUserInfo = (data: any): Promise<any> =>
     getStorage({ key: 'token' }).then((token: any) => {
       request({
         url: `${BaseUrl}wxuser/updateUserInfo`,
-        data: data,
+        data,
         header: { Authorization: token.data, 'content-type': 'application/x-www-form-urlencoded' },
         method: 'POST'
       })
@@ -56,7 +60,7 @@ export const UpdatePhone = (data: any): Promise<any> =>
     getStorage({ key: 'token' }).then((token: any) => {
       request({
         url: `${BaseUrl}wxuser/updatePhoneNumber`,
-        data: data,
+        data,
         header: { Authorization: token.data, 'content-type': 'application/x-www-form-urlencoded' },
         method: 'POST'
       })
@@ -72,7 +76,7 @@ export const MapUsageRecord = (data: { floorId: string; projectId: string }): Pr
     getStorage({ key: 'token' }).then((token: any) => {
       request({
         url: `${BaseUrl}location/addMapUsageRecord`,
-        data: data,
+        data,
         header: { Authorization: token.data, 'content-type': 'application/x-www-form-urlencoded' },
         method: 'POST'
       })

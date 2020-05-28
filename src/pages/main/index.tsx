@@ -1,6 +1,6 @@
-import { AddFavor, BuildList, DelFavor, FloorData, FloorList, Location, MapUsageRecord } from '@/service';
+import { AddFavor, BuildList, DelFavor, FloorData, FloorList, Location, MapUsageRecord, TokenLogin } from '@/service';
 import { AppContext, ContextProps } from '@/app';
-import { Button, Image, MovableArea, MovableView, Text, View, hideHomeButton, navigateTo, showModal, vibrateShort } from 'remax/wechat';
+import { Button, Image, MovableArea, MovableView, Text, View, getStorage, hideHomeButton, navigateTo, setStorageSync, showModal, vibrateShort } from 'remax/wechat';
 import { CircleButton, FloorSelector } from '@/components';
 import { FavoriteIcon, LocationIcon, MyLocation, NotFavoriteIcon, SearchIcon, ShareIcon, SharePng, SpecialIcon } from '@/assets';
 
@@ -222,6 +222,19 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   private fixLocationData = (res: any): void => {
     let location: any;
     const { floorMapUrl, facilityList, floorName, projectId, floorId } = res.result;
+    if (this.context.global?.needLogin) {
+      try {
+        setStorageSync('projectId', projectId);
+        getStorage({ key: 'token' })
+          .then((token: any) => {
+            this.context.setGlobal!({ needLogin: false });
+            TokenLogin(token.data, { projectId }).catch((error: any) => console.warn('TokenLogin is not available!', error));
+          })
+          .catch((error: any) => console.warn('Token is not available!', error));
+      } catch (error) {
+        console.warn(`Set Storage ProjectId Fail! :${error}`);
+      }
+    }
     location = res.result.location;
     if (location === null) location = this.state.location;
     if (floorId !== this.state.floorId) {

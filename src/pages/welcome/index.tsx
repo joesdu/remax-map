@@ -62,9 +62,20 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
     getStorage({ key: 'token' })
       .then((token: any) => {
         this.setState({ btnShow: false });
-        TokenLogin(token.data)
-          .then(() => setTimeout(() => this.gotoMain(), 1500))
-          .catch((error: any) => console.warn('TokenLogin is not available!', error));
+        getStorage({ key: 'projectId' })
+          .then((projectId: any) => {
+            this.context.setGlobal!({ needLogin: false });
+            TokenLogin(token.data, { projectId: projectId.data })
+              .then(() => setTimeout(() => this.gotoMain(), 1500))
+              .catch((error: any) => console.warn('TokenLogin is not available!', error));
+          })
+          .catch(() => {
+            console.warn('ProjectId is not available!');
+            this.context.setGlobal!({ needLogin: true });
+            TokenLogin(token.data)
+              .then(() => setTimeout(() => this.gotoMain(), 1500))
+              .catch((error: any) => console.warn('TokenLogin is not available!', error));
+          });
       })
       .catch((error: any) => {
         console.warn('Token is not available!', error);
