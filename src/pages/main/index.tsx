@@ -164,7 +164,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
   onShareAppMessage = (res: any): any => {
     const { itemData, floorId } = this.state;
     return {
-      title: itemData.address ?? '邀请您使用灯联网定位导航',
+      title: itemData.address.length > 0 ? itemData.address : '邀请您使用灯联网定位导航',
       path: `/pages/welcome/index?floorId=${floorId}&current=${JSON.stringify(itemData)}&from=share&shareobj=${JSON.stringify(res)}`,
       imageUrl: SharePng
     };
@@ -305,25 +305,25 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     const { drawings, currentDrawings } = this.state;
     if (drawings === currentDrawings) {
       let scalaValue: number = 2;
-      this.setState({ scalaValue, realScala: 2 });
+      this.setState({ scalaValue, realScala: scalaValue });
       setTimeout(() => {
         try {
           const { location, mapWidth, mapHeight, isOnShowData, specialPoint } = this.state;
           const { windowHeight, windowWidth, pixelRatio, statusBarHeight } = this.context.global?.systemInfo!;
           let PR: number = this.MathRound(pixelRatio, 3);
-          let MH: number = mapHeight / PR;
-          let MW: number = mapWidth / PR;
+          let MH: number = this.MathRound(mapHeight / PR, 3);
+          let MW: number = this.MathRound(mapWidth / PR, 3);
           let point: Array<number> = [mapWidth / 2, mapHeight / 2];
-          if (isOnShowData) point = specialPoint!;
-          else point = location!;
-          let SH: number = windowHeight;
+          if (isOnShowData) point = specialPoint ?? point;
+          else point = location ?? point;
+          let SH: number = windowHeight - statusBarHeight;
           let SW: number = windowWidth;
-          let PX: number = point[0] / PR + MW / 2;
-          let PY: number = point[1] / PR + MH / 2;
+          let PX: number = this.MathRound(point[0] / PR, 3) + MW / 2;
+          let PY: number = this.MathRound(point[1] / PR, 3) + MH / 2;
           let resultX: number = SW / 2 - PX * PR;
-          let resultY: number = SH / 2 - PY * PR - statusBarHeight * PR;
-          console.log(`${isOnShowData ? 'OnShow' : 'Location'}:${point},XYPoint:[${this.MathRound(resultX)},${this.MathRound(resultY / 2)}]`);
-          this.setState({ transX: this.MathRound(resultX), transY: this.MathRound(resultY / 2) });
+          let resultY: number = SH / 2 - PY * PR;
+          console.log(`${isOnShowData ? 'OnShow' : 'Location'}:${point},XYPoint:[${this.MathRound(resultX)},${this.MathRound(resultY)}]`);
+          this.setState({ transX: this.MathRound(resultX), transY: this.MathRound(resultY) });
         } catch (error) {
           console.warn(error);
         }
