@@ -178,6 +178,7 @@ class App extends React.Component<AppProps, AppState> {
     getSystemInfo()
       .then((res: WechatMiniprogram.GetSystemInfoSuccessCallbackResult) => {
         this.setGlobal({ systemInfo: res });
+        console.log(res);
         const { locationAuthorized, bluetoothEnabled, locationEnabled } = res;
         if (!locationAuthorized || !bluetoothEnabled || !locationEnabled) {
           showModal({ content: '手机蓝牙或者定位功能未打开,请打开后重新进入小程序', showCancel: false });
