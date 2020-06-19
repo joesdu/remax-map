@@ -57,15 +57,23 @@ class App extends React.Component<AppProps, AppState> {
 
   private ibeacons: Array<{ deviceId: number; rssi: number; time: number }> = [];
   private cleanerInterval: any = -1;
+  private IBeacons: Array<{ deviceId: number; rssi: number }> = [];
+  private timeSpan: number = 0;
 
   getIBeacons = (): Array<{ deviceId: number; rssi: number }> => {
-    this.ibeacons.sort((a: { time: number }, b: { time: number }) => b.time - a.time);
-    let iBeaconTemp: Array<{ deviceId: number; rssi: number }> = [];
-    for (let index: number = 0, item; (item = this.ibeacons[index++]); ) {
-      const { deviceId, rssi } = item;
-      if (index < 20) iBeaconTemp.push({ deviceId, rssi });
+    if (this.IBeacons.length >= 3 && Date.now() - this.timeSpan <= 1500) {
+      return this.IBeacons;
+    } else {
+      this.ibeacons.sort((a: { time: number }, b: { time: number }) => b.time - a.time);
+      let iBeaconTemp: Array<{ deviceId: number; rssi: number }> = [];
+      for (let index: number = 0, item; (item = this.ibeacons[index++]); ) {
+        const { deviceId, rssi } = item;
+        if (index < 20) iBeaconTemp.push({ deviceId, rssi });
+      }
+      this.IBeacons = iBeaconTemp;
+      this.timeSpan = Date.now();
+      return iBeaconTemp;
     }
-    return iBeaconTemp;
   };
 
   private checkIBeaconsTimeout = (): void => {
