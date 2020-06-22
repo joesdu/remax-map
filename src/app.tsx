@@ -58,20 +58,29 @@ class App extends React.Component<AppProps, AppState> {
   private ibeacons: Array<{ deviceId: number; rssi: number; time: number }> = [];
   private cleanerInterval: any = -1;
   private IBeacons: Array<{ deviceId: number; rssi: number }> = [];
-  private timeSpan: number = 0;
 
   getIBeacons = (): Array<{ deviceId: number; rssi: number }> => {
-    if (this.IBeacons.length >= 3 && Date.now() - this.timeSpan <= 1500) {
+    if (this.IBeacons.length >= 3) {
+      for (let index: number = 0, item: { deviceId: number; rssi: number }; (item = this.IBeacons[index++]); ) {
+        let i = this.ibeacons.findIndex((x: { deviceId: number }) => {
+          item.deviceId === x.deviceId;
+        });
+        if (i < 0) {
+          this.IBeacons.slice(i, 1);
+          this.ibeacons.sort((a: { rssi: number }, b: { rssi: number }) => b.rssi - a.rssi);
+          this.IBeacons.push({ deviceId: this.ibeacons[0].deviceId, rssi: this.ibeacons[0].rssi });
+        }
+      }
       return this.IBeacons;
     } else {
-      this.ibeacons.sort((a: { time: number }, b: { time: number }) => b.time - a.time);
+      // this.ibeacons.sort((a: { time: number }, b: { time: number }) => b.time - a.time);
+      this.ibeacons.sort((a: { rssi: number }, b: { rssi: number }) => b.rssi - a.rssi);
       let iBeaconTemp: Array<{ deviceId: number; rssi: number }> = [];
       for (let index: number = 0, item; (item = this.ibeacons[index++]); ) {
         const { deviceId, rssi } = item;
-        if (index < 20) iBeaconTemp.push({ deviceId, rssi });
+        if (index <= 3) iBeaconTemp.push({ deviceId, rssi });
       }
       this.IBeacons = iBeaconTemp;
-      this.timeSpan = Date.now();
       return iBeaconTemp;
     }
   };

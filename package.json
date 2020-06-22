@@ -16,7 +16,7 @@
     "@remax/plugin-less": "^1.0.0",
     "@types/prettier": "^2.0.1",
     "@types/react": "^16.9.38",
-    "@umijs/fabric": "^2.1.0",
+    "@umijs/fabric": "^2.1.1",
     "cross-env": "^7.0.2",
     "prettier": "^2.0.5"
   }
