@@ -8,14 +8,14 @@
     "build": "cross-env NODE_ENV=production remax build -t wechat"
   },
   "dependencies": {
-    "@vant/weapp": "^1.3.2",
+    "@vant/weapp": "^1.3.3",
     "react": "^16.13.1",
     "remax": "2.5.5"
   },
   "devDependencies": {
     "@remax/plugin-less": "^1.0.0",
     "@types/prettier": "^2.0.1",
-    "@types/react": "^16.9.38",
+    "@types/react": "^16.9.41",
     "@umijs/fabric": "^2.1.1",
     "cross-env": "^7.0.2",
     "prettier": "^2.0.5"
