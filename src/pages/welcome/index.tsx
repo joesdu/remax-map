@@ -83,23 +83,17 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
       });
   };
 
-  private renderIntoButton = (): JSX.Element | undefined => {
-    const { btnShow } = this.state;
-    if (btnShow) {
-      return (
-        <View className={styles.into}>
-          <Button className={styles.intoBtn} openType="getUserInfo" onClick={this.onInto}>
-            进入小程序
-          </Button>
-        </View>
-      );
-    }
-  };
-
   render(): JSX.Element {
+    const { btnShow } = this.state;
     return (
       <View className={styles.app}>
-        {this.renderIntoButton()}
+        {btnShow ? (
+          <View className={styles.into}>
+            <Button className={styles.intoBtn} openType="getUserInfo" onClick={this.onInto}>
+              进入小程序
+            </Button>
+          </View>
+        ) : undefined}
         <View className={styles.viewFooter}>
           <View className={styles.footerLink}>Insider Preview 20200628.1810</View>
           <View className={styles.txtVersion}>Copyright © 2020 WinSide. All Rights Reserved.</View>
