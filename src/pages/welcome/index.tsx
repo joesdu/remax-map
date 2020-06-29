@@ -67,14 +67,20 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
             this.context.setGlobal!({ needLogin: false });
             TokenLogin(token.data, { projectId: projectId.data })
               .then(() => setTimeout(() => this.gotoMain(), 1500))
-              .catch((error: any) => console.warn('TokenLogin is not available!', error));
+              .catch((error: any) => {
+                console.warn('TokenLogin is not available!', error);
+                this.setState({ btnShow: true });
+              });
           })
           .catch(() => {
             console.warn('ProjectId is not available!');
             this.context.setGlobal!({ needLogin: true });
             TokenLogin(token.data)
               .then(() => setTimeout(() => this.gotoMain(), 1500))
-              .catch((error: any) => console.warn('TokenLogin is not available!', error));
+              .catch((error: any) => {
+                console.warn('TokenLogin is not available!', error);
+                this.setState({ btnShow: true });
+              });
           });
       })
       .catch((error: any) => {
@@ -95,7 +101,7 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
           </View>
         ) : undefined}
         <View className={styles.viewFooter}>
-          <View className={styles.footerLink}>Insider Preview 20200628.1810</View>
+          <View className={styles.footerLink}>Insider Preview 20200629.1810</View>
           <View className={styles.txtVersion}>Copyright © 2020 WinSide. All Rights Reserved.</View>
         </View>
       </View>
