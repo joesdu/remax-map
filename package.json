@@ -10,13 +10,13 @@
   "dependencies": {
     "@vant/weapp": "^1.3.3",
     "react": "^16.13.1",
-    "remax": "2.5.5"
+    "remax": "2.7.0"
   },
   "devDependencies": {
     "@remax/plugin-less": "^1.0.0",
-    "@types/prettier": "^2.0.1",
-    "@types/react": "^16.9.41",
-    "@umijs/fabric": "^2.1.1",
+    "@types/prettier": "^2.0.2",
+    "@types/react": "^16.9.43",
+    "@umijs/fabric": "^2.2.2",
     "cross-env": "^7.0.2",
     "prettier": "^2.0.5"
   }

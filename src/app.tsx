@@ -73,13 +73,11 @@ class App extends React.Component<AppProps, AppState> {
     } else {
       // this.ibeacons.sort((a: { time: number }, b: { time: number }) => b.time - a.time);
       this.ibeacons.sort((a: { rssi: number }, b: { rssi: number }) => b.rssi - a.rssi);
-      let iBeaconTemp: Array<{ deviceId: number; rssi: number }> = [];
       for (let index: number = 0, item; (item = this.ibeacons[index++]); ) {
         const { deviceId, rssi } = item;
-        if (index <= 3) iBeaconTemp.push({ deviceId, rssi });
+        if (index <= 3) this.IBeacons.push({ deviceId, rssi });
       }
-      this.IBeacons = iBeaconTemp;
-      return iBeaconTemp;
+      return this.IBeacons;
     }
   };
 
