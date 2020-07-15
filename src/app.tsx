@@ -64,14 +64,13 @@ class App extends React.Component<AppProps, AppState> {
       for (let index: number = 0, item: { deviceId: number; rssi: number }; (item = this.IBeacons[index++]); ) {
         let i = this.ibeacons.findIndex((x: { deviceId: number }) => item.deviceId === x.deviceId);
         if (i < 0 || Math.abs(item.rssi - this.ibeacons[i].rssi) > 15) {
-          this.IBeacons.slice(i, 1);
+          this.IBeacons.slice(index - 1, 1);
           this.ibeacons.sort((a: { rssi: number }, b: { rssi: number }) => b.rssi - a.rssi);
           this.IBeacons.push({ deviceId: this.ibeacons[0].deviceId, rssi: this.ibeacons[0].rssi });
         }
       }
       return this.IBeacons;
     } else {
-      // this.ibeacons.sort((a: { time: number }, b: { time: number }) => b.time - a.time);
       this.ibeacons.sort((a: { rssi: number }, b: { rssi: number }) => b.rssi - a.rssi);
       for (let index: number = 0, item; (item = this.ibeacons[index++]); ) {
         const { deviceId, rssi } = item;

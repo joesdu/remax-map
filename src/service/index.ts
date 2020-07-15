@@ -154,6 +154,7 @@ export const FloorData = (data: { floorId: string }): Promise<any> =>
 export const Location = (data: any): Promise<any> =>
   new Promise((resolve, reject) => {
     getStorage({ key: 'token' }).then((token: any) => {
+      console.log('定位参数', data);
       request({
         url: `${BaseUrl}location/location`,
         data,
