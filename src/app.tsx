@@ -61,6 +61,7 @@ class App extends React.Component<AppProps, AppState> {
 
   getIBeacons = (): Array<{ deviceId: number; rssi: number }> => {
     if (this.IBeacons.length >= 3) {
+      console.log('IBeaconsLength>=3');
       for (let index: number = 0, item: { deviceId: number; rssi: number }; (item = this.IBeacons[index++]); ) {
         let i = this.ibeacons.findIndex((x: { deviceId: number }) => item.deviceId === x.deviceId);
         if (i < 0 || Math.abs(item.rssi - this.ibeacons[i].rssi) > 15) {
@@ -71,6 +72,7 @@ class App extends React.Component<AppProps, AppState> {
       }
       return this.IBeacons;
     } else {
+      console.log('IBeaconsLength<3');
       this.ibeacons.sort((a: { rssi: number }, b: { rssi: number }) => b.rssi - a.rssi);
       for (let index: number = 0, item; (item = this.ibeacons[index++]); ) {
         const { deviceId, rssi } = item;
