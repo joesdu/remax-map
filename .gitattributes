@@ -1,5 +1,2 @@
-*.css linguist-language=CSS3
-*.html linguist-language=HTML5
-*.tsx linguist-language=TypeScript React
+*.tsx linguist-language=TypeScript
 *.ts linguist-language=TypeScript
-*.less linguist-language=Less
