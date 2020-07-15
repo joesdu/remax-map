@@ -61,22 +61,29 @@ class App extends React.Component<AppProps, AppState> {
 
   getIBeacons = (): Array<{ deviceId: number; rssi: number }> => {
     if (this.IBeacons.length >= 3) {
-      console.log('IBeaconsLength>=3');
-      for (let index: number = 0, item: { deviceId: number; rssi: number }; (item = this.IBeacons[index++]); ) {
+      console.log('IBeaconsLength>=3', '2020.07.15.1240');
+      for (let I: number = 0, item: { deviceId: number; rssi: number }; (item = this.IBeacons[I++]); ) {
         let i = this.ibeacons.findIndex((x: { deviceId: number }) => item.deviceId === x.deviceId);
-        if (i < 0 || Math.abs(item.rssi - this.ibeacons[i].rssi) > 15) {
-          this.IBeacons.slice(index - 1, 1);
+        if (i < 0 || (i >= 0 && Math.abs(item.rssi - this.ibeacons[i].rssi) >= 15)) this.IBeacons.splice(I - 1, 1);
+        if (this.IBeacons.length < 3) {
           this.ibeacons.sort((a: { rssi: number }, b: { rssi: number }) => b.rssi - a.rssi);
-          this.IBeacons.push({ deviceId: this.ibeacons[0].deviceId, rssi: this.ibeacons[0].rssi });
+          for (let index: number = 0, Item: { deviceId: number; rssi: number; time: number }; (Item = this.ibeacons[index++]); ) {
+            let index = this.IBeacons.findIndex((x: { deviceId: number }) => Item.deviceId === x.deviceId);
+            if (index < 0 && this.IBeacons.length < 3) {
+              this.IBeacons.push({ deviceId: Item.deviceId, rssi: Item.rssi });
+            }
+          }
         }
       }
       return this.IBeacons;
     } else {
-      console.log('IBeaconsLength<3');
+      console.log('IBeaconsLength<3', '2020.07.15.1240');
       this.ibeacons.sort((a: { rssi: number }, b: { rssi: number }) => b.rssi - a.rssi);
-      for (let index: number = 0, item; (item = this.ibeacons[index++]); ) {
-        const { deviceId, rssi } = item;
-        if (index <= 3) this.IBeacons.push({ deviceId, rssi });
+      for (let index: number = 0, item: { deviceId: number; rssi: number; time: number }; (item = this.ibeacons[index++]); ) {
+        let i = this.IBeacons.findIndex((x: { deviceId: number }) => item.deviceId === x.deviceId);
+        if (i < 0 && this.IBeacons.length < 3) {
+          this.IBeacons.push({ deviceId: item.deviceId, rssi: item.rssi });
+        }
       }
       return this.IBeacons;
     }
