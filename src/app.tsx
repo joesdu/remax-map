@@ -92,7 +92,7 @@ class App extends React.Component<AppProps, AppState> {
   private checkIBeaconsTimeout = (): void => {
     this.cleanerInterval = setInterval(() => {
       if (this.ibeacons.length > 3) {
-        let timeout = this.ibeacons.findIndex((x: { time: number }) => Date.now() - x.time > 4100);
+        let timeout = this.ibeacons.findIndex((x: { time: number }) => Date.now() - x.time > 6300);
         if (timeout !== -1) this.ibeacons.splice(timeout, 1);
       }
     }, 500);
