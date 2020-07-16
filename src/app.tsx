@@ -132,10 +132,10 @@ class App extends React.Component<AppProps, AppState> {
       if (res && res.beacons && res.beacons.length > 0) {
         const { beacons } = res;
         for (let index: number = 0, item: any; (item = beacons[index++]); ) {
-          const { major, minor, rssi } = item;
+          const { major, minor, rssi, accuracy } = item;
           let exist: number = -1;
           let deviceId: number = this.FixDeviceId(major, minor);
-          console.log('设备:', { deviceId, rssi });
+          console.log('设备:', { deviceId, rssi, accuracy });
           if (this.ibeacons.length > 0) exist = this.ibeacons.findIndex((x: { deviceId: number }) => x.deviceId === deviceId);
           if (exist === -1) this.ibeacons.push({ deviceId, rssi, time: Date.now() });
           else {
