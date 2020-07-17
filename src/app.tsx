@@ -62,7 +62,6 @@ class App extends React.Component<AppProps, AppState> {
 
   getIBeacons = (): Array<{ deviceId: number; rssi: number; txPower: number }> => {
     if (this.IBeacons.length >= 3) {
-      console.log('IBeaconsLength>=3', '2020.07.15.1240');
       for (let I: number = 0, item: { deviceId: number; rssi: number }; (item = this.IBeacons[I++]); ) {
         let i = this.ibeacons.findIndex((x: { deviceId: number }) => item.deviceId === x.deviceId);
         if (i < 0 || (i >= 0 && Math.abs(item.rssi - this.ibeacons[i].rssi) >= 10)) this.IBeacons.splice(I - 1, 1);
@@ -87,7 +86,6 @@ class App extends React.Component<AppProps, AppState> {
       }
       return this.IBeacons;
     } else {
-      console.log('IBeaconsLength<3', '2020.07.15.1240');
       this.ibeacons.sort((a: { rssi: number }, b: { rssi: number }) => b.rssi - a.rssi);
       for (let index: number = 0, item: { deviceId: number; rssi: number; time: number; txPower: number }; (item = this.ibeacons[index++]); ) {
         let i = this.IBeacons.findIndex((x: { deviceId: number }) => item.deviceId === x.deviceId);
@@ -116,10 +114,7 @@ class App extends React.Component<AppProps, AppState> {
       console.warn(error);
     }
     openBluetoothAdapter({
-      success: () => {
-        // this.onStartBeaconDiscovery();
-        this.onGetBluetoothAdapterState();
-      }
+      success: () => this.onGetBluetoothAdapterState()
     });
   };
 
@@ -169,9 +164,7 @@ class App extends React.Component<AppProps, AppState> {
     let bitStr: string = tcr.toString(2);
     if (bitStr.startsWith('1')) {
       let result: string = '';
-      for (let index = 1, str: string; (str = bitStr.charAt(index++)); ) {
-        str === '0' ? (result += '1') : (result += '0');
-      }
+      for (let index = 1, str: string; (str = bitStr.charAt(index++)); ) str === '0' ? (result += '1') : (result += '0');
       return -result.toNumber(2) - 1;
     }
     return tcr;
@@ -189,6 +182,7 @@ class App extends React.Component<AppProps, AppState> {
             let deviceId: number = usefulData.join('').toNumber(16);
             const { RSSI: rssi } = item;
             console.log(`原始数据:${advertisData}`);
+            console.log(`使用数据:${usefulData.join(',')}`);
             console.log(`设备信息:deviceId:${deviceId},rssi:${rssi},txPower:${txPower}`);
             let exist: number = this.ibeacons.findIndex((x: { deviceId: number }) => x.deviceId === deviceId);
             if (exist === -1) this.ibeacons.push({ deviceId, rssi, time: Date.now(), txPower });
@@ -233,7 +227,6 @@ class App extends React.Component<AppProps, AppState> {
   };
 
   onHide = (): void => {
-    // this.onStopBeaconDiscovery();
     this.onStopBluetoothDevicesDiscovery();
     CloseMap();
   };
