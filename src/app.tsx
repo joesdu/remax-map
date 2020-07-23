@@ -176,8 +176,8 @@ class App extends React.Component<AppProps, AppState> {
         const { devices } = res;
         for (let index: number = 0, item: any; (item = devices[index++]); ) {
           let advertisData = this.ab2hex(item.advertisData).toUpperCase();
-          if (advertisData.startsWith('E9BD0215ED5B98A7C8126F57494E53494445FFFE')) {
-            let usefulData: Array<string> = advertisData.substr('E9BD0215ED5B98A7C8126F57494E53494445FFFE'.length, 10).segment(2);
+          if (advertisData.startsWith('11220215ED5B98A7C8126F57494E53494445FFFE')) {
+            let usefulData: Array<string> = advertisData.substr('11220215ED5B98A7C8126F57494E53494445FFFE'.length, 10).segment(2);
             let txPower: number = this.TCRtoTF(usefulData.pop()!.toNumber(16));
             let deviceId: number = usefulData.join('').toNumber(16);
             const { RSSI: rssi } = item;
