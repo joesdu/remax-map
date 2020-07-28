@@ -301,6 +301,9 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
    */
   private MathRound = (number: number, precision = 2): number => Math.round(Number(+number + 'e' + precision)) / Math.pow(10, precision);
 
+  /**
+   * 处理地图移动
+   */
   private fixMapMove = (): void => {
     const { drawings, currentDrawings } = this.state;
     if (drawings === currentDrawings) {

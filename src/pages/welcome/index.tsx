@@ -39,6 +39,9 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
     redirectTo({ url: '../main/index' });
   };
 
+  /**
+   * 点击进入按钮,执行登录等操作
+   */
   private onInto = (): void => {
     vibrateShort();
     login()
@@ -55,6 +58,9 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
       });
   };
 
+  /**
+   * 进入首页时判断数据来源.是否是分享来的.并将相应数据存入到data中.
+   */
   onShow = (): void => {
     setNavigationBarColor({ frontColor: '#ffffff', backgroundColor: '#9CB4E5' });
     let query: any = this.props.location.query;

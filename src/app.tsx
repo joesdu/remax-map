@@ -56,16 +56,32 @@ class App extends React.Component<AppProps, AppState> {
     this.setState({ global: { ...global, ...data } });
   };
 
+  /**
+   * 用于存放蓝牙搜到的设备的数据信息
+   */
   private ibeacons: Array<{ deviceId: number; rssi: number; time: number; txPower: number }> = [];
+  /**
+   * 清理计时器的ID
+   */
   private cleanerInterval: any = -1;
+  /**
+   * 用于存放访问定位接口的数据
+   */
   private IBeacons: Array<{ deviceId: number; rssi: number; txPower: number }> = [];
-
+  /**
+   * 该函数用于生成访问定位接口数据,每次定位接口的调用都需要对数据进行判断
+   */
   getIBeacons = (): Array<{ deviceId: number; rssi: number; txPower: number }> => {
+    // 当定数据大于或等于3时进行替换判断
     if (this.IBeacons.length >= 3) {
       for (let I: number = 0, item: { deviceId: number; rssi: number }; (item = this.IBeacons[I++]); ) {
+        // 查找当前数据在已搜索到设备中是否过期,没有过期则不进行替换
         let i = this.ibeacons.findIndex((x: { deviceId: number }) => item.deviceId === x.deviceId);
+        // 当当前数据在已知搜到设备中不存在或者RSSI差异较大,则视为过期,需要删除
         if (i < 0 || (i >= 0 && Math.abs(item.rssi - this.ibeacons[i].rssi) >= 10)) this.IBeacons.splice(I - 1, 1);
+        // 删除后,IBeacon必然小于3,所以需要新增
         if (this.IBeacons.length < 3) {
+          // 使用RSSI进行排序后取最大
           this.ibeacons.sort((a: { rssi: number }, b: { rssi: number }) => b.rssi - a.rssi);
           for (let J: number = 0, Item: { deviceId: number; rssi: number; time: number; txPower: number }; (Item = this.ibeacons[J++]); ) {
             let index = this.IBeacons.findIndex((x: { deviceId: number }) => Item.deviceId === x.deviceId);
@@ -97,6 +113,9 @@ class App extends React.Component<AppProps, AppState> {
     }
   };
 
+  /**
+   * 定时检测全部搜索到的数据中是否存在超过指定时间的数据.
+   */
   private checkIBeaconsTimeout = (): void => {
     this.cleanerInterval = setInterval(() => {
       if (this.ibeacons.length > 3) {
@@ -106,6 +125,9 @@ class App extends React.Component<AppProps, AppState> {
     }, 500);
   };
 
+  /**
+   * 启动蓝牙搜索
+   */
   private SearchIBeacon = (): void => {
     try {
       this.onStopBluetoothDevicesDiscovery();
@@ -117,7 +139,9 @@ class App extends React.Component<AppProps, AppState> {
       success: () => this.onGetBluetoothAdapterState()
     });
   };
-
+  /**
+   * 获取蓝牙状态
+   */
   private onGetBluetoothAdapterState = (): void => {
     getBluetoothAdapterState({
       success: (res) => {
@@ -127,8 +151,13 @@ class App extends React.Component<AppProps, AppState> {
       fail: (error) => console.error('getBluetoothAdapterState', error)
     });
   };
-
+  /**
+   * 开启蓝牙搜索
+   */
   private onStartBluetoothDevicesDiscovery = (): void => {
+    /**
+     * Tips: 在IOS中无法识别Promise的写法,因此需要改成这种success,fail和complete的写法
+     */
     startBluetoothDevicesDiscovery({
       powerLevel: 'high',
       allowDuplicatesKey: true,
@@ -153,11 +182,14 @@ class App extends React.Component<AppProps, AppState> {
       }
     });
   };
-
+  /**
+   * ArrayBuffer转成16进制字符串
+   * @param buffer 二进制数据转成16进制
+   */
   private ab2hex = (buffer: Iterable<number>) => Array.prototype.map.call(new Uint8Array(buffer), (bit) => `00${bit.toString(16)}`.slice(-2)).join('');
 
   /**
-   * 补码转原码
+   * 补码转原码,这里采用了字符串的处理方式,应该有数学上的处理方式,不做研究,没时间搞
    * @param tcr 补码的10进制数
    */
   private TCRtoTF = (tcr: number) => {
@@ -169,13 +201,16 @@ class App extends React.Component<AppProps, AppState> {
     }
     return tcr;
   };
-
+  /**
+   * 发现设备后触发
+   */
   private onBluetoothUpdate = (): void => {
     onBluetoothDeviceFound((res: any) => {
       if (res && res.devices && res.devices.length > 0) {
         const { devices } = res;
         for (let index: number = 0, item: any; (item = devices[index++]); ) {
           let advertisData = this.ab2hex(item.advertisData).toUpperCase();
+          // 将获取到的设备广播数据转化成16进制后,按照文档协议进行解析.
           if (advertisData.startsWith('11220215ED5B98A7C8126F57494E53494445FFFE')) {
             let usefulData: Array<string> = advertisData.substr('11220215ED5B98A7C8126F57494E53494445FFFE'.length, 10).segment(2);
             let txPower: number = this.TCRtoTF(usefulData.pop()!.toNumber(16));
@@ -183,6 +218,7 @@ class App extends React.Component<AppProps, AppState> {
             const { RSSI: rssi } = item;
             console.info(`设备信息:deviceId:${deviceId},rssi:${rssi},txPower:${txPower},广播数据:${advertisData}`);
             let exist: number = this.ibeacons.findIndex((x: { deviceId: number }) => x.deviceId === deviceId);
+            // 当设备存在更新RSSI等信息,若是不存在设备则新增
             if (exist === -1) this.ibeacons.push({ deviceId, rssi, time: Date.now(), txPower });
             else {
               this.ibeacons[exist].time = Date.now();
@@ -196,6 +232,9 @@ class App extends React.Component<AppProps, AppState> {
     });
   };
 
+  /**
+   * 关闭蓝牙搜索,当长时间无法搜索到蓝牙设备时,关掉,避免大量耗电.
+   */
   private onStopBluetoothDevicesDiscovery = () => {
     stopBluetoothDevicesDiscovery()
       .then(() => {
@@ -206,6 +245,9 @@ class App extends React.Component<AppProps, AppState> {
       .catch((error: WechatMiniprogram.BluetoothError) => console.warn(error.errMsg));
   };
 
+  /**
+   * 检测小程序更新
+   */
   private checkUpgrade = (): void => {
     let updateManager: WechatMiniprogram.UpdateManager = getUpdateManager();
     updateManager.onCheckForUpdate((res: WechatMiniprogram.OnCheckForUpdateCallbackResult) => {
@@ -224,11 +266,17 @@ class App extends React.Component<AppProps, AppState> {
     });
   };
 
+  /**
+   * 当退出小程序时触发,关闭蓝牙,同时发送数据到后台,用于做统计
+   */
   onHide = (): void => {
     this.onStopBluetoothDevicesDiscovery();
     CloseMap();
   };
 
+  /**
+   * 启动APP的时候触发
+   */
   onShow = (): void => {
     getSystemInfo()
       .then((res: WechatMiniprogram.GetSystemInfoSuccessCallbackResult) => {
