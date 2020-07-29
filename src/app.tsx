@@ -116,6 +116,8 @@ class App extends React.Component<AppProps, AppState> {
      */
     startBluetoothDevicesDiscovery({
       allowDuplicatesKey: true,
+      powerLevel: 'high',
+      interval: this.state.global.systemInfo?.platform === 'android' ? 500 : 0,
       success: (startRes: WechatMiniprogram.BluetoothError) => {
         console.warn(startRes.errMsg);
         this.checkIBeaconsTimeout();
@@ -174,7 +176,7 @@ class App extends React.Component<AppProps, AppState> {
           let advertisData = this.ab2hex(item.advertisData).toUpperCase();
           // 将获取到的设备广播数据转化成16进制后,按照文档协议进行解析.
           if (advertisData.includes(this.UUID)) {
-            let usefulData: Array<string> = advertisData.substr(advertisData.indexOf(this.UUID) + this.UUID.length, 10).segment(2);
+            let usefulData: Array<string> = advertisData.substr(advertisData.indexOf(this.UUID) + 32, 10).segment(2);
             let txPower: number = this.TCRtoTF(usefulData.pop()!.toNumber(16));
             let deviceId: number = usefulData.join('').toNumber(16);
             const { RSSI: rssi } = item;

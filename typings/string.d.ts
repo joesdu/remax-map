@@ -29,5 +29,5 @@ interface StringConstructor {
   /**
    * 获取一个自定义长度的随机字符串,默认16位长度
    */
-  random(expect: number): string;
+  random(expect?: number): string;
 }

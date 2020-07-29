@@ -212,7 +212,7 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
             this.context.setGlobal!({ hadFail: true });
           });
       }
-    }, 3000);
+    }, 1500);
     this.context.setGlobal!({ getLocationInterval });
   };
   /**
@@ -225,12 +225,14 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
     if (this.context.global?.needLogin) {
       try {
         setStorageSync('projectId', projectId);
-        getStorage({ key: 'token' })
-          .then((token: any) => {
+        getStorage({
+          key: 'token',
+          success: (token: any) => {
             this.context.setGlobal!({ needLogin: false });
             TokenLogin(token.data, { projectId }).catch((error: any) => console.warn('TokenLogin is not available!', error));
-          })
-          .catch((error: any) => console.warn('Token is not available!', error));
+          },
+          fail: (error: any) => console.warn('Token is not available!', error)
+        });
       } catch (error) {
         console.warn(`Set Storage ProjectId Fail! :${error}`);
       }

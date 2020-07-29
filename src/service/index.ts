@@ -9,16 +9,19 @@ const BaseUrl: string = 'http://service-gw.winside.com:8080/smartlight/api/';
  * 登陆API
  * @param data 获取的loginCode
  */
-export const Login = (code: string): void => {
-  request({
-    url: `${BaseUrl}wxuser/jscodeLogin`,
-    data: { jsCode: code, appId: 'wxa521c64b9a5faa4c' },
-    method: 'POST',
-    header: { 'content-type': 'application/x-www-form-urlencoded' }
-  })
-    .then((res: any) => setStorage({ key: 'token', data: res.data.result.token }))
-    .catch((error: any) => console.error(error));
-};
+export const Login = (code: string): Promise<any> =>
+  new Promise((resolve, reject) => {
+    request({
+      url: `${BaseUrl}wxuser/jscodeLogin`,
+      data: { jsCode: code, appId: 'wxa521c64b9a5faa4c' },
+      method: 'POST',
+      header: { 'content-type': 'application/x-www-form-urlencoded' }
+    })
+      .then((res: any) => {
+        setStorage({ key: 'token', data: res.data.result.token, success: () => resolve(), fail: () => reject() });
+      })
+      .catch((error: any) => reject(error));
+  });
 /**
  * Token登陆API
  */

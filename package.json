@@ -10,7 +10,7 @@
   "dependencies": {
     "@vant/weapp": "^1.4.1",
     "react": "^16.13.1",
-    "remax": "2.7.6"
+    "remax": "2.7.7"
   },
   "devDependencies": {
     "@remax/plugin-less": "^1.0.0",
