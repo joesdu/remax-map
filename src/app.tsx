@@ -117,7 +117,7 @@ class App extends React.Component<AppProps, AppState> {
     startBluetoothDevicesDiscovery({
       allowDuplicatesKey: true,
       powerLevel: 'high',
-      interval: this.state.global.systemInfo?.platform === 'android' ? 500 : 0,
+      interval: 0,
       success: (startRes: WechatMiniprogram.BluetoothError) => {
         console.warn(startRes.errMsg);
         this.checkIBeaconsTimeout();

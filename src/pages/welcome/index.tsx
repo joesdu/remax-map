@@ -117,7 +117,7 @@ class Welcome extends React.Component<WelcomeProps, WelcomeState> {
           </View>
         ) : undefined}
         <View className={styles.viewFooter}>
-          <View className={styles.footerLink}>Insider Preview 20200729 扫描版1.6</View>
+          <View className={styles.footerLink}>Insider Preview 20200729 扫描版1.7</View>
           <View className={styles.txtVersion}>Copyright © 2020 WinSide. All Rights Reserved.</View>
         </View>
       </View>
