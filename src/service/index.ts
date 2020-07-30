@@ -164,7 +164,10 @@ export const Location = (data: any): Promise<any> =>
         header: { Authorization: token.data, 'content-type': 'application/x-www-form-urlencoded' },
         method: 'POST'
       })
-        .then((res: any) => resolve(res.data))
+        .then((res: any) => {
+          console.log(res);
+          resolve(res.data);
+        })
         .catch((error: any) => reject(error));
     });
   });
