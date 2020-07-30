@@ -165,7 +165,7 @@ export const Location = (data: any): Promise<any> =>
         method: 'POST'
       })
         .then((res: any) => {
-          console.log(res);
+          console.log(res.data);
           resolve(res.data);
         })
         .catch((error: any) => reject(error));
