@@ -138,7 +138,7 @@ class App extends React.Component<AppProps, AppState> {
             this.setGlobal({ allowUpdate: true, hadFail: true });
             this.onStopBluetoothDevicesDiscovery();
           } else console.info(`IBeacons device data available,device count:${this.ibeacons.length}.`);
-        }, 20000);
+        }, 15000);
       }
     });
   };

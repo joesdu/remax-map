@@ -209,7 +209,8 @@ class MainPage extends React.Component<MainPageProps, MainPageState> {
           })
           .catch((error) => {
             console.warn(error);
-            this.context.setGlobal!({ hadFail: true });
+            // 关闭接口报错后进行的错误提示.
+            // this.context.setGlobal!({ hadFail: true });
           });
       }
     }, 1500);
